@@ -1,0 +1,32 @@
+{
+  "primary": "#FFC107",
+  "secondary": "#FF5722",
+  "tertiary": "#00BCD4",
+  "quaternary": "#9C27B0",
+
+
+  "background": "#121212",
+  "surface": "#1E1E1E",
+
+
+  "border": "#2C2C2C",
+  "divider": "#373737",
+
+
+  "error": "#EF5350",
+  "warning": "#FFD54F",
+  "success": "#81C784",
+  "info": "#4FC3F7",
+
+
+  "white": "#FFFFFF",
+  "black": "#000000",
+  "grey": "#BDBDBD",
+  "light_grey": "#424242",
+  "dark_grey": "#212121",
+
+
+  "text_primary": "#FFFFFF",
+  "text_secondary": "#B0BEC5",
+  "text_disabled": "#757575"
+}
