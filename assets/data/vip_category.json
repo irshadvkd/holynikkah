@@ -1,0 +1,40 @@
+{
+  "categories": [
+    {
+      "catId": "1",
+      "name": "Middle Class",
+      "networth": "$2-$25",
+      "icon": "assets/icons/category/middle.svg"
+    },
+    {
+      "catId": "2",
+      "name": "Upper Middle Class",
+      "networth": "$50-$100",
+      "icon": "assets/icons/category/upper_middle.svg"
+    },
+    {
+      "catId": "3",
+      "name": "HNI (Rich)",
+      "networth": "$2-$25",
+      "icon": "assets/icons/category/hni.svg"
+    },
+    {
+      "catId": "4",
+      "name": "Super Rich",
+      "networth": "$25-$50",
+      "icon": "assets/icons/category/super_rich.svg"
+    },
+    {
+      "catId": "5",
+      "name": "Ultra Rich",
+      "networth": "$50-$100",
+      "icon": "assets/icons/category/ultra_rich.svg"
+    },
+    {
+      "catId": "6",
+      "name": "Billionaire",
+      "networth": "$800",
+      "icon": "assets/icons/category/billionaire.svg"
+    }
+  ]
+}

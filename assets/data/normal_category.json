@@ -1,0 +1,58 @@
+{
+  "categories": [
+    {
+      "catId": "1",
+      "name": "Classic Family",
+      "networth": "",
+      "icon": ""
+    },
+    {
+      "catId": "2",
+      "name": "Traditional Family",
+      "networth": "",
+      "icon": ""
+    },
+    {
+      "catId": "3",
+      "name": "Professionals",
+      "networth": "",
+      "icon": ""
+    },
+    {
+      "catId": "4",
+      "name": "Religion Scholars Hafiz",
+      "networth": "",
+      "icon": ""
+    },
+    {
+      "catId": "5",
+      "name": "Handicaped",
+      "networth": "",
+      "icon": ""
+    },
+    {
+      "catId": "6",
+      "name": "Ahlubaith",
+      "networth": "",
+      "icon": ""
+    },
+    {
+      "catId": "7",
+      "name": "Yatheem",
+      "networth": "",
+      "icon": ""
+    },
+    {
+      "catId": "8",
+      "name": "Divorced",
+      "networth": "",
+      "icon": ""
+    },
+    {
+      "catId": "9",
+      "name": "Search by Location",
+      "networth": "",
+      "icon": ""
+    }
+  ]
+}

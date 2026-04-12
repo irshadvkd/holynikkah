@@ -1,23 +1,19 @@
 {
-  "primary": "#FFC107",
-  "secondary": "#FF5722",
-  "tertiary": "#00BCD4",
-  "quaternary": "#9C27B0",
-
+  "primary": "#FAC60C",
+  "secondary": "#FF6D00",
+  "tertiary": "#00ACC1",
+  "quaternary": "#8E24AA",
 
   "background": "#121212",
   "surface": "#1E1E1E",
 
-
   "border": "#2C2C2C",
   "divider": "#373737",
 
-
   "error": "#EF5350",
-  "warning": "#FFD54F",
+  "warning": "#FFD740",
   "success": "#81C784",
-  "info": "#4FC3F7",
-
+  "info": "#29B6F6",
 
   "white": "#FFFFFF",
   "black": "#000000",
@@ -25,8 +21,7 @@
   "light_grey": "#424242",
   "dark_grey": "#212121",
 
-
   "text_primary": "#FFFFFF",
-  "text_secondary": "#B0BEC5",
-  "text_disabled": "#757575"
+  "text_secondary": "#E0E0E0",
+  "text_disabled": "#9E9E9E"
 }

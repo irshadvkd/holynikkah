@@ -26,8 +26,8 @@ final class _Urls {
   final String base = "https://api.example.com";
 
   // Auth endpoints
-  final String login = "/auth/login";
-  final String register = "/auth/register";
+  final String login = "/login/login";
+  final String register = "/login/register";
 
   // User
   final String userProfile = "/user/profile";
@@ -45,9 +45,19 @@ final class _IconPaths {
 
   final String appLogoLight = "assets/images/app_logo_light.png";
   final String appLogoDark = "assets/images/app_logo_dark.png";
-  final String home = "assets/icons/home.png";
   final String settings = "assets/icons/settings.png";
   final String profile = "assets/icons/profile.png";
+  final String visible = "assets/icons/visible.svg";
+  final String hidden = "assets/icons/hidden.svg";
+  final String user = "assets/icons/user.svg";
+  final String home = "assets/icons/home.svg";
+  final String reels = "assets/icons/reels.svg";
+  final String ads = "assets/icons/ads.svg";
+  final String vipRegister = "assets/icons/vip_register.svg";
+  final String donate = "assets/icons/donate.svg";
+  final String like = "assets/icons/like.svg";
+  final String comment = "assets/icons/comment.svg";
+  final String share = "assets/icons/share.svg";
 }
 
 final class _ThemePaths {
@@ -61,7 +71,7 @@ final class _Misc {
   const _Misc();
 
   // General constants (you can extend later)
-  final String appName = "Your App Name";
+  final String appName = "Holy Nikkah";
   final String defaultLanguage = "en";
   final Duration apiTimeout = const Duration(seconds: 30);
 }

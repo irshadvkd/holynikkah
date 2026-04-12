@@ -1,0 +1,70 @@
+{
+  "categories": [
+    {
+      "id": "middle_class",
+      "name": "MIDDLE CLASS",
+      "networth": "₹2-5 Lakh",
+      "hasSubcategories": true,
+      "subcategories": [
+        {
+          "id": "upper_middle_class",
+          "name": "UPPER MIDDLE CLASS",
+          "networth": "₹5-10 Lakh"
+        },
+        {
+          "id": "hnr_rich",
+          "name": "HNR RICH",
+          "networth": "₹25-50 Lakh"
+        }
+      ]
+    },
+    {
+      "id": "classic_family",
+      "name": "CLASSIC FAMILY",
+      "networth": null,
+      "hasSubcategories": false
+    },
+    {
+      "id": "traditional_family",
+      "name": "TRADITIONAL FAMILY",
+      "networth": null,
+      "hasSubcategories": false
+    },
+    {
+      "id": "professionals",
+      "name": "PROFESSIONALS",
+      "networth": null,
+      "hasSubcategories": false
+    },
+    {
+      "id": "religious_scholars",
+      "name": "RELIGIOUS SCHOLARS",
+      "networth": "₹8-12 Lakh",
+      "hasSubcategories": false
+    },
+    {
+      "id": "handicapped",
+      "name": "HANDICAPPED",
+      "networth": null,
+      "hasSubcategories": false
+    },
+    {
+      "id": "ahlebaith",
+      "name": "AHLEBAITH",
+      "networth": null,
+      "hasSubcategories": false
+    },
+    {
+      "id": "yatheem",
+      "name": "YATHEEM",
+      "networth": null,
+      "hasSubcategories": false
+    },
+    {
+      "id": "divorced",
+      "name": "DIVORCED",
+      "networth": null,
+      "hasSubcategories": false
+    }
+  ]
+}

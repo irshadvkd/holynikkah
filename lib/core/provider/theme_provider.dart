@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:holynikkah/core/services/theme/app_colors.dart';
-import 'package:holynikkah/core/services/theme/color_service.dart';
-import 'package:holynikkah/core/services/theme/text_service.dart';
+import 'package:holynikkah/core/theme/app_colors.dart';
 
 /// 🔹 Manages light/dark theme at runtime
 class ThemeProvider extends ChangeNotifier {
@@ -9,17 +7,16 @@ class ThemeProvider extends ChangeNotifier {
 
   bool get isDark => _isDark;
 
-  AppColors get colors => ColorService.colors;
+  AppColors get colors => _isDark ? AppColors.dark : AppColors.light;
 
   ThemeData get lightThemeData => ThemeData(
     brightness: Brightness.light,
-    scaffoldBackgroundColor: colors.background,
-    primaryColor: colors.primary,
-    textTheme: TextService.textTheme,
+    scaffoldBackgroundColor: Colors.white,
+    primaryColor: Colors.blue,
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: colors.primary,
-        foregroundColor: colors.white,
+        backgroundColor: Colors.amber,
+        foregroundColor: Colors.black,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     ),
@@ -27,17 +24,19 @@ class ThemeProvider extends ChangeNotifier {
 
   ThemeData get darkThemeData => ThemeData(
     brightness: Brightness.dark,
-    scaffoldBackgroundColor: colors.background,
-    primaryColor: colors.primary,
-    textTheme: TextService.textTheme,
+    scaffoldBackgroundColor: Colors.black,
+    primaryColor: Colors.blue,
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: colors.primary,
-        foregroundColor: colors.white,
+        backgroundColor: Colors.amber,
+        foregroundColor: Colors.black,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     ),
   );
+
+  /// Get current theme
+  ThemeData get currentTheme => _isDark ? darkThemeData : lightThemeData;
 
   /// Toggle theme dynamically
   void toggleTheme() {
