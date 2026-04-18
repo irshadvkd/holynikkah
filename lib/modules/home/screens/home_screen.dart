@@ -1,26 +1,27 @@
-import 'package:auto_route/annotations.dart';
-import 'package:auto_route/auto_route.dart';
+/// 🔥 HOME SCREEN (FINAL + OLD BOTTOM BAR UI)
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:holynikkah/core/router/app_router.dart';
-import 'package:holynikkah/core/services/category_session_storage.dart';
-import 'package:holynikkah/core/services/home_session_storage.dart';
-import 'package:holynikkah/core/utils/constants.dart';
-import 'package:holynikkah/core/utils/app_logger.dart';
-import 'package:holynikkah/core/widgets/debug_navigation_fab.dart';
-import 'package:holynikkah/modules/ads/screens/ads_screen.dart';
-import 'package:holynikkah/modules/category/screens/vip_category_screen.dart';
-import 'package:holynikkah/modules/donaters/screens/donaters_screen.dart';
-import 'package:holynikkah/modules/login/providers/auth_provider.dart';
-import 'package:holynikkah/modules/partner/widgets/partner_full_screen_view.dart';
-import 'package:holynikkah/modules/reels/screens/reels_screen.dart';
+import 'package:holynikkah/modules/category/controller/category_provider.dart';
+import 'package:holynikkah/modules/category/screens/normal_category_screen.dart';
 import 'package:provider/provider.dart';
 
-@RoutePage()
+import 'package:holynikkah/core/services/home_session_storage.dart';
+import 'package:holynikkah/core/utils/constants.dart';
+
+import 'package:holynikkah/modules/login/providers/auth_provider.dart';
+import 'package:holynikkah/modules/login/screens/login_screen.dart';
+import 'package:holynikkah/modules/category/screens/vip_category_screen.dart';
+import 'package:holynikkah/modules/partner/widgets/partner_full_screen_view.dart';
+import 'package:holynikkah/modules/reels/screens/reels_screen.dart';
+import 'package:holynikkah/modules/ads/screens/ads_screen.dart';
+import 'package:holynikkah/modules/donaters/screens/donaters_screen.dart';
+
 class HomeScreen extends StatefulWidget {
   final int? initialIndex;
+
   const HomeScreen({super.key, this.initialIndex});
 
   @override
@@ -29,179 +30,145 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 2;
-  bool _hasCheckedCategory = false;
-  int? _lastInitialIndex;
 
   @override
   void initState() {
     super.initState();
-    _lastInitialIndex = widget.initialIndex;
     _initSelectedIndex();
   }
 
-  @override
-  void didUpdateWidget(HomeScreen oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    // Reset category check if initialIndex changed
-    if (widget.initialIndex != _lastInitialIndex) {
-      _lastInitialIndex = widget.initialIndex;
-      _hasCheckedCategory = false;
-      _initSelectedIndex();
-    }
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // Check category selection after dependencies are resolved
-    if (!_hasCheckedCategory) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _checkCategorySelection();
-        _hasCheckedCategory = true;
-      });
-    }
-  }
-
   Future<void> _initSelectedIndex() async {
-    // If caller forces an initial tab (e.g. after registration), prefer it.
     if (widget.initialIndex != null) {
       _selectedIndex = widget.initialIndex!;
       await HomeSessionStorage().writeSelectedIndex(_selectedIndex);
       return;
     }
 
-    // Otherwise restore last selected tab.
     final storedIndex = await HomeSessionStorage().readSelectedIndex();
+
     if (!mounted) return;
+
     if (storedIndex != null && storedIndex >= 0 && storedIndex <= 4) {
-      setState(() {
-        _selectedIndex = storedIndex;
-      });
+      setState(() => _selectedIndex = storedIndex);
     }
   }
 
-  Future<void> _checkCategorySelection() async {
-    AppLogger.info("Checking category selection for index $_selectedIndex", tag: "HomeScreen");
-    if (_selectedIndex == 0) {
-      final isLoggedIn = context.read<AuthProvider>().isLoggedIn;
-      AppLogger.info("User logged in: $isLoggedIn", tag: "HomeScreen");
-      if (isLoggedIn) {
-        final isCategorySelected = await CategorySessionStorage().isCategorySelected();
-        AppLogger.info("Category selected: $isCategorySelected", tag: "HomeScreen");
-        if (!isCategorySelected && mounted) {
-          AppLogger.info("Showing VipCategoryScreen", tag: "HomeScreen");
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => VipCategoryScreen(
-                onNavigate: (newIndex) {
-                  Navigator.of(context).pop();
-                  setState(() {
-                    _selectedIndex = newIndex;
-                  });
-                  HomeSessionStorage().writeSelectedIndex(newIndex);
-                },
-              ),
-            ),
-          );
-        }
-      }
+  /// 🔥 VIP LOGIC
+  Widget _buildVipScreen({
+    required bool isLoggedIn,
+    required bool isCategorySelected,
+  }) {
+    if (!isLoggedIn) {
+      return const VipCategoryScreen(isSelectionRequired: false);
     }
+
+    if (!isCategorySelected) {
+      return VipCategoryScreen(
+        isSelectionRequired: true,
+        onNavigate: (index) {
+          setState(() => _selectedIndex = index);
+        },
+      );
+    }
+
+    return PartnerFullScreenView(
+      imageUrls: [
+        'assets/sample/partner1.png',
+        'assets/sample/partner2.png',
+        'assets/sample/partner3.png',
+        'assets/sample/partner4.png',
+      ],
+    );
+  }
+
+  /// 🔥 NORMAL LOGIC
+  Widget _buildNormalScreen({
+    required bool isLoggedIn,
+    required bool isCategorySelected,
+  }) {
+    if (!isLoggedIn) {
+      return const NormalCategoryScreen(isSelectionRequired: false);
+    }
+
+    if (!isCategorySelected) {
+      return NormalCategoryScreen(
+        isSelectionRequired: true,
+        onNavigate: (index) {
+          setState(() => _selectedIndex = index);
+        },
+      );
+    }
+
+    return PartnerFullScreenView(
+      imageUrls: [
+        'assets/sample/partner1.png',
+        'assets/sample/partner2.png',
+        'assets/sample/partner3.png',
+        'assets/sample/partner4.png',
+      ],
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final isLoggedIn = context.watch<AuthProvider>().isLoggedIn;
-    AppLogger.info("HomeScreen build, isLoggedIn: $isLoggedIn", tag: "HomeScreen");
-    
-    // Check category selection when user is logged in and on index 0
-    if (isLoggedIn && _selectedIndex == 0 && !_hasCheckedCategory) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _checkCategorySelection();
-        _hasCheckedCategory = true;
-      });
+    final isVipLoggedIn = context.watch<AuthProvider>().isVipLoggedIn;
+    final isNormalLoggedIn = context.watch<AuthProvider>().isNormalLoggedIn;
+    final categoryProvider = context.watch<CategoryProvider>();
+
+    /// 🔥 Loading state
+    if (!categoryProvider.isLoaded) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
-    
+
     final screens = <Widget>[
-      if (isLoggedIn)
-        PartnerFullScreenView(
-          imageUrls: [
-            'assets/sample/partner1.png',
-            'assets/sample/partner2.png',
-            'assets/sample/partner3.png',
-            'assets/sample/partner4.png',
-          ],
-        )
-      else
-        const LoginPage(type: "vip"),
-      const LoginPage(type: "normal"),
+      _buildVipScreen(
+        isLoggedIn: isVipLoggedIn,
+        isCategorySelected: categoryProvider.isVipSelected,
+      ),
+      _buildNormalScreen(
+        isLoggedIn: isNormalLoggedIn,
+        isCategorySelected: categoryProvider.isNormalSelected,
+      ),
       const ReelsScreen(),
       const AdsScreen(),
       const DonatersScreen(),
     ];
-    AppLogger.info("Selected screen index: $_selectedIndex", tag: "HomeScreen");
 
     return Scaffold(
-      appBar: null,
-      body: SafeArea(child: screens[_selectedIndex]),
-      bottomNavigationBar: _buildBottomNavigation(),
+      body: screens[_selectedIndex],
+      bottomNavigationBar: _buildBottomNavigation(
+        isCategorySelected: categoryProvider.hasSelection,
+      ),
     );
   }
 
-  Widget _buildBottomNavigation() {
-    final isLoggedIn = context.watch<AuthProvider>().isLoggedIn;
-    AppLogger.info("Building bottom nav, isLoggedIn: $isLoggedIn", tag: "HomeScreen");
+  /// 🔥 YOUR ORIGINAL BOTTOM NAV (RESTORED)
+  Widget _buildBottomNavigation({required bool isCategorySelected}) {
+    final isVipLoggedIn = context.watch<AuthProvider>().isVipLoggedIn;
+    final isNormalLoggedIn = context.watch<AuthProvider>().isNormalLoggedIn;
+
     return BottomNavigationBar(
       type: BottomNavigationBarType.fixed,
       selectedItemColor: Colors.white,
-      unselectedItemColor: Color(0xFF616161).withAlpha(240),
+      unselectedItemColor: const Color(0xFF616161).withAlpha(240),
+
       selectedFontSize: 10.sp,
-      selectedLabelStyle: GoogleFonts.inter(
-        fontSize: 12,
-        fontWeight: FontWeight.w600, // SemiBold
-        height: 1.0, // line-height: 100%
-        letterSpacing: 0,
-      ),
       unselectedFontSize: 10.sp,
       currentIndex: _selectedIndex,
+
+      selectedLabelStyle: GoogleFonts.inter(
+        fontSize: 12,
+        fontWeight: FontWeight.w600,
+        height: 1.0,
+      ),
+
       onTap: (index) async {
-        // Reset category check flag when navigating away from index 0
-        if (_selectedIndex == 0 && index != 0) {
-          _hasCheckedCategory = false;
-        }
-        
-        // Check if navigating to index 0, user is logged in, and category not selected
-        if (index == 0) {
-          final isLoggedIn = context.read<AuthProvider>().isLoggedIn;
-          if (isLoggedIn) {
-            final isCategorySelected = await CategorySessionStorage().isCategorySelected();
-            if (!isCategorySelected) {
-              // Push VipCategoryScreen instead of changing tab
-              if (mounted) {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => VipCategoryScreen(
-                      onNavigate: (newIndex) {
-                        Navigator.of(context).pop();
-                        setState(() {
-                          _selectedIndex = newIndex;
-                        });
-                        HomeSessionStorage().writeSelectedIndex(newIndex);
-                      },
-                    ),
-                  ),
-                );
-              }
-              return;
-            }
-          }
-        }
-        
-        setState(() {
-          _selectedIndex = index;
-        });
+        setState(() => _selectedIndex = index);
         await HomeSessionStorage().writeSelectedIndex(index);
       },
+
       items: [
+        /// 🔥 VIP / PROFILE
         BottomNavigationBarItem(
           icon: Padding(
             padding: const EdgeInsets.only(bottom: 8.0, top: 8),
@@ -212,13 +179,15 @@ class _HomeScreenState extends State<HomeScreen> {
               colorFilter: ColorFilter.mode(
                 _selectedIndex == 0
                     ? Colors.white
-                    : Color(0xFF616161).withAlpha(240),
+                    : const Color(0xFF616161).withAlpha(240),
                 BlendMode.srcIn,
               ),
             ),
           ),
-          label: isLoggedIn ? 'Profile' : 'Vip Register',
+          label: isCategorySelected ? 'Vip Profile' : 'Vip Register',
         ),
+
+        /// 🔥 REGISTER
         BottomNavigationBarItem(
           icon: Padding(
             padding: const EdgeInsets.only(bottom: 8.0, top: 8),
@@ -229,13 +198,15 @@ class _HomeScreenState extends State<HomeScreen> {
               colorFilter: ColorFilter.mode(
                 _selectedIndex == 1
                     ? Colors.white
-                    : Color(0xFF616161).withAlpha(240),
+                    : const Color(0xFF616161).withAlpha(240),
                 BlendMode.srcIn,
               ),
             ),
           ),
           label: 'Register',
         ),
+
+        /// 🔥 REELS
         BottomNavigationBarItem(
           icon: Padding(
             padding: const EdgeInsets.only(bottom: 8.0, top: 8),
@@ -246,13 +217,15 @@ class _HomeScreenState extends State<HomeScreen> {
               colorFilter: ColorFilter.mode(
                 _selectedIndex == 2
                     ? Colors.white
-                    : Color(0xFF616161).withAlpha(240),
+                    : const Color(0xFF616161).withAlpha(240),
                 BlendMode.srcIn,
               ),
             ),
           ),
           label: 'Reels',
         ),
+
+        /// 🔥 ADS
         BottomNavigationBarItem(
           icon: Padding(
             padding: const EdgeInsets.only(bottom: 8.0, top: 8),
@@ -263,13 +236,15 @@ class _HomeScreenState extends State<HomeScreen> {
               colorFilter: ColorFilter.mode(
                 _selectedIndex == 3
                     ? Colors.white
-                    : Color(0xFF616161).withAlpha(240),
+                    : const Color(0xFF616161).withAlpha(240),
                 BlendMode.srcIn,
               ),
             ),
           ),
           label: 'Ads',
         ),
+
+        /// 🔥 DONATERS
         BottomNavigationBarItem(
           icon: Padding(
             padding: const EdgeInsets.only(bottom: 8.0, top: 8),
@@ -280,7 +255,7 @@ class _HomeScreenState extends State<HomeScreen> {
               colorFilter: ColorFilter.mode(
                 _selectedIndex == 4
                     ? Colors.white
-                    : Color(0xFF616161).withAlpha(240),
+                    : const Color(0xFF616161).withAlpha(240),
                 BlendMode.srcIn,
               ),
             ),

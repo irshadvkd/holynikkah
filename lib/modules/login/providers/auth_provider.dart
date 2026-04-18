@@ -1,64 +1,163 @@
+/// 🔥 AuthProvider (VIP + NORMAL - FULL CLEAN VERSION)
+
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:holynikkah/core/utils/app_logger.dart';
 import 'package:holynikkah/modules/login/domain/auth_service.dart';
 
-/// 🧭 Provider for managing authentication state
 class AuthProvider extends ChangeNotifier {
   static const _storage = FlutterSecureStorage();
-  static const _key = 'is_logged_in';
 
-  bool _isLoggedIn = false;
+  /// 🔥 Storage Keys
+  static const String _vipLoginKey = 'is_vip_logged_in';
+  static const String _normalLoginKey = 'is_normal_logged_in';
 
-  bool get isLoggedIn {
-    AppLogger.info("Getting isLoggedIn: $_isLoggedIn", tag: "AuthProvider");
-    return _isLoggedIn;
-  }
+  /// 🔥 Private States
+  bool _isVipLoggedIn = false;
+  bool _isNormalLoggedIn = false;
+  bool _isLoading = false;
 
-  /// 🔹 Check login status
+  /// ============================
+  /// 🔥 GETTERS
+  /// ============================
+
+  /// 🔹 VIP Login Status
+  bool get isVipLoggedIn => _isVipLoggedIn;
+
+  /// 🔹 NORMAL Login Status
+  bool get isNormalLoggedIn => _isNormalLoggedIn;
+
+  /// 🔹 Combined (Optional)
+  bool get isAnyUserLoggedIn => _isVipLoggedIn || _isNormalLoggedIn;
+
+  /// 🔹 Loading State
+  bool get isLoading => _isLoading;
+
+  /// ============================
+  /// 🔥 INIT / CHECK LOGIN
+  /// ============================
+
+  /// 🔹 Check both login states from storage
   Future<void> checkLoginStatus() async {
-    AppLogger.info("Checking login status from storage...", tag: "AuthProvider");
-    final value = await _storage.read(key: _key);
-    AppLogger.info("Storage value for '$_key': $value", tag: "AuthProvider");
-    _isLoggedIn = value == 'true';
-    AppLogger.info("Set _isLoggedIn to: $_isLoggedIn", tag: "AuthProvider");
+    AppLogger.info("Checking login status...", tag: "AuthProvider");
+
+    final vipValue = await _storage.read(key: _vipLoginKey);
+    final normalValue = await _storage.read(key: _normalLoginKey);
+
+    _isVipLoggedIn = vipValue == 'true';
+    _isNormalLoggedIn = normalValue == 'true';
+
+    AppLogger.info(
+      "VIP: $_isVipLoggedIn | NORMAL: $_isNormalLoggedIn",
+      tag: "AuthProvider",
+    );
+
     notifyListeners();
-    AppLogger.success("Login status check completed", tag: "AuthProvider");
   }
 
-  /// 🔹 Send OTP (NOT login)
+  /// ============================
+  /// 🔥 OTP
+  /// ============================
+
   Future<bool> sendOtp(String phone) async {
+    _isLoading = true;
+    notifyListeners();
+
     AppLogger.info("Sending OTP to: $phone", tag: "AuthProvider");
+
     final result = await AuthService.instance.login(phone);
-    AppLogger.info("OTP send result: $result", tag: "AuthProvider");
+
+    _isLoading = false;
+    notifyListeners();
+
     return result;
   }
 
-  /// 🔹 Mark user as logged in AFTER OTP
-  Future<void> setLoggedIn() async {
-    AppLogger.info("Setting user as logged in...", tag: "AuthProvider");
-    _isLoggedIn = true;
-    await _storage.write(key: _key, value: 'true');
-    AppLogger.success("User marked as logged in and stored in storage", tag: "AuthProvider");
+  /// ============================
+  /// 🔥 LOGIN METHODS
+  /// ============================
+
+  /// 🔹 VIP LOGIN
+  Future<void> setVipLoggedIn() async {
+    AppLogger.info("Setting VIP login...", tag: "AuthProvider");
+
+    _isVipLoggedIn = true;
+
+    await _storage.write(key: _vipLoginKey, value: 'true');
+
+    AppLogger.success("VIP user logged in", tag: "AuthProvider");
+
     notifyListeners();
   }
 
-  /// 🔹 Logout
-  Future<void> logout() async {
-    AppLogger.info("Starting logout...", tag: "AuthProvider");
+  /// 🔹 NORMAL LOGIN
+  Future<void> setNormalLoggedIn() async {
+    AppLogger.info("Setting NORMAL login...", tag: "AuthProvider");
+
+    _isNormalLoggedIn = true;
+
+    await _storage.write(key: _normalLoginKey, value: 'true');
+
+    AppLogger.success("Normal user logged in", tag: "AuthProvider");
+
+    notifyListeners();
+  }
+
+  /// ============================
+  /// 🔥 LOGOUT METHODS
+  /// ============================
+
+  /// 🔹 LOGOUT VIP ONLY
+  Future<void> logoutVip() async {
+    AppLogger.info("Logging out VIP...", tag: "AuthProvider");
+
+    _isVipLoggedIn = false;
+
+    await _storage.delete(key: _vipLoginKey);
+
+    notifyListeners();
+  }
+
+  /// 🔹 LOGOUT NORMAL ONLY
+  Future<void> logoutNormal() async {
+    AppLogger.info("Logging out NORMAL...", tag: "AuthProvider");
+
+    _isNormalLoggedIn = false;
+
+    await _storage.delete(key: _normalLoginKey);
+
+    notifyListeners();
+  }
+
+  /// 🔹 LOGOUT ALL
+  Future<void> logoutAll() async {
+    AppLogger.info("Logging out ALL users...", tag: "AuthProvider");
+
     await AuthService.instance.logout();
-    _isLoggedIn = false;
-    await _storage.delete(key: _key);
-    AppLogger.success("Logout completed, cleared auth state", tag: "AuthProvider");
+
+    _isVipLoggedIn = false;
+    _isNormalLoggedIn = false;
+
+    await _storage.delete(key: _vipLoginKey);
+    await _storage.delete(key: _normalLoginKey);
+
+    AppLogger.success("All users logged out", tag: "AuthProvider");
+
     notifyListeners();
   }
 
-  /// 🔹 Clear all auth data (for testing)
+  /// ============================
+  /// 🔥 CLEAR (DEV ONLY)
+  /// ============================
+
   Future<void> clearAuthData() async {
     AppLogger.info("Clearing all auth data...", tag: "AuthProvider");
-    _isLoggedIn = false;
+
+    _isVipLoggedIn = false;
+    _isNormalLoggedIn = false;
+
     await _storage.deleteAll();
-    AppLogger.success("All auth data cleared", tag: "AuthProvider");
+
     notifyListeners();
   }
 }

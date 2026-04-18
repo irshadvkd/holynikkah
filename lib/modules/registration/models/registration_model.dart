@@ -4,8 +4,8 @@ class RegistrationModel {
   final String phoneNumber;
   final String information;
   final bool isVip;
-  final String? categoryId;
-  final String? subcategoryId;
+  final String? categoryId; // VIP: single category
+  final List<String>? categoryIds; // Normal: multiple categories
 
   RegistrationModel({
     required this.profileId,
@@ -14,7 +14,7 @@ class RegistrationModel {
     required this.information,
     this.isVip = false,
     this.categoryId,
-    this.subcategoryId,
+    this.categoryIds,
   });
 
   Map<String, dynamic> toJson() => {
@@ -24,7 +24,7 @@ class RegistrationModel {
     'information': information,
     'is_vip': isVip,
     'category_id': categoryId,
-    'subcategory_id': subcategoryId,
+    'category_ids': categoryIds,
   };
 
   factory RegistrationModel.fromJson(Map<String, dynamic> json) => RegistrationModel(
@@ -34,6 +34,6 @@ class RegistrationModel {
     information: json['information'] ?? '',
     isVip: json['is_vip'] ?? false,
     categoryId: json['category_id'],
-    subcategoryId: json['subcategory_id'],
+    categoryIds: json['category_ids']?.cast<String>(),
   );
 }

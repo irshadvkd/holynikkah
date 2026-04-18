@@ -1,8 +1,7 @@
-import 'package:auto_route/auto_route.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:holynikkah/core/widgets/logo_widget.dart';
-import 'package:holynikkah/core/router/app_router.dart';
+import 'package:holynikkah/core/utils/routes.dart';
 import 'package:holynikkah/modules/login/providers/auth_provider.dart';
 import 'package:holynikkah/core/utils/app_logger.dart';
 import 'package:provider/provider.dart';
@@ -26,17 +25,19 @@ class _SplashScreenState extends State<SplashScreen> {
     final delay = kDebugMode ? Duration.zero : const Duration(seconds: 2);
     await Future.delayed(delay);
     if (!mounted) return;
-    
+
     AppLogger.info("Checking login status...", tag: "SplashScreen");
     await context.read<AuthProvider>().checkLoginStatus();
     if (!mounted) return;
-    
-    final isLoggedIn = context.read<AuthProvider>().isLoggedIn;
-    AppLogger.info("Login status: $isLoggedIn", tag: "SplashScreen");
+
+    final isVipLoggedIn = context.read<AuthProvider>().isVipLoggedIn;
+    final isNormalLoggedIn = context.read<AuthProvider>().isNormalLoggedIn;
+    AppLogger.info("Vip Login status: $isVipLoggedIn", tag: "SplashScreen");
+    AppLogger.info("Normal Login status: $isNormalLoggedIn", tag: "SplashScreen");
     AppLogger.info("Navigating to HomeRoute...", tag: "SplashScreen");
     await context.read<AuthProvider>().clearAuthData();
 
-    context.router.replace(HomeRoute());
+    Navigator.of(context).pushReplacementNamed(Routes.home);
   }
 
   @override

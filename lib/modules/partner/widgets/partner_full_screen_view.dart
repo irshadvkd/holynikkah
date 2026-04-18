@@ -10,12 +10,14 @@ class PartnerFullScreenView extends StatelessWidget {
       backgroundColor: Colors.black,
 
       /// 🔥 Vertical swipe (Reels style)
-      body: PageView.builder(
-        scrollDirection: Axis.vertical,
-        itemCount: imageUrls.length,
-        itemBuilder: (context, index) {
-          return Image.asset(imageUrls[index], fit: BoxFit.cover);
-        },
+      body: SafeArea(
+        child: PageView.builder(
+          scrollDirection: Axis.vertical,
+          itemCount: imageUrls.length,
+          itemBuilder: (context, index) {
+            return Image.asset(imageUrls[index], fit: BoxFit.fitHeight);
+          },
+        ),
       ),
     );
   }

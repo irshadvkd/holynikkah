@@ -2,9 +2,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:holynikkah/models/video_model.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:share_plus/share_plus.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/services.dart';
 
 class ReelsScreen extends StatefulWidget {
@@ -38,7 +35,7 @@ class _ReelsScreenState extends State<ReelsScreen> {
         {
           "description": "Sample test video 1",
           "sources": [
-            "https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4"
+            "https://raw.githubusercontent.com/irshadvkd/holynikkah/main/assets/sample/reel1.mp4"
           ],
           "subtitle": "SampleLib",
           "thumb": "https://picsum.photos/400/600",
@@ -47,7 +44,7 @@ class _ReelsScreenState extends State<ReelsScreen> {
         {
           "description": "Sample test video 2",
           "sources": [
-            "https://flutter.github.io/assets-for-api-docs/assets/videos/butterfly.mp4"
+            "https://raw.githubusercontent.com/irshadvkd/holynikkah/main/assets/sample/reel2.mp4"
           ],
           "subtitle": "SampleLib",
           "thumb": "https://picsum.photos/401/600",
@@ -56,11 +53,20 @@ class _ReelsScreenState extends State<ReelsScreen> {
         {
           "description": "Sample test video 3",
           "sources": [
-            "https://sample-videos.com/zip/10/mp4/SampleVideo_360x240_1mb.mp4"
+            "https://raw.githubusercontent.com/irshadvkd/holynikkah/main/assets/sample/reel3.mp4"
           ],
           "subtitle": "SampleLib",
           "thumb": "https://picsum.photos/402/600",
           "title": "Sample Video 3"
+        },
+        {
+          "description": "Sample test video 4",
+          "sources": [
+            "https://raw.githubusercontent.com/irshadvkd/holynikkah/main/assets/sample/reel4.mp4"
+          ],
+          "subtitle": "SampleLib",
+          "thumb": "https://picsum.photos/402/600",
+          "title": "Sample Video 4"
         }
       ]
     }
@@ -86,19 +92,22 @@ class _ReelsScreenState extends State<ReelsScreen> {
           Uri.parse(videos[i].sources.first),
         );
         controllers[i] = controller;
-        controller.initialize().then((_) {
-          if (mounted) {
-            controller.setVolume(1.0);
-            controller.setLooping(true);
-            // Only auto-play the first video after proper initialization
-            if (i == 0) {
-              setState(() {}); // Trigger rebuild to show video
-              controller.play();
-            }
-          }
-        }).catchError((error) {
-          print('Video error: $error');
-        });
+        controller
+            .initialize()
+            .then((_) {
+              if (mounted) {
+                controller.setVolume(1.0);
+                controller.setLooping(true);
+                // Only auto-play the first video after proper initialization
+                if (i == 0) {
+                  setState(() {}); // Trigger rebuild to show video
+                  controller.play();
+                }
+              }
+            })
+            .catchError((error) {
+              print('Video error: $error');
+            });
       }
     }
   }
@@ -154,7 +163,12 @@ class ReelItem extends StatefulWidget {
   final bool isActive;
   final VideoPlayerController? controller;
 
-  const ReelItem({super.key, required this.video, required this.isActive, this.controller});
+  const ReelItem({
+    super.key,
+    required this.video,
+    required this.isActive,
+    this.controller,
+  });
 
   @override
   State<ReelItem> createState() => _ReelItemState();
@@ -228,7 +242,8 @@ class _ReelItemState extends State<ReelItem> {
         // Tap to play/pause
         GestureDetector(
           onTap: () {
-            if (widget.controller != null && widget.controller!.value.isInitialized) {
+            if (widget.controller != null &&
+                widget.controller!.value.isInitialized) {
               if (widget.controller!.value.isPlaying) {
                 widget.controller!.pause();
               } else {
@@ -241,131 +256,131 @@ class _ReelItemState extends State<ReelItem> {
         ),
 
         // Bottom content area
-        Positioned(
-          bottom: 32,
-          left: 0,
-          right: 0,
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Column(
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                isLiked = !isLiked;
-                              });
-                            },
-                            child: SvgPicture.asset(
-                              'assets/icons/like.svg',
-                              width: 32,
-                              height: 32,
-                              colorFilter: ColorFilter.mode(
-                                isLiked ? Colors.red : Colors.white,
-                                BlendMode.srcIn,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            '1.2K',
-                            style: GoogleFonts.inter(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
-                      Column(
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              showModalBottomSheet(
-                                context: context,
-                                builder: (context) => Container(
-                                  height: 300,
-                                  padding: const EdgeInsets.all(16),
-                                  child: Column(
-                                    children: [
-                                      Text(
-                                        'Comments',
-                                        style: GoogleFonts.inter(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 16),
-                                      const Text('No comments yet'),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                            child: SvgPicture.asset(
-                              'assets/icons/comment.svg',
-                              width: 32,
-                              height: 32,
-                              colorFilter: const ColorFilter.mode(
-                                Colors.white,
-                                BlendMode.srcIn,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            '89',
-                            style: GoogleFonts.inter(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
-                      Column(
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              Share.share('Check out this video!');
-                            },
-                            child: SvgPicture.asset(
-                              'assets/icons/share.svg',
-                              width: 32,
-                              height: 32,
-                              colorFilter: const ColorFilter.mode(
-                                Colors.white,
-                                BlendMode.srcIn,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            '45',
-                            style: GoogleFonts.inter(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
+        // Positioned(
+        //   bottom: 32,
+        //   left: 0,
+        //   right: 0,
+        //   child: SafeArea(
+        //     child: Padding(
+        //       padding: const EdgeInsets.all(16),
+        //       child: Row(
+        //         crossAxisAlignment: CrossAxisAlignment.end,
+        //         mainAxisAlignment: MainAxisAlignment.end,
+        //         children: [
+        //           Column(
+        //             mainAxisSize: MainAxisSize.min,
+        //             children: [
+        //               Column(
+        //                 children: [
+        //                   GestureDetector(
+        //                     onTap: () {
+        //                       setState(() {
+        //                         isLiked = !isLiked;
+        //                       });
+        //                     },
+        //                     child: SvgPicture.asset(
+        //                       'assets/icons/like.svg',
+        //                       width: 32,
+        //                       height: 32,
+        //                       colorFilter: ColorFilter.mode(
+        //                         isLiked ? Colors.red : Colors.white,
+        //                         BlendMode.srcIn,
+        //                       ),
+        //                     ),
+        //                   ),
+        //                   const SizedBox(height: 8),
+        //                   Text(
+        //                     '1.2K',
+        //                     style: GoogleFonts.inter(
+        //                       color: Colors.white,
+        //                       fontSize: 16,
+        //                       fontWeight: FontWeight.w700,
+        //                     ),
+        //                   ),
+        //                 ],
+        //               ),
+        //               const SizedBox(height: 20),
+        //               Column(
+        //                 children: [
+        //                   GestureDetector(
+        //                     onTap: () {
+        //                       showModalBottomSheet(
+        //                         context: context,
+        //                         builder: (context) => Container(
+        //                           height: 300,
+        //                           padding: const EdgeInsets.all(16),
+        //                           child: Column(
+        //                             children: [
+        //                               Text(
+        //                                 'Comments',
+        //                                 style: GoogleFonts.inter(
+        //                                   fontSize: 18,
+        //                                   fontWeight: FontWeight.bold,
+        //                                 ),
+        //                               ),
+        //                               const SizedBox(height: 16),
+        //                               const Text('No comments yet'),
+        //                             ],
+        //                           ),
+        //                         ),
+        //                       );
+        //                     },
+        //                     child: SvgPicture.asset(
+        //                       'assets/icons/comment.svg',
+        //                       width: 32,
+        //                       height: 32,
+        //                       colorFilter: const ColorFilter.mode(
+        //                         Colors.white,
+        //                         BlendMode.srcIn,
+        //                       ),
+        //                     ),
+        //                   ),
+        //                   const SizedBox(height: 8),
+        //                   Text(
+        //                     '89',
+        //                     style: GoogleFonts.inter(
+        //                       color: Colors.white,
+        //                       fontSize: 16,
+        //                       fontWeight: FontWeight.w700,
+        //                     ),
+        //                   ),
+        //                 ],
+        //               ),
+        //               const SizedBox(height: 20),
+        //               Column(
+        //                 children: [
+        //                   GestureDetector(
+        //                     onTap: () {
+        //                       Share.share('Check out this video!');
+        //                     },
+        //                     child: SvgPicture.asset(
+        //                       'assets/icons/share.svg',
+        //                       width: 32,
+        //                       height: 32,
+        //                       colorFilter: const ColorFilter.mode(
+        //                         Colors.white,
+        //                         BlendMode.srcIn,
+        //                       ),
+        //                     ),
+        //                   ),
+        //                   const SizedBox(height: 8),
+        //                   Text(
+        //                     '45',
+        //                     style: GoogleFonts.inter(
+        //                       color: Colors.white,
+        //                       fontSize: 16,
+        //                       fontWeight: FontWeight.w700,
+        //                     ),
+        //                   ),
+        //                 ],
+        //               ),
+        //             ],
+        //           ),
+        //         ],
+        //       ),
+        //     ),
+        //   ),
+        // ),
 
         // Play/pause overlay
         if (widget.controller != null &&

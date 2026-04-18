@@ -1,14 +1,13 @@
 import 'dart:io';
 import 'dart:math';
 
-import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:holynikkah/core/router/app_router.dart';
+import 'package:holynikkah/core/utils/routes.dart';
 import 'package:holynikkah/core/services/navigation_guard.dart';
 import 'package:holynikkah/core/services/user_journey_tracker.dart';
 import 'package:holynikkah/core/theme/context_extension.dart';
@@ -47,7 +46,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
   // Sample data - replace with your actual data source
   final List<String> states = [
-    'Andhra Pradesh',
     'Karnataka',
     'Kerala',
     'Tamil Nadu',
@@ -85,6 +83,13 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   @override
   void initState() {
     super.initState();
+
+    /// Clear any previous registration data except VIP status
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final provider = context.read<RegistrationProvider>();
+      provider.clearRegistrationData();
+      provider.setVipStatus(widget.isVip);
+    });
 
     /// Generate random profile id
     _profileIdController.text = generateProfileId();
@@ -482,37 +487,21 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       //   'Registration completed successfully!',
       // );
 
-      await context.read<AuthProvider>().setLoggedIn();
+      if (widget.isVip) {
+        await context.read<AuthProvider>().setVipLoggedIn();
+      } else {
+        await context.read<AuthProvider>().setNormalLoggedIn();
+      }
 
       // Single navigation with delay and proper guard
       Future.delayed(const Duration(milliseconds: 800), () async {
         if (!mounted) return;
 
-        // Replace the full stack with Home, landing on the "profile" tab.
-        // (In current HomeScreen, tab index 1 is the user/profile section.)
-        final PageRouteInfo nextRoute = HomeRoute(initialIndex: 0);
-
-        final success = await context.navigationGuard.navigateTo(
-          context,
-          nextRoute,
-          replaceAll: true,
-          trigger: 'registration_complete',
-          data: {'isVip': widget.isVip, 'registrationCompleted': true},
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          Routes.home,
+          (route) => false, // 🔥 clears entire stack
+          arguments: {'initialIndex': widget.isVip ? 0 : 1},
         );
-
-        if (success) {
-          // Complete the registration journey
-          await UserJourneyTracker().completeJourney(
-            finalData: {'isVip': widget.isVip, 'nextRoute': 'home'},
-          );
-        }
-
-        final success1 = await context.navigationGuard.navigateTo(
-          context,
-          nextRoute,
-        );
-
-
       });
     }
   }

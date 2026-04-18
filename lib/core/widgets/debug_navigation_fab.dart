@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:holynikkah/core/router/app_router.dart';
+import 'package:holynikkah/core/utils/routes.dart';
 import 'package:holynikkah/core/services/navigation_guard.dart';
 import 'package:holynikkah/core/theme/context_extension.dart';
 
@@ -25,7 +25,7 @@ class DebugNavigationFAB extends StatelessWidget {
         onPressed: () async {
           await context.navigationGuard.navigateTo(
             context,
-            const NavigationAnalyticsRoute(),
+            Routes.navigationAnalytics,
             trigger: 'debug_access',
           );
         },

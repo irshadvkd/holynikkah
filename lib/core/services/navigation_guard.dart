@@ -1,4 +1,3 @@
-import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:holynikkah/core/services/navigation_logger.dart';
 import 'package:holynikkah/core/utils/app_logger.dart';
@@ -19,7 +18,8 @@ class NavigationGuard {
   /// Safe navigation with duplicate prevention
   Future<bool> navigateTo(
     BuildContext context,
-    PageRouteInfo route, {
+    String routeName, {
+    Object? arguments,
     bool replace = false,
     bool replaceAll = false,
     String? trigger,
@@ -30,7 +30,6 @@ class NavigationGuard {
       return false;
     }
 
-    final routeName = route.routeName;
     final currentTime = DateTime.now();
 
     // Prevent duplicate navigation
@@ -53,14 +52,14 @@ class NavigationGuard {
 
     try {
       _isNavigating = true;
-      final currentRoute = context.router.current.name;
+      final currentRoute = ModalRoute.of(context)?.settings.name ?? 'unknown';
 
       // Log navigation attempt
       await _logger.logRouteChange(
         from: currentRoute,
         to: routeName,
         parameters: {
-          if (route.args != null) 'args': route.args,
+          if (arguments != null) 'args': arguments,
           ...?data,
         },
         trigger: trigger,
@@ -69,14 +68,23 @@ class NavigationGuard {
       // Perform navigation
       bool success = false;
       if (replaceAll) {
-        // Do not await: in auto_route, push/replace futures may complete on pop.
-        context.router.replaceAll([route]);
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          routeName,
+          (route) => false,
+          arguments: arguments,
+        );
         success = true;
       } else if (replace) {
-        context.router.replace(route);
+        Navigator.of(context).pushReplacementNamed(
+          routeName,
+          arguments: arguments,
+        );
         success = true;
       } else {
-        context.router.push(route);
+        Navigator.of(context).pushNamed(
+          routeName,
+          arguments: arguments,
+        );
         success = true;
       }
 
@@ -119,15 +127,15 @@ class NavigationGuard {
     }
 
     try {
-      final currentRoute = context.router.current.name;
-      final canPop = context.router.canPop();
+      final currentRoute = ModalRoute.of(context)?.settings.name ?? 'unknown';
+      final canPop = Navigator.of(context).canPop();
 
       if (!canPop) {
         AppLogger.warning('Cannot pop from $currentRoute');
         return false;
       }
 
-      context.router.maybePop(result);
+      Navigator.of(context).pop(result);
       
       await _logger.logRouteChange(
         from: currentRoute,
@@ -151,7 +159,8 @@ class NavigationGuard {
   /// Navigate with validation
   Future<bool> navigateWithValidation(
     BuildContext context,
-    PageRouteInfo route, {
+    String routeName, {
+    Object? arguments,
     required bool Function() validator,
     String? validationError,
     bool replace = false,
@@ -159,11 +168,11 @@ class NavigationGuard {
   }) async {
     if (!validator()) {
       final error =
-          validationError ?? 'Validation failed for ${route.routeName}';
+          validationError ?? 'Validation failed for $routeName';
       AppLogger.warning(error, tag: 'NavigationGuard');
       
       await _logger.logNavigationError(
-        route: route.routeName,
+        route: routeName,
         error: error,
         context: {'trigger': trigger},
       );
@@ -173,7 +182,8 @@ class NavigationGuard {
 
     return navigateTo(
       context,
-      route,
+      routeName,
+      arguments: arguments,
       replace: replace,
       trigger: trigger,
     );

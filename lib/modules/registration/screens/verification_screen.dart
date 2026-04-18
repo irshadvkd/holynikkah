@@ -1,9 +1,8 @@
-import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:holynikkah/core/router/app_router.dart';
+import 'package:holynikkah/core/utils/routes.dart';
 import 'package:holynikkah/core/utils/app_logger.dart';
 import 'package:holynikkah/core/widgets/common_snackbar.dart';
 import 'package:holynikkah/modules/login/providers/auth_provider.dart';
@@ -37,19 +36,16 @@ class _VerificationScreenState extends State<VerificationScreen> {
     }
 
     /// ✅ SUCCESS - Mark user as logged in
-    await context.read<AuthProvider>().setLoggedIn();
+    // await context.read<AuthProvider>().setLoggedIn();
     CommonSnackBar.showSuccess(context, 'OTP Verified');
 
     // Read the registration type stored during login
-    final registrationType = await _storage.read(key: 'registration_type') ?? 'vip';
+    final registrationType = await _storage.read(key: 'registration_type');
     final isVip = registrationType == 'vip';
 
-    /// 🚀 AUTO ROUTE NAVIGATION (CORRECT WAY)
-    context.router.replace(
-      RegistrationRoute(
-        isVip: isVip,
-      ),
-    );
+    Navigator.of(
+      context,
+    ).pushReplacementNamed(Routes.registration, arguments: {'isVip': isVip});
   }
 
   @override

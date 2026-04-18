@@ -11,6 +11,7 @@ class CategoryCard extends StatelessWidget {
   final bool isSelected;
   final VoidCallback onTap;
   final bool withCategories;
+  final bool isSelectionRequired;
   final TextStyle? textStyle;
 
   const CategoryCard({
@@ -20,6 +21,7 @@ class CategoryCard extends StatelessWidget {
     required this.isSelected,
     required this.onTap,
     this.withCategories = true,
+    required this.isSelectionRequired,
     this.textStyle,
   });
 
@@ -54,6 +56,7 @@ class CategoryCard extends StatelessWidget {
         ),
         child: Row(
           children: [
+            if(isSelectionRequired == true)
             Icon(
               isSelected
                   ? Icons.radio_button_checked
