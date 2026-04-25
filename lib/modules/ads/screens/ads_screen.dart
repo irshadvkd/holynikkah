@@ -1,99 +1,169 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
 
-/// Ads Screen with global scaling
-/// Keeps UI proportions exactly same while enlarging visually
 class AdsScreen extends StatelessWidget {
   const AdsScreen({super.key});
 
-  /// Global scale factor
-  /// Change this to enlarge or shrink UI
-  static const double uiScale = 1.2; // 👈 Increase this (1.1 → 1.5)
+  static const List<_OrbitItem> _orbitItems = [
+    _OrbitItem(label: 'REPLENISH EXCEPT\nHIS OWN', angleDeg: 310),
+    _OrbitItem(label: 'AURA', angleDeg: 345),
+    _OrbitItem(label: 'SHAADI VIBES', angleDeg: 20),
+    _OrbitItem(label: 'SPACE 4 ADVERTISEMENT', angleDeg: 55),
+    _OrbitItem(label: 'SPACE 4 ADVERTISEMENT', angleDeg: 89),
+    _OrbitItem(label: 'ANTIAGING', angleDeg: 275),
+  ];
 
   @override
   Widget build(BuildContext context) {
-    final screenSize = MediaQuery.of(context).size;
+    final size = MediaQuery.of(context).size;
+    final center = Offset(60, size.height / 2);
+
+    const double orbitRadiusX = 200;
+    const double orbitRadiusY = 190;
+    const double mainRadius = 140;
+    const double smallRadius = 32;
 
     return Scaffold(
-      backgroundColor: Colors.black,
-      body: Center(
-        child: Transform.scale(
-          scale: uiScale,
-          alignment: Alignment.center,
-          child: OverflowBox(
-            maxWidth: double.infinity,
-            child: Transform.translate(
-              offset: Offset(-screenSize.width * 0.35, 0),
-              child: SizedBox(
-                width: screenSize.width * 1.5,
-                height: screenSize.width * 1.2,
-                child: _buildCircleUI(screenSize),
+      backgroundColor: Colors.white,
+      body: Stack(
+        alignment: Alignment.topLeft,
+        children: [
+          /// ── Orbit ring ─────────────────────────────
+          Positioned.fill(
+            child: CustomPaint(
+              painter: _OrbitPainter(
+                center: center,
+                radiusX: orbitRadiusX,
+                radiusY: orbitRadiusY,
               ),
             ),
           ),
-        ),
+
+          /// ── Orbit Items ────────────────────────────
+          ..._orbitItems.asMap().entries.map((entry) {
+            final index = entry.key;
+            final item = entry.value;
+            final angle = item.angleDeg * math.pi / 180;
+
+            final globeCenter =
+                center +
+                Offset(
+                  orbitRadiusX * math.cos(angle),
+                  orbitRadiusY * math.sin(angle),
+                );
+
+            return _OrbitGlobe(
+              center: globeCenter,
+              radius: smallRadius,
+              label: item.label,
+              angleDeg: item.angleDeg,
+              index: index,
+            );
+          }),
+
+          /// ── Center Image ───────────────────────────
+          Positioned(
+            left: center.dx - mainRadius,
+            top: center.dy - mainRadius,
+            child: Image.asset(
+              'assets/icons/ads/prayers.png',
+              width: mainRadius * 2,
+              height: mainRadius * 2,
+              fit: BoxFit.contain,
+            ),
+          ),
+        ],
       ),
     );
   }
+}
 
-  /// Main UI Builder (Separated for Clean Code)
-  Widget _buildCircleUI(Size screenSize) {
+/// ─────────────────────────────────────────────
+
+class _OrbitItem {
+  final String label;
+  final double angleDeg;
+
+  const _OrbitItem({required this.label, required this.angleDeg});
+}
+
+/// ─────────────────────────────────────────────
+
+class _OrbitGlobe extends StatelessWidget {
+  final Offset center;
+  final double radius;
+  final String label;
+  final double angleDeg;
+  final int index;
+
+  const _OrbitGlobe({
+    required this.center,
+    required this.radius,
+    required this.label,
+    required this.angleDeg,
+    required this.index,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final angleRad = angleDeg * math.pi / 180;
+
+    /// Direction vector
+    final dx = math.cos(angleRad);
+    final dy = math.sin(angleRad);
+
+    /// Distance of label from globe
+    const double labelDistance = 14;
+
+    /// Smart alignment
+    TextAlign textAlign;
+    if (dx > 0.3) {
+      textAlign = TextAlign.left;
+    } else if (dx < -0.3) {
+      textAlign = TextAlign.right;
+    } else {
+      textAlign = TextAlign.center;
+    }
+
     return Stack(
-      alignment: Alignment.center,
       children: [
-        /// Outer Ring
-        SizedBox(
-          width: screenSize.width * 1,
-          height: screenSize.width * 1.2,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              /// Outer Border Circle
-              Container(
-                width: screenSize.width * 0.8,
-                height: screenSize.width * 0.8,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.grey[400]!, width: 3),
-                ),
-              ),
-
-              /// Orbit Items
-              ..._buildOrbitItems(screenSize),
-            ],
+        /// Globe
+        Positioned(
+          left: center.dx - radius,
+          top: center.dy - radius,
+          child: Image.asset(
+            'assets/icons/ads/globe1.png',
+            width: radius * 2,
+            height: radius * 2,
+            fit: BoxFit.contain,
           ),
         ),
 
-        /// Inner Circle
-        Container(
-          width: screenSize.width * 0.5,
-          height: screenSize.width * 0.5,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.grey[400]!,
-            boxShadow: [
-              /// Matches: 0px 4px 100px 67px #00000099 inset
-              BoxShadow(
-                offset: const Offset(0, 4),
-                blurRadius: 100,
-                spreadRadius: 67,
-                color: const Color(0x99000000),
-              ),
-            ],
-          ),
-          child: Align(
-            alignment: Alignment.centerRight,
-            child: Padding(
-              padding: const EdgeInsets.only(right: 16),
+        /// Label (🔥 FIXED POSITION)
+        /// Label (🔥 Rotated along orbit)
+        Positioned(
+          left:
+              center.dx +
+              (radius + labelDistance) * dx -
+              (index == 1
+                  ? 45
+                  : index == 2
+                  ? 25
+                  : 30),
+          top: center.dy + (radius + labelDistance) * dy - 12,
+          child: Transform.rotate(
+            angle: _getReadableAngle(angleRad),
+            child: SizedBox(
+              width: 110,
               child: Text(
-                'PRAYERS',
-                style: GoogleFonts.inter(
-                  color: Colors.black,
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.2,
+                label,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.5,
+                  color: Colors.black87,
+                  height: 1.3,
                 ),
               ),
             ),
@@ -103,43 +173,46 @@ class AdsScreen extends StatelessWidget {
     );
   }
 
-  /// Orbit Items Generator
-  List<Widget> _buildOrbitItems(Size screenSize) {
-    final labels = [
-      'ANTIAGING',
-      'GLOWTIPS',
-      'AURA',
-      'REPLENISH EXCEPT HIS OWN',
-      'SPACE 4 AD',
-      'SPACE 4 AD',
-    ];
+  double _getReadableAngle(double angle) {
+    double rotation = angle + math.pi / 2;
 
-    return List.generate(6, (index) {
-      final angle = (270 + index * 35) * math.pi / 180;
-      final radius = screenSize.width * 0.4;
+    /// Prevent upside-down text
+    if (rotation > math.pi / 2 && rotation < 3 * math.pi / 2) {
+      rotation += math.pi;
+    }
 
-      final x = math.cos(angle) * radius;
-      final y = math.sin(angle) * radius;
+    return 0;
+  }
+}
 
-      return Positioned(
-        left: screenSize.width / 2 + x - 30,
-        top: screenSize.width * 0.6 + y - 30,
-        child: Container(
-          width: 70,
-          height: 70,
-          alignment: Alignment.center,
-          clipBehavior: Clip.antiAliasWithSaveLayer,
-          decoration: BoxDecoration(
-            color: Colors.grey[700],
-            shape: BoxShape.circle,
-          ),
-          child: Text(
-            labels[index],
-            style: GoogleFonts.inter(fontSize: 10, color: Colors.white),
-            textAlign: TextAlign.center,
-          ),
-        ),
-      );
-    });
+/// ─────────────────────────────────────────────
+
+class _OrbitPainter extends CustomPainter {
+  final Offset center;
+  final double radiusX;
+  final double radiusY;
+
+  const _OrbitPainter({
+    required this.center,
+    required this.radiusX,
+    required this.radiusY,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.drawOval(
+      Rect.fromCenter(center: center, width: radiusX * 2, height: radiusY * 2),
+      Paint()
+        ..color = const Color(0xFF2A5FA0).withOpacity(0.5)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 0.8,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_OrbitPainter oldDelegate) {
+    return oldDelegate.center != center ||
+        oldDelegate.radiusX != radiusX ||
+        oldDelegate.radiusY != radiusY;
   }
 }

@@ -13,6 +13,7 @@ import 'package:holynikkah/core/services/user_journey_tracker.dart';
 import 'package:holynikkah/core/theme/context_extension.dart';
 import 'package:holynikkah/core/utils/constants.dart';
 import 'package:holynikkah/core/utils/validation_utils.dart';
+import 'package:holynikkah/core/widgets/common_app_bar.dart';
 import 'package:holynikkah/core/widgets/gradient_border.dart';
 import 'package:holynikkah/core/widgets/widgets.dart';
 import 'package:holynikkah/modules/login/providers/auth_provider.dart';
@@ -43,6 +44,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   final ValueNotifier<String?> stateNotifier = ValueNotifier<String?>(null);
   final ValueNotifier<String?> districtNotifier = ValueNotifier<String?>(null);
   final ValueNotifier<String?> cityNotifier = ValueNotifier<String?>(null);
+
+  /// Loading state
+  bool _isLoading = false;
 
   // Sample data - replace with your actual data source
   final List<String> states = [
@@ -141,22 +145,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        systemOverlayStyle: SystemUiOverlayStyle.light,
-        centerTitle: true,
-        title: Text(
-          "${widget.isVip ? 'VIP ' : ''}REGISTRATION",
-          style: GoogleFonts.inter(
-            color: Colors.white,
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-      body: SingleChildScrollView(
+    return CommonAppBar(
+      title: "${widget.isVip ? 'VIP ' : ''}REGISTRATION",
+      child: SingleChildScrollView(
         child: Form(
           key: _formKey,
           child: Padding(
@@ -175,7 +166,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           width: 116.sp,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white24),
+                            border: Border.all(color: Colors.black26),
                             image: _profileImage != null
                                 ? DecorationImage(
                                     image: FileImage(_profileImage!),
@@ -185,9 +176,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           ),
                           child: _profileImage == null
                               ? Padding(
-                                  padding: EdgeInsets.all(24.sp),
+                                  padding: EdgeInsets.all(0.sp),
                                   child: SvgPicture.asset(
-                                    AppConstants.icons.user,
+                                    "assets/icons/profile.svg",
+                                    fit: BoxFit.fill,
                                   ),
                                 )
                               : null,
@@ -200,12 +192,12 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           child: Container(
                             padding: EdgeInsets.all(6),
                             decoration: const BoxDecoration(
-                              color: Color(0xFFFFD700),
+                              color: Color(0xFF032544),
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(
                               Icons.camera_alt,
-                              color: Colors.black,
+                              color: Colors.white,
                               size: 18,
                             ),
                           ),
@@ -232,8 +224,15 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 /// GENDER SELECTION
                 Container(
                   decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(50.r),
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(50),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Color(0xFF303036).withOpacity(.7),
+                        offset: Offset(0, 4),
+                        blurRadius: 8,
+                      ),
+                    ],
                   ),
                   child: Row(
                     children: [
@@ -241,7 +240,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         child: RadioListTile<String>(
                           value: "Male",
                           groupValue: gender,
-                          activeColor: AppColors.brandYellowDark,
+                          activeColor: Color(0xFF032544),
                           onChanged: (value) {
                             setState(() {
                               gender = "Male";
@@ -266,7 +265,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         child: RadioListTile<String>(
                           value: "Female",
                           groupValue: gender,
-                          activeColor: AppColors.brandYellowDark,
+                          activeColor: Color(0xFF032544),
                           onChanged: (value) {
                             setState(() {
                               gender = "Female";
@@ -286,7 +285,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   ),
                 ),
 
-                SizedBox(height: 12.h),
+                SizedBox(height: 16.h),
 
                 /// NAME
                 ValidatedTextField(
@@ -297,7 +296,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   textCapitalization: TextCapitalization.words,
                 ),
 
-                SizedBox(height: 12.h),
+                SizedBox(height: 16.h),
 
                 /// STATE DROPDOWN
                 CommonDropdown<String>(
@@ -312,7 +311,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   },
                 ),
 
-                SizedBox(height: 12.h),
+                SizedBox(height: 16.h),
 
                 /// DISTRICT DROPDOWN
                 ValueListenableBuilder<String?>(
@@ -333,7 +332,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   },
                 ),
 
-                SizedBox(height: 12.h),
+                SizedBox(height: 16.h),
 
                 /// CITY DROPDOWN
                 ValueListenableBuilder<String?>(
@@ -353,41 +352,35 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   },
                 ),
 
-                SizedBox(height: 12.h),
+                SizedBox(height: 16.h),
 
                 /// INFORMATION (OVAL SHAPE)
-                OvalTextField(
+                ValidatedTextField(
                   controller: _informationController,
-                  hintText: 'Information (10-500 characters)',
+                  hintText: 'Information (25-500 characters)',
                   maxLines: 4,
                   maxLength: 500,
                   textCapitalization: TextCapitalization.sentences,
-                  inputFormatters: InputFormatters.informationFormatter(
+                  customFormatters: InputFormatters.informationFormatter(
                     maxLength: 500,
                   ),
-                  validator: (value) => ValidationUtils.validateLength(
+                  customValidator: (value) => ValidationUtils.validateLength(
                     value,
-                    minLength: 10,
+                    minLength: 25,
                     maxLength: 500,
                     fieldName: 'Information',
                   ),
                 ),
 
                 SizedBox(height: 30.h),
-
-                /// CONTINUE BUTTON
-                GradientBorderContainer(
-                  borderRadius: 25.r,
-                  onTap: _continue,
-                  child: Text(
-                    'Continue',
-                    style: GoogleFonts.inter(
-                      color: Colors.black,
-                      fontWeight: FontWeight.w500,
-                      fontSize: 20.sp,
-                    ),
+                Center(
+                  child: CommonButton(
+                    title: "Continue",
+                    isLoading: _isLoading,
+                    onTap: _continue,
                   ),
                 ),
+                SizedBox(height: 30.h),
               ],
             ),
           ),
@@ -398,111 +391,151 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
   /// Continue button action
   void _continue() async {
-    // Track registration step
-    await UserJourneyTracker().trackRegistrationFlow(
-      isVip: widget.isVip,
-      step: 'form_validation',
-      data: {
-        'hasGender': gender.isNotEmpty,
-        'hasName': _nameController.text.trim().isNotEmpty,
-        'hasState': stateNotifier.value != null,
-        'hasDistrict': districtNotifier.value != null,
-        'hasCity': cityNotifier.value != null,
-        'hasInformation': _informationController.text.isNotEmpty,
-      },
-    );
+    if (_isLoading) return;
 
-    if (gender.isEmpty) {
-      CommonSnackBar.showError(context, 'Please select gender');
-      return;
-    }
+    setState(() {
+      _isLoading = true;
+    });
 
-    if (_nameController.text.trim().isEmpty) {
-      CommonSnackBar.showError(context, 'Please enter your name');
-      return;
-    }
-
-    if (stateNotifier.value == null) {
-      CommonSnackBar.showError(context, 'Please select state');
-      return;
-    }
-
-    if (districtNotifier.value == null) {
-      CommonSnackBar.showError(context, 'Please select district');
-      return;
-    }
-
-    if (cityNotifier.value == null) {
-      CommonSnackBar.showError(context, 'Please select city');
-      return;
-    }
-
-    if (_informationController.text.isEmpty) {
-      CommonSnackBar.showError(context, 'Please enter about yourself');
-      return;
-    }
-
-    if (_informationController.text.trim().length < 25) {
-      CommonSnackBar.showError(
-        context,
-        'Information should be minimum 25 characters',
-      );
-      return;
-    }
-
-    if (_informationController.text.trim().length > 500) {
-      CommonSnackBar.showError(
-        context,
-        'Information must not exceed 500 characters',
-      );
-      return;
-    }
-
-    // If all validations pass
-    if (_formKey.currentState!.validate()) {
-      final provider = context.read<RegistrationProvider>();
-
-      // Update provider data
-      provider.setVipStatus(widget.isVip);
-      provider.updateProfileId(_profileIdController.text);
-      provider.updateName(_nameController.text);
-      provider.updatePhoneNumber(_phoneController.text);
-      provider.updateInformation(_informationController.text);
-
-      // Track successful form completion
+    try {
+      // Track registration step
       await UserJourneyTracker().trackRegistrationFlow(
         isVip: widget.isVip,
-        step: 'form_completed',
+        step: 'form_validation',
         data: {
-          'name': _nameController.text.trim(),
-          'state': stateNotifier.value,
-          'district': districtNotifier.value,
-          'city': cityNotifier.value,
-          'informationLength': _informationController.text.trim().length,
+          'hasGender': gender.isNotEmpty,
+          'hasName': _nameController.text.trim().isNotEmpty,
+          'hasState': stateNotifier.value != null,
+          'hasDistrict': districtNotifier.value != null,
+          'hasCity': cityNotifier.value != null,
+          'hasInformation': _informationController.text.isNotEmpty,
         },
       );
 
-      // CommonSnackBar.showSuccess(
-      //   context,
-      //   'Registration completed successfully!',
-      // );
-
-      if (widget.isVip) {
-        await context.read<AuthProvider>().setVipLoggedIn();
-      } else {
-        await context.read<AuthProvider>().setNormalLoggedIn();
+      if (gender.isEmpty) {
+        setState(() {
+          _isLoading = false;
+        });
+        CommonSnackBar.showError(context, 'Please select gender');
+        return;
       }
 
-      // Single navigation with delay and proper guard
-      Future.delayed(const Duration(milliseconds: 800), () async {
-        if (!mounted) return;
+      if (_nameController.text.trim().isEmpty) {
+        setState(() {
+          _isLoading = false;
+        });
+        CommonSnackBar.showError(context, 'Please enter your name');
+        return;
+      }
 
-        Navigator.of(context).pushNamedAndRemoveUntil(
-          Routes.home,
-          (route) => false, // 🔥 clears entire stack
-          arguments: {'initialIndex': widget.isVip ? 0 : 1},
+      if (stateNotifier.value == null) {
+        setState(() {
+          _isLoading = false;
+        });
+        CommonSnackBar.showError(context, 'Please select state');
+        return;
+      }
+
+      if (districtNotifier.value == null) {
+        setState(() {
+          _isLoading = false;
+        });
+        CommonSnackBar.showError(context, 'Please select district');
+        return;
+      }
+
+      if (cityNotifier.value == null) {
+        setState(() {
+          _isLoading = false;
+        });
+        CommonSnackBar.showError(context, 'Please select city');
+        return;
+      }
+
+      if (_informationController.text.isEmpty) {
+        setState(() {
+          _isLoading = false;
+        });
+        CommonSnackBar.showError(context, 'Please enter about yourself');
+        return;
+      }
+
+      if (_informationController.text.trim().length < 25) {
+        setState(() {
+          _isLoading = false;
+        });
+        CommonSnackBar.showError(
+          context,
+          'Information should be minimum 25 characters',
         );
-      });
+        return;
+      }
+
+      if (_informationController.text.trim().length > 500) {
+        setState(() {
+          _isLoading = false;
+        });
+        CommonSnackBar.showError(
+          context,
+          'Information must not exceed 500 characters',
+        );
+        return;
+      }
+
+      // If all validations pass
+      if (_formKey.currentState!.validate()) {
+        final provider = context.read<RegistrationProvider>();
+
+        // Update provider data
+        provider.setVipStatus(widget.isVip);
+        provider.updateProfileId(_profileIdController.text);
+        provider.updateName(_nameController.text);
+        provider.updatePhoneNumber(_phoneController.text);
+        provider.updateInformation(_informationController.text);
+
+        // Track successful form completion
+        await UserJourneyTracker().trackRegistrationFlow(
+          isVip: widget.isVip,
+          step: 'form_completed',
+          data: {
+            'name': _nameController.text.trim(),
+            'state': stateNotifier.value,
+            'district': districtNotifier.value,
+            'city': cityNotifier.value,
+            'informationLength': _informationController.text.trim().length,
+          },
+        );
+
+        if (widget.isVip) {
+          await context.read<AuthProvider>().setVipLoggedIn();
+        } else {
+          await context.read<AuthProvider>().setNormalLoggedIn();
+        }
+
+        // Single navigation with delay and proper guard
+        Future.delayed(const Duration(milliseconds: 800), () async {
+          if (!mounted) return;
+
+          Navigator.of(context).pushNamedAndRemoveUntil(
+            Routes.home,
+            (route) => false,
+            arguments: {'initialIndex': widget.isVip ? 0 : 1},
+          );
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        CommonSnackBar.showError(
+          context,
+          'Registration failed. Please try again.',
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 }

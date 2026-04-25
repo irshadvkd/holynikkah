@@ -75,66 +75,80 @@ class _ValidatedTextFieldState extends State<ValidatedTextField> {
 
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
-      controller: widget.controller,
-      validator: _getValidator(),
-      inputFormatters: _getInputFormatters(),
-      keyboardType: _getKeyboardType(),
-      obscureText: _obscureText,
-      maxLines: widget.maxLines,
-      maxLength: widget.maxLength,
-      enabled: widget.enabled,
-      onTap: widget.onTap,
-      onChanged: widget.onChanged,
-      style: GoogleFonts.inter(
-        fontSize: 16.sp,
-        color: Colors.black87,
+    return Container(
+      clipBehavior: Clip.antiAliasWithSaveLayer,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(50.r),
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Color(0xFF303036).withOpacity(.7),
+            offset: Offset(0, 4),
+            blurRadius: 8,
+          ),
+        ],
       ),
-      textCapitalization: widget.textCapitalization ?? TextCapitalization.none,
-      decoration: InputDecoration(
-        hintText: widget.hintText,
-        hintStyle: GoogleFonts.inter(
+      child: TextFormField(
+        controller: widget.controller,
+        validator: _getValidator(),
+        inputFormatters: _getInputFormatters(),
+        keyboardType: _getKeyboardType(),
+        obscureText: _obscureText,
+        maxLines: widget.maxLines,
+        maxLength: widget.maxLength,
+        enabled: widget.enabled,
+        onTap: widget.onTap,
+        onChanged: widget.onChanged,
+        style: GoogleFonts.inter(
           fontSize: 16.sp,
-          color: Colors.grey[600],
+          color: Colors.black87,
         ),
-        prefixIcon: widget.prefixIcon,
-        suffixIcon: _getSuffixIcon(),
-        filled: true,
-        fillColor: Colors.white,
-        contentPadding: EdgeInsets.symmetric(
-          horizontal: 16.w,
-          vertical: 16.h,
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(25.r),
-          borderSide: BorderSide.none,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(25.r),
-          borderSide: BorderSide.none,
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(25.r),
-          borderSide: BorderSide(
-            color: const Color(0xFFFFD700),
-            width: 2.w,
+        textCapitalization: widget.textCapitalization ?? TextCapitalization.none,
+        decoration: InputDecoration(
+          hintText: widget.hintText,
+          hintStyle: GoogleFonts.inter(
+            fontSize: 16.sp,
+            color: Colors.grey[600],
           ),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(25.r),
-          borderSide: BorderSide(
-            color: Colors.red,
-            width: 2.w,
+          prefixIcon: widget.prefixIcon,
+          suffixIcon: _getSuffixIcon(),
+          filled: true,
+          fillColor: Colors.white,
+          contentPadding: EdgeInsets.symmetric(
+            horizontal: 16.w,
+            vertical: 16.h,
           ),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(25.r),
-          borderSide: BorderSide(
-            color: Colors.red,
-            width: 2.w,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(50.r),
+            borderSide: BorderSide.none,
           ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(50.r),
+            borderSide: BorderSide.none,
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(50.r),
+            borderSide: BorderSide(
+              color: const Color(0xFF032544),
+              width: 2.w,
+            ),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(50.r),
+            borderSide: BorderSide(
+              color: Colors.red,
+              width: 2.w,
+            ),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(50.r),
+            borderSide: BorderSide(
+              color: Colors.red,
+              width: 2.w,
+            ),
+          ),
+          counterText: '', // Hide character counter
         ),
-        counterText: '', // Hide character counter
       ),
     );
   }

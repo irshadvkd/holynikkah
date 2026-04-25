@@ -1,11 +1,13 @@
 import 'dart:convert';
+
 /// categories : [{"catId":1,"name":"Middle Class","networth":"$2-$25","icon":"home"},{"catId":2,"name":"Upper Middle Class","networth":"$50-$100","icon":"house"},{"catId":3,"name":"HNI (Rich)","networth":"$2-$25","icon":"bank"},{"catId":4,"name":"Super Rich","networth":"$25-$50","icon":"business"},{"catId":5,"name":"Ultra Rich","networth":"$50-$100","icon":"flight"},{"catId":6,"name":"Billionaire","networth":"$800","icon":"car"}]
 
-CategoryModel categoryModelFromJson(String str) => CategoryModel.fromJson(json.decode(str));
+CategoryModel categoryModelFromJson(String str) =>
+    CategoryModel.fromJson(json.decode(str));
 String categoryModelToJson(CategoryModel data) => json.encode(data.toJson());
+
 class CategoryModel {
-  CategoryModel({
-      this.categories,});
+  CategoryModel({this.categories});
 
   CategoryModel.fromJson(dynamic json) {
     if (json['categories'] != null) {
@@ -24,41 +26,41 @@ class CategoryModel {
     }
     return map;
   }
-
 }
 
-/// catId : 1
-/// name : "Middle Class"
-/// networth : "$2-$25"
-/// icon : "home"
-
-Categories categoriesFromJson(String str) => Categories.fromJson(json.decode(str));
+Categories categoriesFromJson(String str) =>
+    Categories.fromJson(json.decode(str));
 String categoriesToJson(Categories data) => json.encode(data.toJson());
+
 class Categories {
   Categories({
-      this.catId, 
-      this.name, 
-      this.networth, 
-      this.icon,});
+    this.catId,
+    this.name,
+    this.networth,
+    this.bgColor,
+    this.textColor,
+  });
 
   Categories.fromJson(dynamic json) {
     catId = json['catId'];
     name = json['name'];
     networth = json['networth'];
-    icon = json['icon'];
+    bgColor = json['bgColor'];
+    textColor = json['textColor'];
   }
   String? catId;
   String? name;
   String? networth;
-  String? icon;
+  String? bgColor;
+  String? textColor;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
     map['catId'] = catId;
     map['name'] = name;
     map['networth'] = networth;
-    map['icon'] = icon;
+    map['bgColor'] = bgColor;
+    map['textColor'] = textColor;
     return map;
   }
-
 }

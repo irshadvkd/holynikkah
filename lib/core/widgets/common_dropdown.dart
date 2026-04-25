@@ -25,8 +25,15 @@ class CommonDropdown<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(50.r),
         color: Colors.white,
-        borderRadius: BorderRadius.circular(25.r),
+        boxShadow: [
+          BoxShadow(
+            color: Color(0xFF303036).withOpacity(.7),
+            offset: Offset(0, 4),
+            blurRadius: 8,
+          ),
+        ],
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton2<T>(

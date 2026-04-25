@@ -35,7 +35,7 @@ class _SplashScreenState extends State<SplashScreen> {
     AppLogger.info("Vip Login status: $isVipLoggedIn", tag: "SplashScreen");
     AppLogger.info("Normal Login status: $isNormalLoggedIn", tag: "SplashScreen");
     AppLogger.info("Navigating to HomeRoute...", tag: "SplashScreen");
-    await context.read<AuthProvider>().clearAuthData();
+    // await context.read<AuthProvider>().clearAuthData();
 
     Navigator.of(context).pushReplacementNamed(Routes.home);
   }

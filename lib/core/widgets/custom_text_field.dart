@@ -38,43 +38,47 @@ class CustomTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.watch<ThemeProvider>().colors;
 
-    return TextFormField(
-      controller: controller,
-      obscureText: obscureText,
-      keyboardType: keyboardType,
-      validator: validator,
-      maxLines: maxLines,
-      maxLength: maxLength,
-      inputFormatters: inputFormatters,
-      enabled: enabled,
-      style: GoogleFonts.inter(color: colors.textPrimary, fontSize: 16.sp),
-      decoration: InputDecoration(
-        hintText: hintText,
-        hintStyle: GoogleFonts.inter(
-          color: colors.textSecondary,
-          fontSize: 16.sp,
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(50.r),
+        border: Border.all(
+          color: Colors.grey.withOpacity(0.2),
+          width: 1,
         ),
-        filled: true,
-        counterText: "",
-        fillColor: colors.surface,
-        prefixIcon: prefixIcon,
-        suffixIcon: suffixIcon,
-        contentPadding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 16.w),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(50.r),
-          borderSide: BorderSide(color: colors.border),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(50.r),
-          borderSide: BorderSide(color: colors.border),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(50.r),
-          borderSide: BorderSide(color: colors.primary),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(50.r),
-          borderSide: BorderSide(color: colors.error),
+        boxShadow: [
+          BoxShadow(
+            color:  Color(0xFF303036).withOpacity(.7),
+            offset: const Offset(0, 4),
+            blurRadius: 8,
+          ),
+        ],
+      ),
+      child: TextFormField(
+        controller: controller,
+        obscureText: obscureText,
+        keyboardType: keyboardType,
+        validator: validator,
+        maxLines: maxLines,
+        maxLength: maxLength,
+        inputFormatters: inputFormatters,
+        enabled: enabled,
+        style: GoogleFonts.inter(color: colors.textPrimary, fontSize: 16.sp),
+        decoration: InputDecoration(
+          hintText: hintText,
+          hintStyle: GoogleFonts.inter(
+            color: colors.textSecondary,
+            fontSize: 16.sp,
+          ),
+          filled: false,
+          counterText: "",
+          prefixIcon: prefixIcon,
+          suffixIcon: suffixIcon,
+          contentPadding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 16.w),
+          border: InputBorder.none,
+          enabledBorder: InputBorder.none,
+          focusedBorder: InputBorder.none,
+          errorBorder: InputBorder.none,
         ),
       ),
     );

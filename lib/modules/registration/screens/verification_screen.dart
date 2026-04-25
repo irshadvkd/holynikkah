@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:holynikkah/core/utils/routes.dart';
 import 'package:holynikkah/core/utils/app_logger.dart';
+import 'package:holynikkah/core/widgets/common_app_bar.dart';
+import 'package:holynikkah/core/widgets/common_button.dart';
 import 'package:holynikkah/core/widgets/common_snackbar.dart';
 import 'package:holynikkah/modules/login/providers/auth_provider.dart';
 import 'package:holynikkah/modules/registration/widgets/otp_input_field.dart';
@@ -20,6 +23,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
   /// 🔥 Store OTP here
   String _otp = '';
   final _storage = const FlutterSecureStorage();
+  bool _isLoading = false;
 
   /// 🔥 Validate + Navigate
   void _verifyOtp() async {
@@ -35,24 +39,44 @@ class _VerificationScreenState extends State<VerificationScreen> {
       return;
     }
 
-    /// ✅ SUCCESS - Mark user as logged in
-    // await context.read<AuthProvider>().setLoggedIn();
-    CommonSnackBar.showSuccess(context, 'OTP Verified');
+    setState(() {
+      _isLoading = true;
+    });
 
-    // Read the registration type stored during login
-    final registrationType = await _storage.read(key: 'registration_type');
-    final isVip = registrationType == 'vip';
+    try {
+      /// Simulate API call
+      await Future.delayed(const Duration(seconds: 2));
 
-    Navigator.of(
-      context,
-    ).pushReplacementNamed(Routes.registration, arguments: {'isVip': isVip});
+      /// ✅ SUCCESS - Mark user as logged in
+      // await context.read<AuthProvider>().setLoggedIn();
+      CommonSnackBar.showSuccess(context, 'OTP Verified');
+
+      // Read the registration type stored during login
+      final registrationType = await _storage.read(key: 'registration_type');
+      final isVip = registrationType == 'vip';
+
+      Navigator.of(
+        context,
+      ).pushReplacementNamed(Routes.registration, arguments: {'isVip': isVip});
+    } catch (e) {
+      CommonSnackBar.showError(
+        context,
+        'Verification failed. Please try again.',
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: Padding(
+    return CommonAppBar(
+      title: "",
+      child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 24.w),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -65,7 +89,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
               style: GoogleFonts.inter(
                 fontSize: 28.sp,
                 fontWeight: FontWeight.w600,
-                color: Colors.white,
+                color: Colors.black,
               ),
             ),
 
@@ -74,7 +98,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
             /// 🔹 Subtitle
             Text(
               'Please Enter Verification Code sent to your phone number',
-              style: GoogleFonts.inter(fontSize: 14.sp, color: Colors.white),
+              style: GoogleFonts.inter(fontSize: 14.sp, color: Colors.black),
             ),
 
             SizedBox(height: 60.h),
@@ -90,30 +114,13 @@ class _VerificationScreenState extends State<VerificationScreen> {
 
             const Spacer(),
 
-            /// 🔹 VERIFY BUTTON
-            GestureDetector(
-              onTap: _verifyOtp,
-              child: Container(
-                height: 55.h,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(30.r),
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFFFFD700), Color(0xFFB8860B)],
-                  ),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  'Verify OTP',
-                  style: GoogleFonts.inter(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black,
-                  ),
-                ),
+            Center(
+              child: CommonButton(
+                title: "Verify OTP",
+                isLoading: _isLoading,
+                onTap: _verifyOtp,
               ),
             ),
-
             SizedBox(height: 60.h),
           ],
         ),

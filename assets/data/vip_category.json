@@ -3,38 +3,43 @@
     {
       "catId": "1",
       "name": "Middle Class",
-      "networth": "$2-$25",
-      "icon": "assets/icons/category/middle.svg"
+      "networth": "(₹16.6Cr-207.5Cr)",
+      "bgColor": "#032544",
+      "textColor": "#CDBB32"
     },
     {
       "catId": "2",
       "name": "Upper Middle Class",
-      "networth": "$50-$100",
-      "icon": "assets/icons/category/upper_middle.svg"
+      "networth": "(₹415Cr-830Cr)",
+      "bgColor": "#ED7009",
+      "textColor": "#FFFFFF"
     },
     {
       "catId": "3",
       "name": "HNI (Rich)",
-      "networth": "$2-$25",
-      "icon": "assets/icons/category/hni.svg"
+      "networth": "(₹16.6Cr-207.5Cr)",
+      "bgColor": "#F7DD36",
+      "textColor": "#6E6427"
     },
     {
       "catId": "4",
       "name": "Super Rich",
-      "networth": "$25-$50",
-      "icon": "assets/icons/category/super_rich.svg"
+      "networth": "(₹207.5Cr-415Cr)",
+      "bgColor": "#92CBD1",
+      "textColor": "#D48326"
     },
     {
       "catId": "5",
       "name": "Ultra Rich",
-      "networth": "$50-$100",
-      "icon": "assets/icons/category/ultra_rich.svg"
+      "networth": "(₹415Cr-830Cr)",
+      "bgColor": "#F297AC",
+      "textColor": "#FFFFFF"
     },
     {
       "catId": "6",
       "name": "Billionaire",
-      "networth": "$800",
-      "icon": "assets/icons/category/billionaire.svg"
-    }
+      "networth": "(₹6,640Cr)",
+      "bgColor": "#3FC575",
+      "textColor": "#FFFFFF"    }
   ]
 }

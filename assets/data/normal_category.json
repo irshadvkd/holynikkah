@@ -4,49 +4,57 @@
       "catId": "1",
       "name": "Classic Family",
       "networth": "",
-      "icon": ""
+      "bgColor": "#A98B76",
+      "textColor": "#F3E4C9"
     },
     {
       "catId": "2",
       "name": "Traditional Family",
       "networth": "",
-      "icon": ""
+      "bgColor": "#91C6BC",
+      "textColor": "#122C6D"
     },
     {
       "catId": "3",
-      "name": "Professionals",
+      "name": "Professionals Family",
       "networth": "",
-      "icon": ""
+      "bgColor": "#237227",
+      "textColor": "#DBB321"
     },
     {
       "catId": "4",
       "name": "Religion Scholars Hafiz",
       "networth": "",
-      "icon": ""
+      "bgColor": "#819067",
+      "textColor": "#FFF8D4"
     },
     {
       "catId": "5",
-      "name": "Handicaped",
+      "name": "Handicapped",
       "networth": "",
-      "icon": ""
+      "bgColor": "#09637E",
+      "textColor": "#EDEDCE"
     },
     {
       "catId": "6",
       "name": "Ahlubaith",
       "networth": "",
-      "icon": ""
+      "bgColor": "#EDEDCE",
+      "textColor": "#0E720E"
     },
     {
       "catId": "7",
       "name": "Yatheem",
       "networth": "",
-      "icon": ""
+      "bgColor": "#BFC9D1",
+      "textColor": "#25343F"
     },
     {
       "catId": "8",
       "name": "Divorced",
       "networth": "",
-      "icon": ""
+      "bgColor": "#B5828C",
+      "textColor": "#533951"
     }
   ]
 }

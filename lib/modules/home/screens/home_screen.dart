@@ -6,18 +6,17 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:holynikkah/modules/category/controller/category_provider.dart';
 import 'package:holynikkah/modules/category/screens/normal_category_screen.dart';
+import 'package:holynikkah/modules/extra/screens/extra_screen.dart';
 import 'package:provider/provider.dart';
 
 import 'package:holynikkah/core/services/home_session_storage.dart';
 import 'package:holynikkah/core/utils/constants.dart';
 
 import 'package:holynikkah/modules/login/providers/auth_provider.dart';
-import 'package:holynikkah/modules/login/screens/login_screen.dart';
 import 'package:holynikkah/modules/category/screens/vip_category_screen.dart';
 import 'package:holynikkah/modules/partner/widgets/partner_full_screen_view.dart';
 import 'package:holynikkah/modules/reels/screens/reels_screen.dart';
 import 'package:holynikkah/modules/ads/screens/ads_screen.dart';
-import 'package:holynikkah/modules/donaters/screens/donaters_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final int? initialIndex;
@@ -131,23 +130,22 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       const ReelsScreen(),
       const AdsScreen(),
-      const DonatersScreen(),
+      const ExtraScreen(),
     ];
 
     return Scaffold(
       body: screens[_selectedIndex],
-      bottomNavigationBar: _buildBottomNavigation(
-        isCategorySelected: categoryProvider.hasSelection,
-      ),
+      bottomNavigationBar: _buildBottomNavigation(),
     );
   }
 
   /// 🔥 YOUR ORIGINAL BOTTOM NAV (RESTORED)
-  Widget _buildBottomNavigation({required bool isCategorySelected}) {
+  Widget _buildBottomNavigation() {
     final isVipLoggedIn = context.watch<AuthProvider>().isVipLoggedIn;
     final isNormalLoggedIn = context.watch<AuthProvider>().isNormalLoggedIn;
 
     return BottomNavigationBar(
+      backgroundColor: Color(0xFF032544),
       type: BottomNavigationBarType.fixed,
       selectedItemColor: Colors.white,
       unselectedItemColor: const Color(0xFF616161).withAlpha(240),
@@ -156,11 +154,19 @@ class _HomeScreenState extends State<HomeScreen> {
       unselectedFontSize: 10.sp,
       currentIndex: _selectedIndex,
 
+
       selectedLabelStyle: GoogleFonts.inter(
         fontSize: 12,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w700,
         height: 1.0,
       ),
+
+      unselectedLabelStyle: GoogleFonts.inter(
+        fontSize: 12,
+        fontWeight: FontWeight.w700,
+        height: 1.0,
+      ),
+
 
       onTap: (index) async {
         setState(() => _selectedIndex = index);
@@ -171,7 +177,7 @@ class _HomeScreenState extends State<HomeScreen> {
         /// 🔥 VIP / PROFILE
         BottomNavigationBarItem(
           icon: Padding(
-            padding: const EdgeInsets.only(bottom: 8.0, top: 8),
+            padding: const EdgeInsets.only(bottom: 8.0, top: 12),
             child: SvgPicture.asset(
               AppConstants.icons.vipRegister,
               width: 24,
@@ -184,13 +190,13 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-          label: isCategorySelected ? 'Vip Profile' : 'Vip Register',
+          label: isVipLoggedIn ? 'Vip Profile' : 'Vip Register',
         ),
 
         /// 🔥 REGISTER
         BottomNavigationBarItem(
           icon: Padding(
-            padding: const EdgeInsets.only(bottom: 8.0, top: 8),
+            padding: const EdgeInsets.only(bottom: 8.0, top: 12),
             child: SvgPicture.asset(
               AppConstants.icons.user,
               width: 24,
@@ -203,13 +209,13 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-          label: 'Register',
+          label: isNormalLoggedIn ? 'Profile' : 'Register',
         ),
 
         /// 🔥 REELS
         BottomNavigationBarItem(
           icon: Padding(
-            padding: const EdgeInsets.only(bottom: 8.0, top: 8),
+            padding: const EdgeInsets.only(bottom: 8.0, top: 12),
             child: SvgPicture.asset(
               AppConstants.icons.reels,
               width: 24,
@@ -228,7 +234,7 @@ class _HomeScreenState extends State<HomeScreen> {
         /// 🔥 ADS
         BottomNavigationBarItem(
           icon: Padding(
-            padding: const EdgeInsets.only(bottom: 8.0, top: 8),
+            padding: const EdgeInsets.only(bottom: 8.0, top: 12),
             child: SvgPicture.asset(
               AppConstants.icons.ads,
               width: 24,
@@ -247,9 +253,9 @@ class _HomeScreenState extends State<HomeScreen> {
         /// 🔥 DONATERS
         BottomNavigationBarItem(
           icon: Padding(
-            padding: const EdgeInsets.only(bottom: 8.0, top: 8),
+            padding: const EdgeInsets.only(bottom: 8.0, top: 12),
             child: SvgPicture.asset(
-              AppConstants.icons.donate,
+              AppConstants.icons.extra,
               width: 24,
               height: 24,
               colorFilter: ColorFilter.mode(
@@ -260,7 +266,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-          label: 'Donaters',
+          label: 'Extra',
         ),
       ],
     );

@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:holynikkah/core/utils/constants.dart';
+import 'package:holynikkah/core/utils/utils.dart';
 import 'package:holynikkah/modules/registration/models/category_model.dart';
 
 class CategoryCard extends StatelessWidget {
@@ -33,56 +34,49 @@ class CategoryCard extends StatelessWidget {
         margin: isVip
             ? EdgeInsets.symmetric(vertical: 8.h, horizontal: 19.w)
             : EdgeInsets.all(0),
-        padding: isVip
-            ?  EdgeInsets.all(16.w) :EdgeInsets.all(8.w),
+        padding: isVip ? EdgeInsets.all(16.w) : EdgeInsets.all(8.w),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xF01F2421), // Dark greenish-gray
-              Color(0xFF938F8F), // Medium gray
-            ],
-          ),
-
+          // gradient: LinearGradient(
+          //   begin: Alignment.topLeft,
+          //   end: Alignment.bottomRight,
+          //   colors: [
+          //     Color(0xF01F2421), // Dark greenish-gray
+          //     Color(0xFF938F8F), // Medium gray
+          //   ],
+          // ),
+          color: hexToColor(category.bgColor),
           borderRadius: BorderRadius.circular(10.r),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFFF8F7F7),
+              color: Color(0xFF303036).withOpacity(.7),
               offset: const Offset(0, 4),
-              blurRadius: 4,
+              blurRadius: 8,
             ),
           ],
         ),
         child: Row(
           children: [
-            if(isSelectionRequired == true)
-            Icon(
-              isSelected
-                  ? Icons.radio_button_checked
-                  : Icons.radio_button_unchecked,
-              color: isSelected ? Colors.green : Colors.grey,
-              size: 16,
-            ),
-            SizedBox(width: 8.w),
-            if (isVip == true) ...[
-              SvgPicture.asset(
-                category.icon ?? "",
-                width: 19.sp,
-                height: 17.sp,
+            if (isSelectionRequired == true)
+              Icon(
+                isSelected
+                    ? Icons.radio_button_checked
+                    : Icons.radio_button_unchecked,
+                color: isSelected ? Colors.green : Colors.grey,
+                size: 16,
               ),
-              SizedBox(width: 12.w),
-            ],
+            SizedBox(width: 8.w),
             Expanded(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: isVip
+                    ? CrossAxisAlignment.start
+                    : CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   if (isVip == true)
                     Text(
                       "Class",
                       style: GoogleFonts.inter(
-                        color: Color(0xFFFFFFFF),
+                        color: hexToColor(category.textColor),
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w600,
                       ),
@@ -92,10 +86,11 @@ class CategoryCard extends StatelessWidget {
                     style:
                         textStyle ??
                         GoogleFonts.inter(
-                          color: Color(0xFFFFFFFF),
+                          color: hexToColor(category.textColor),
                           fontSize: 15.sp,
                           fontWeight: FontWeight.w600,
                         ),
+                    textAlign: isVip ? TextAlign.start : TextAlign.center,
                   ),
                   if (category.networth != "") ...[SizedBox(height: 4.h)],
                 ],
@@ -107,18 +102,20 @@ class CategoryCard extends StatelessWidget {
                 child: Container(
                   width: 1,
                   height: 50.h,
-                  decoration: BoxDecoration(color: Color(0xFF303036)),
+                  decoration: BoxDecoration(
+                    color: hexToColor(category.textColor),
+                  ),
                 ),
               ),
             if (isVip == true)
               SizedBox(
-                width: 80.w,
+                width: 125.w,
                 child: Column(
                   children: [
                     Text(
                       'Networth',
                       style: GoogleFonts.inter(
-                        color: Color(0xFFFFFFFF),
+                        color: hexToColor(category.textColor),
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w600,
                       ),
@@ -126,7 +123,7 @@ class CategoryCard extends StatelessWidget {
                     Text(
                       '${category.networth}',
                       style: GoogleFonts.inter(
-                        color: Color(0xFFFFFFFF),
+                        color: hexToColor(category.textColor),
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w600,
                       ),

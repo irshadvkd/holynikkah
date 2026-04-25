@@ -9,7 +9,6 @@ import 'package:holynikkah/core/widgets/navigation_analytics_widget.dart';
 import 'package:holynikkah/modules/category/screens/normal_category_screen.dart';
 import 'package:holynikkah/modules/category/screens/vip_category_screen.dart';
 import 'package:holynikkah/modules/home/screens/home_screen.dart';
-import 'package:holynikkah/modules/login/screens/forgot_password_screen.dart';
 import 'package:holynikkah/modules/login/screens/login_screen.dart';
 import 'package:holynikkah/modules/registration/screens/registration_screen.dart';
 import 'package:holynikkah/modules/registration/screens/verification_screen.dart';
@@ -60,7 +59,6 @@ class _ApplicationState extends State<Application> {
                   final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
                   return LoginScreen(type: args?['type']);
                 },
-                Routes.forgotPassword: (context) => const ForgotPasswordScreen(),
                 Routes.registration: (context) {
                   final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
                   return RegistrationScreen(isVip: args?['isVip'] ?? true);

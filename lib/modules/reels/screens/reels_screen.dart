@@ -5,7 +5,8 @@ import 'package:holynikkah/models/video_model.dart';
 import 'package:flutter/services.dart';
 
 class ReelsScreen extends StatefulWidget {
-  const ReelsScreen({super.key});
+  final bool isBackArrowEnabled;
+  const ReelsScreen({super.key, this.isBackArrowEnabled = false});
 
   @override
   State<ReelsScreen> createState() => _ReelsScreenState();
@@ -98,9 +99,8 @@ class _ReelsScreenState extends State<ReelsScreen> {
               if (mounted) {
                 controller.setVolume(1.0);
                 controller.setLooping(true);
-                // Only auto-play the first video after proper initialization
                 if (i == 0) {
-                  setState(() {}); // Trigger rebuild to show video
+                  setState(() {});
                   controller.play();
                 }
               }
@@ -121,7 +121,7 @@ class _ReelsScreenState extends State<ReelsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.white,
       body: PageView.builder(
         controller: pageController,
         scrollDirection: Axis.vertical,
@@ -130,7 +130,7 @@ class _ReelsScreenState extends State<ReelsScreen> {
           setState(() {
             currentIndex = index;
           });
-          // Preload next videos
+
           for (int i = index; i < index + 2 && i < videos.length; i++) {
             if (!controllers.containsKey(i) && videos[i].sources.isNotEmpty) {
               final controller = VideoPlayerController.networkUrl(
@@ -151,8 +151,29 @@ class _ReelsScreenState extends State<ReelsScreen> {
             video: videos[index],
             isActive: index == currentIndex,
             controller: controllers[index],
+            enableBackArrow: widget.isBackArrowEnabled,
           );
         },
+      ),
+    );
+  }
+}
+
+/// 🔥 BACK BUTTON (Reusable)
+class CustomBackButton extends StatelessWidget {
+  const CustomBackButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => Navigator.pop(context),
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.5),
+          shape: BoxShape.circle,
+        ),
+        child: const Icon(Icons.arrow_back, color: Colors.white, size: 22),
       ),
     );
   }
@@ -162,12 +183,14 @@ class ReelItem extends StatefulWidget {
   final VideoModel video;
   final bool isActive;
   final VideoPlayerController? controller;
+  final bool enableBackArrow;
 
   const ReelItem({
     super.key,
     required this.video,
     required this.isActive,
     this.controller,
+    this.enableBackArrow = false,
   });
 
   @override
@@ -176,12 +199,6 @@ class ReelItem extends StatefulWidget {
 
 class _ReelItemState extends State<ReelItem> {
   bool isLiked = false;
-
-  @override
-  void initState() {
-    super.initState();
-    // Remove auto-play from initState - let it be handled by didUpdateWidget
-  }
 
   @override
   void didUpdateWidget(ReelItem oldWidget) {
@@ -202,7 +219,6 @@ class _ReelItemState extends State<ReelItem> {
     return Stack(
       fit: StackFit.expand,
       children: [
-        // Background thumbnail
         if (widget.video.thumb.isNotEmpty)
           Image.network(
             widget.video.thumb,
@@ -217,7 +233,6 @@ class _ReelItemState extends State<ReelItem> {
             },
           ),
 
-        // Video player overlay
         if (widget.controller != null && widget.controller!.value.isInitialized)
           SizedBox(
             width: double.infinity,
@@ -239,7 +254,6 @@ class _ReelItemState extends State<ReelItem> {
             ),
           ),
 
-        // Tap to play/pause
         GestureDetector(
           onTap: () {
             if (widget.controller != null &&
@@ -255,134 +269,14 @@ class _ReelItemState extends State<ReelItem> {
           child: Container(color: Colors.transparent),
         ),
 
-        // Bottom content area
-        // Positioned(
-        //   bottom: 32,
-        //   left: 0,
-        //   right: 0,
-        //   child: SafeArea(
-        //     child: Padding(
-        //       padding: const EdgeInsets.all(16),
-        //       child: Row(
-        //         crossAxisAlignment: CrossAxisAlignment.end,
-        //         mainAxisAlignment: MainAxisAlignment.end,
-        //         children: [
-        //           Column(
-        //             mainAxisSize: MainAxisSize.min,
-        //             children: [
-        //               Column(
-        //                 children: [
-        //                   GestureDetector(
-        //                     onTap: () {
-        //                       setState(() {
-        //                         isLiked = !isLiked;
-        //                       });
-        //                     },
-        //                     child: SvgPicture.asset(
-        //                       'assets/icons/like.svg',
-        //                       width: 32,
-        //                       height: 32,
-        //                       colorFilter: ColorFilter.mode(
-        //                         isLiked ? Colors.red : Colors.white,
-        //                         BlendMode.srcIn,
-        //                       ),
-        //                     ),
-        //                   ),
-        //                   const SizedBox(height: 8),
-        //                   Text(
-        //                     '1.2K',
-        //                     style: GoogleFonts.inter(
-        //                       color: Colors.white,
-        //                       fontSize: 16,
-        //                       fontWeight: FontWeight.w700,
-        //                     ),
-        //                   ),
-        //                 ],
-        //               ),
-        //               const SizedBox(height: 20),
-        //               Column(
-        //                 children: [
-        //                   GestureDetector(
-        //                     onTap: () {
-        //                       showModalBottomSheet(
-        //                         context: context,
-        //                         builder: (context) => Container(
-        //                           height: 300,
-        //                           padding: const EdgeInsets.all(16),
-        //                           child: Column(
-        //                             children: [
-        //                               Text(
-        //                                 'Comments',
-        //                                 style: GoogleFonts.inter(
-        //                                   fontSize: 18,
-        //                                   fontWeight: FontWeight.bold,
-        //                                 ),
-        //                               ),
-        //                               const SizedBox(height: 16),
-        //                               const Text('No comments yet'),
-        //                             ],
-        //                           ),
-        //                         ),
-        //                       );
-        //                     },
-        //                     child: SvgPicture.asset(
-        //                       'assets/icons/comment.svg',
-        //                       width: 32,
-        //                       height: 32,
-        //                       colorFilter: const ColorFilter.mode(
-        //                         Colors.white,
-        //                         BlendMode.srcIn,
-        //                       ),
-        //                     ),
-        //                   ),
-        //                   const SizedBox(height: 8),
-        //                   Text(
-        //                     '89',
-        //                     style: GoogleFonts.inter(
-        //                       color: Colors.white,
-        //                       fontSize: 16,
-        //                       fontWeight: FontWeight.w700,
-        //                     ),
-        //                   ),
-        //                 ],
-        //               ),
-        //               const SizedBox(height: 20),
-        //               Column(
-        //                 children: [
-        //                   GestureDetector(
-        //                     onTap: () {
-        //                       Share.share('Check out this video!');
-        //                     },
-        //                     child: SvgPicture.asset(
-        //                       'assets/icons/share.svg',
-        //                       width: 32,
-        //                       height: 32,
-        //                       colorFilter: const ColorFilter.mode(
-        //                         Colors.white,
-        //                         BlendMode.srcIn,
-        //                       ),
-        //                     ),
-        //                   ),
-        //                   const SizedBox(height: 8),
-        //                   Text(
-        //                     '45',
-        //                     style: GoogleFonts.inter(
-        //                       color: Colors.white,
-        //                       fontSize: 16,
-        //                       fontWeight: FontWeight.w700,
-        //                     ),
-        //                   ),
-        //                 ],
-        //               ),
-        //             ],
-        //           ),
-        //         ],
-        //       ),
-        //     ),
-        //   ),
-        // ),
+        /// 🔥 BACK BUTTON ADDED
+        if (widget.enableBackArrow)
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 12,
+            left: 16,
+            child: const CustomBackButton(),
+          ),
 
-        // Play/pause overlay
         if (widget.controller != null &&
             widget.controller!.value.isInitialized &&
             !widget.controller!.value.isPlaying)

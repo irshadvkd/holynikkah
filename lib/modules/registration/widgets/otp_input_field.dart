@@ -128,7 +128,7 @@ class _OtpInputFieldState extends State<OtpInputField> {
                 color: AppColors.inputText,
               ),
 
-              cursorColor: const Color(0xFFFFD700),
+              cursorColor: const Color(0xFF032544),
 
               decoration: InputDecoration(
                 counterText: '',
@@ -142,7 +142,7 @@ class _OtpInputFieldState extends State<OtpInputField> {
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14.r),
                   borderSide: const BorderSide(
-                    color: Color(0xFFFFD700),
+                    color: Color(0xFF032544),
                     width: 1.8,
                   ),
                 ),

@@ -74,6 +74,8 @@ flutter:
     - assets/json/theme/
     - assets/icons/
     - assets/icons/category/
+    - assets/icons/extra/
+    - assets/icons/ads/
     - assets/images/
     - assets/data/
     - assets/sample/

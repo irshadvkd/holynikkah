@@ -54,7 +54,7 @@ final class _IconPaths {
   final String reels = "assets/icons/reels.svg";
   final String ads = "assets/icons/ads.svg";
   final String vipRegister = "assets/icons/vip_register.svg";
-  final String donate = "assets/icons/donate.svg";
+  final String extra = "assets/icons/extra.svg";
   final String like = "assets/icons/like.svg";
   final String comment = "assets/icons/comment.svg";
   final String share = "assets/icons/share.svg";

@@ -4,7 +4,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:holynikkah/core/utils/routes.dart';
+import 'package:holynikkah/core/utils/utils.dart';
 import 'package:holynikkah/core/utils/validation_utils.dart';
+import 'package:holynikkah/core/widgets/common_app_bar.dart';
 import 'package:holynikkah/core/widgets/common_snackbar.dart';
 import 'package:holynikkah/core/widgets/custom_text_field.dart';
 import 'package:holynikkah/core/widgets/gradient_border.dart';
@@ -27,14 +29,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        systemOverlayStyle: SystemUiOverlayStyle.light,
-        centerTitle: true,
-      ),
-      body: Consumer<AuthProvider>(
+    return CommonAppBar(
+      title: "",
+      child: Consumer<AuthProvider>(
         builder: (context, authProvider, child) {
           return Padding(
             padding: EdgeInsets.all(16.w),
@@ -49,7 +46,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: Text(
                         'Ready to Join',
                         style: GoogleFonts.inter(
-                          color: Color(0xFFF5F5F5),
+                          color: Color(0xFF000000),
                           fontSize: 24.sp,
                           fontWeight: FontWeight.bold,
                         ),
@@ -71,28 +68,43 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     SizedBox(height: 48.h),
-                    GradientBorderContainer(
-                      borderRadius: 25.r,
+                    GestureDetector(
                       onTap: authProvider.isLoading ? () {} : _login,
-                      child: authProvider.isLoading
-                          ? SizedBox(
-                              height: 20.h,
-                              width: 20.w,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  Colors.black,
+                      child: Container(
+                        width: 300.w,
+                        height: 50.h,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(50.r),
+                          color: Colors.white,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Color(0xFF303036).withOpacity(.7),
+                              offset: Offset(0, 4),
+                              blurRadius: 8,
+                            ),
+                          ],
+                        ),
+                        child: authProvider.isLoading
+                            ? SizedBox(
+                                height: 20.h,
+                                width: 20.w,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Colors.black,
+                                  ),
+                                ),
+                              )
+                            : Text(
+                                'Send OTP',
+                                style: GoogleFonts.inter(
+                                  color: Color(0xFF000000),
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 20.sp,
                                 ),
                               ),
-                            )
-                          : Text(
-                              'Send OTP',
-                              style: GoogleFonts.inter(
-                                color: Color(0xFF000000),
-                                fontWeight: FontWeight.w500,
-                                fontSize: 20.sp,
-                              ),
-                            ),
+                      ),
                     ),
                   ],
                 ),
