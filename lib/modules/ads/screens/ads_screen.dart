@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:holynikkah/modules/ads/screens/prayers_screen.dart';
 
 class AdsScreen extends StatelessWidget {
   const AdsScreen({super.key});
@@ -16,7 +17,14 @@ class AdsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final center = Offset(60, size.height / 2);
+
+    final bottomNavHeight = kBottomNavigationBarHeight;
+
+    final usableHeight =
+        size.height - bottomNavHeight - MediaQuery.of(context).padding.bottom;
+
+    final center = Offset(60, usableHeight / 2);
+    // final center = Offset(60, size.height / 2);
 
     const double orbitRadiusX = 200;
     const double orbitRadiusY = 190;
@@ -65,11 +73,21 @@ class AdsScreen extends StatelessWidget {
           Positioned(
             left: center.dx - mainRadius,
             top: center.dy - mainRadius,
-            child: Image.asset(
-              'assets/icons/ads/prayers.png',
-              width: mainRadius * 2,
-              height: mainRadius * 2,
-              fit: BoxFit.contain,
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const PrayersScreen(),
+                  ),
+                );
+              },
+              child: Image.asset(
+                'assets/icons/ads/prayers.png',
+                width: mainRadius * 2,
+                height: mainRadius * 2,
+                fit: BoxFit.contain,
+              ),
             ),
           ),
         ],
@@ -142,15 +160,33 @@ class _OrbitGlobe extends StatelessWidget {
         /// Label (🔥 FIXED POSITION)
         /// Label (🔥 Rotated along orbit)
         Positioned(
-          left:
-              center.dx +
-              (radius + labelDistance) * dx -
-              (index == 1
-                  ? 45
-                  : index == 2
-                  ? 25
-                  : 30),
-          top: center.dy + (radius + labelDistance) * dy - 12,
+          left: index == 0
+              ? center.dx + (radius + labelDistance) * dx - 75
+              : index == 1
+              ? center.dx + (radius + labelDistance) * dx - 45
+              : index == 2
+              ? center.dx + (radius + labelDistance) * dx - 20
+              : index == 3
+              ? center.dx + (radius + labelDistance) * dx - 75
+              : index == 4
+              ? center.dx + (radius + labelDistance) * dx - 55
+              : index == 5
+              ? center.dx + (radius + labelDistance) * dx - 55
+              : center.dx + (radius + labelDistance) * dx,
+
+          top: index == 0
+              ? center.dy + (radius + labelDistance) * dy - 36
+              : index == 1
+              ? center.dy + (radius + labelDistance) * dy
+              : index == 2
+              ? center.dy + (radius + labelDistance) * dy - 24
+              : index == 3
+              ? center.dy + (radius + labelDistance) * dy + 12
+              : index == 4
+              ? center.dy + (radius + labelDistance) * dy
+              : index == 5
+              ? center.dy + (radius + labelDistance) * dy - 12
+              : center.dy + (radius + labelDistance) * dy,
           child: Transform.rotate(
             angle: _getReadableAngle(angleRad),
             child: SizedBox(

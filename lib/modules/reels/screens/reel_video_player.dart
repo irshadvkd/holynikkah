@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:holynikkah/core/widgets/custom_network_image.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:share_plus/share_plus.dart';
 
 class ReelVideoPlayer extends StatefulWidget {
   final String videoUrl;

@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:holynikkah/core/services/category_session_storage.dart';
+import 'package:holynikkah/modules/registration/models/vip_user_fields.dart';
 
 class CategoryProvider extends ChangeNotifier {
   bool _isVipSelected = false;
@@ -24,8 +25,18 @@ class CategoryProvider extends ChangeNotifier {
   /// 🔥 Update VIP selection
   Future<void> setVipSelected(bool value) async {
     _isVipSelected = value;
-    await CategorySessionStorage().setVipCategorySelected();
+    await CategorySessionStorage().setVipCategorySelected(value);
     notifyListeners();
+  }
+
+  /// Sync VIP category flag from API user payload (`is_category_selected`).
+  Future<void> applyVipCategoryFromUser(Map<String, dynamic>? user) async {
+    await setVipSelected(VipUserFields.isCategorySelected(user));
+  }
+
+  /// Sync normal category flag from API user payload (`is_category_selected`).
+  Future<void> applyNormalCategoryFromUser(Map<String, dynamic>? user) async {
+    await setNormalSelected(VipUserFields.isCategorySelected(user));
   }
 
   /// 🔥 Update Normal selection

@@ -39,20 +39,29 @@ class Categories {
     this.networth,
     this.bgColor,
     this.textColor,
+    this.sortOrder,
   });
 
   Categories.fromJson(dynamic json) {
-    catId = json['catId'];
-    name = json['name'];
+    catId = (json['catId'] ?? json['id'])?.toString();
+    name = json['name'] ?? json['title'];
     networth = json['networth'];
-    bgColor = json['bgColor'];
-    textColor = json['textColor'];
+    bgColor =
+        json['bgColor'] ??
+        json['bg_color'] ??
+        json['button_bg_color'];
+    textColor =
+        json['textColor'] ??
+        json['text_color'] ??
+        json['button_text_color'];
+    sortOrder = _int(json['sort_order']);
   }
   String? catId;
   String? name;
   String? networth;
   String? bgColor;
   String? textColor;
+  int? sortOrder;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
@@ -61,6 +70,43 @@ class Categories {
     map['networth'] = networth;
     map['bgColor'] = bgColor;
     map['textColor'] = textColor;
+    map['sort_order'] = sortOrder;
     return map;
   }
+
+  static int? _int(dynamic value) {
+    if (value is int) return value;
+    return int.tryParse('$value');
+  }
 }
+
+/// Parses category list payloads from `/api/categories` and `/api/vip-categories`.
+class CategoriesResponse {
+  CategoriesResponse._();
+
+  static List<Categories> parseCategories(dynamic json) {
+    final items = _extractItems(json);
+    return items
+        .where(_isActive)
+        .map((item) => Categories.fromJson(item))
+        .toList()
+      ..sort((a, b) => (a.sortOrder ?? 0).compareTo(b.sortOrder ?? 0));
+  }
+
+  static List<dynamic> _extractItems(dynamic json) {
+    if (json is List) return json;
+    if (json is Map && json['data'] is List) {
+      return json['data'] as List;
+    }
+    return [];
+  }
+
+  static bool _isActive(dynamic item) {
+    if (item is! Map) return true;
+    final status = item['status']?.toString().toLowerCase();
+    return status == null || status == 'active';
+  }
+}
+
+typedef VipCategoriesResponse = CategoriesResponse;
+typedef NormalCategoriesResponse = CategoriesResponse;

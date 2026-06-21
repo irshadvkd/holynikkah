@@ -111,6 +111,7 @@ class CategoryCard extends StatelessWidget {
               SizedBox(
                 width: 125.w,
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
                       'Networth',
@@ -119,13 +120,18 @@ class CategoryCard extends StatelessWidget {
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w600,
                       ),
+                      textAlign: TextAlign.center,
                     ),
-                    Text(
-                      '${category.networth}',
-                      style: GoogleFonts.inter(
-                        color: hexToColor(category.textColor),
-                        fontSize: 13.sp,
-                        fontWeight: FontWeight.w600,
+                    SizedBox(
+                      width: 125.w,
+                      child: Text(
+                        '${category.networth}',
+                        style: GoogleFonts.inter(
+                          color: hexToColor(category.textColor),
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        textAlign: TextAlign.center,
                       ),
                     ),
                   ],

@@ -1,7 +1,18 @@
 // Registration Module Exports
+export 'models/location_model.dart';
 export 'models/registration_model.dart';
 export 'models/category_model.dart';
 export 'providers/registration_provider.dart';
+export 'models/phone_visibility.dart';
+export 'models/vip_user_fields.dart';
+export 'models/vip_registration_model.dart';
+export 'services/locations_service.dart';
+export 'services/normal_category_service.dart';
+export 'services/normal_otp_service.dart';
+export 'services/normal_registration_service.dart';
+export 'models/normal_category_select_model.dart';
+export 'services/vip_category_service.dart';
+export 'services/vip_registration_service.dart';
 export 'services/registration_service.dart';
 export 'screens/registration_screen.dart';
 export 'screens/verification_screen.dart';

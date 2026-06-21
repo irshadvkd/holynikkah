@@ -21,8 +21,11 @@ class CategorySessionStorage {
     return value == 'true';
   }
 
-  Future<void> setVipCategorySelected() {
-    return _storage.write(key: _isVipCategorySelectedKey, value: "true");
+  Future<void> setVipCategorySelected(bool isSelected) {
+    return _storage.write(
+      key: _isVipCategorySelectedKey,
+      value: isSelected.toString(),
+    );
   }
 
   Future<void> setNormalCategorySelected(bool isSelected) {

@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:holynikkah/core/services/navigation_logger.dart';
 import 'package:holynikkah/core/services/user_journey_tracker.dart';
 import 'package:holynikkah/core/theme/context_extension.dart';
+import 'package:holynikkah/core/widgets/common_snackbar.dart';
 
 /// 📊 Navigation Analytics Widget
 /// 
@@ -384,21 +385,14 @@ class _NavigationAnalyticsWidgetState extends State<NavigationAnalyticsWidget> {
       debugPrint('Navigation Data Exported: ${data.length} characters');
       
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Navigation data exported (${data.length} chars)'),
-            backgroundColor: Colors.green,
-          ),
+        CommonSnackBar.showSuccess(
+          context,
+          'Navigation data exported (${data.length} chars)',
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Export failed: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        CommonSnackBar.showError(context, 'Export failed: $e');
       }
     }
   }
@@ -410,21 +404,14 @@ class _NavigationAnalyticsWidgetState extends State<NavigationAnalyticsWidget> {
       debugPrint('Journey Data Exported: ${data.length} characters');
       
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Journey data exported (${data.length} chars)'),
-            backgroundColor: Colors.green,
-          ),
+        CommonSnackBar.showSuccess(
+          context,
+          'Journey data exported (${data.length} chars)',
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Export failed: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        CommonSnackBar.showError(context, 'Export failed: $e');
       }
     }
   }
@@ -434,12 +421,7 @@ class _NavigationAnalyticsWidgetState extends State<NavigationAnalyticsWidget> {
     setState(() {});
     
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Navigation data cleared'),
-          backgroundColor: Colors.blue,
-        ),
-      );
+      CommonSnackBar.showInfo(context, 'Navigation data cleared');
     }
   }
 }

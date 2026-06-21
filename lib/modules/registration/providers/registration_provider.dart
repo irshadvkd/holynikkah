@@ -12,8 +12,8 @@ class RegistrationProvider extends ChangeNotifier {
   String _phoneNumber = '';
   String _information = '';
   bool _isVip = false;
-  String? _selectedCategoryId; // VIP: single selection
-  List<String> _selectedCategoryIds = []; // Normal: multiple selection
+  String? _selectedCategoryId;
+  List<String> _selectedCategoryIds = [];
 
   // Categories
   List<Categories> _categories = [];
@@ -64,15 +64,7 @@ class RegistrationProvider extends ChangeNotifier {
   }
 
   void selectCategory(String categoryId) {
-    if (_isVip) {
-      _selectedCategoryId = categoryId;
-    } else {
-      if (_selectedCategoryIds.contains(categoryId)) {
-        _selectedCategoryIds.remove(categoryId);
-      } else {
-        _selectedCategoryIds.add(categoryId);
-      }
-    }
+    _selectedCategoryId = categoryId;
     notifyListeners();
   }
 
@@ -89,7 +81,7 @@ class RegistrationProvider extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    final success = await _service.sendOtp(_phoneNumber);
+    final success = await _service.sendOtp(_phoneNumber, isVip: _isVip);
     _otpSent = success;
     _isLoading = false;
     notifyListeners();
@@ -101,7 +93,11 @@ class RegistrationProvider extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    final success = await _service.verifyOtp(_phoneNumber, otp);
+    final success = await _service.verifyOtp(
+      _phoneNumber,
+      otp,
+      isVip: _isVip,
+    );
     _otpVerified = success;
     _isLoading = false;
     notifyListeners();
@@ -119,8 +115,8 @@ class RegistrationProvider extends ChangeNotifier {
       phoneNumber: _phoneNumber,
       information: _information,
       isVip: _isVip,
-      categoryId: _isVip ? _selectedCategoryId : null,
-      categoryIds: _isVip ? null : _selectedCategoryIds,
+      categoryId: _selectedCategoryId,
+      categoryIds: _selectedCategoryId != null ? [_selectedCategoryId!] : null,
     );
 
     final success = await _service.submitRegistration(registration);

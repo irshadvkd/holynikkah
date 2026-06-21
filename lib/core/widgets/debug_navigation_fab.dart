@@ -35,7 +35,7 @@ class DebugNavigationFAB extends StatelessWidget {
   }
 }
 
-/// Extension to easily add debug FAB to any screen
+/// Extension to easily add debug FAB to any screens
 extension DebugNavigationExtension on Widget {
   Widget withDebugNavigation() {
     return Stack(

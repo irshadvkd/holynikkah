@@ -1,0 +1,17 @@
+<svg width="300" height="300" viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Top Left -->
+    <rect x="40" y="40" width="80" height="80" rx="20"
+        stroke="black" stroke-width="18" fill="none"/>
+
+    <!-- Top Right -->
+    <rect x="180" y="40" width="80" height="80" rx="20"
+        stroke="black" stroke-width="18" fill="none"/>
+
+    <!-- Bottom Left -->
+    <rect x="40" y="180" width="80" height="80" rx="20"
+        stroke="black" stroke-width="18" fill="none"/>
+
+    <!-- Bottom Right Circle -->
+    <circle cx="220" cy="220" r="40"
+        stroke="black" stroke-width="18" fill="none"/>
+</svg>

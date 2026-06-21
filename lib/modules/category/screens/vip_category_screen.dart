@@ -5,8 +5,10 @@ import 'package:holynikkah/core/widgets/common_button.dart';
 import 'package:holynikkah/core/widgets/common_snackbar.dart';
 import 'package:holynikkah/core/widgets/gradient_border.dart';
 import 'package:holynikkah/modules/category/controller/category_provider.dart';
+import 'package:holynikkah/modules/login/providers/auth_provider.dart';
 import 'package:holynikkah/modules/login/screens/login_screen.dart';
 import 'package:holynikkah/modules/registration/providers/registration_provider.dart';
+import 'package:holynikkah/modules/registration/services/vip_category_service.dart';
 import 'package:holynikkah/modules/registration/widgets/category_card.dart';
 import 'package:provider/provider.dart';
 
@@ -24,6 +26,8 @@ class VipCategoryScreen extends StatefulWidget {
 }
 
 class _VipCategoryScreenState extends State<VipCategoryScreen> {
+  bool _isSubmitting = false;
+
   @override
   void initState() {
     super.initState();
@@ -57,28 +61,28 @@ class _VipCategoryScreenState extends State<VipCategoryScreen> {
         builder: (context, provider, child) {
           return Column(
             children: [
-              Align(
-                alignment: Alignment.centerRight,
-                child: Container(
-                  width: 85.w,
-                  height: 35.w,
-                  margin: EdgeInsets.only(bottom: 16.h, top: 8.h, right: 32.w),
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: Color(0xFFFAC60C),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: Colors.black),
-                  ),
-                  child: Text(
-                    "PAID",
-                    style: GoogleFonts.inter(
-                      fontSize: 20.sp,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black,
-                    ),
-                  ),
-                ),
-              ),
+              // Align(
+              //   alignment: Alignment.centerRight,
+              //   child: Container(
+              //     width: 85.w,
+              //     height: 35.w,
+              //     margin: EdgeInsets.only(bottom: 16.h, top: 8.h, right: 32.w),
+              //     alignment: Alignment.center,
+              //     decoration: BoxDecoration(
+              //       color: Color(0xFFFAC60C),
+              //       borderRadius: BorderRadius.circular(10),
+              //       border: Border.all(color: Colors.black),
+              //     ),
+              //     child: Text(
+              //       "PAID",
+              //       style: GoogleFonts.inter(
+              //         fontSize: 20.sp,
+              //         fontWeight: FontWeight.w600,
+              //         color: Colors.black,
+              //       ),
+              //     ),
+              //   ),
+              // ),
               if (provider.categoriesLoading)
                 Expanded(
                   child: const Center(child: CircularProgressIndicator()),
@@ -156,22 +160,8 @@ class _VipCategoryScreenState extends State<VipCategoryScreen> {
               if (widget.isSelectionRequired)
                 CommonButton(
                   title: "Continue",
-                  onTap: () async {
-                    if (provider.selectedCategoryId != null) {
-                      /// 🔥 Update provider (THIS triggers UI instantly)
-                      await context.read<CategoryProvider>().setVipSelected(
-                        true,
-                      );
-
-                      /// 🔥 Stay on same tab
-                      widget.onNavigate?.call(0);
-                    } else {
-                      CommonSnackBar.showError(
-                        context,
-                        'Please select category to continue',
-                      );
-                    }
-                  },
+                  isLoading: _isSubmitting,
+                  onTap: _isSubmitting ? () {} : _continueWithCategory,
                 )
               else
                 CommonButton(
@@ -196,5 +186,53 @@ class _VipCategoryScreenState extends State<VipCategoryScreen> {
   void _selectCategory(String categoryId) {
     final provider = context.read<RegistrationProvider>();
     provider.selectCategory(categoryId);
+  }
+
+  Future<void> _continueWithCategory() async {
+    final provider = context.read<RegistrationProvider>();
+    final selectedCategoryId = provider.selectedCategoryId;
+
+    if (selectedCategoryId == null) {
+      CommonSnackBar.showError(
+        context,
+        'Please select category to continue',
+      );
+      return;
+    }
+
+    final vipCategoryId = int.tryParse(selectedCategoryId);
+    if (vipCategoryId == null) {
+      CommonSnackBar.showError(context, 'Invalid category selected');
+      return;
+    }
+
+    setState(() => _isSubmitting = true);
+
+    try {
+      await context.read<AuthProvider>().ensureApiTokenFor(isVip: true);
+
+      final result =
+          await VipCategoryService.instance.selectCategory(vipCategoryId);
+
+      if (!mounted) return;
+
+      if (!result.status) {
+        CommonSnackBar.showError(
+          context,
+          result.message.isNotEmpty
+              ? result.message
+              : 'Failed to select category',
+        );
+        return;
+      }
+
+      await context.read<AuthProvider>().updateStoredVipCategorySelected(true);
+      await context.read<CategoryProvider>().setVipSelected(true);
+      widget.onNavigate?.call(0);
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
+    }
   }
 }

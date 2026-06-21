@@ -128,7 +128,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     await _storage.write(key: 'phone_number', value: phone);
-    // Store the registration type for verification screen
+    // Store the registration type for verification screens
     await _storage.write(key: 'registration_type', value: widget.type);
 
     final auth = context.read<AuthProvider>();
@@ -136,13 +136,15 @@ class _LoginScreenState extends State<LoginScreen> {
     // Prevent double tap by checking loading state
     if (auth.isLoading) return;
 
-    final success = await auth.sendOtp(phone);
+    final result = await auth.sendOtp(phone, type: widget.type);
 
-    if (success) {
-      CommonSnackBar.showSuccess(context, 'OTP sent successfully');
+    if (!mounted) return;
+
+    if (result.success) {
+      CommonSnackBar.showSuccess(context, result.message);
       Navigator.of(context).pushNamed(Routes.verification);
     } else {
-      CommonSnackBar.showError(context, 'Failed to send OTP');
+      CommonSnackBar.showError(context, result.message);
     }
   }
 }

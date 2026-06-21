@@ -18,6 +18,7 @@ class CustomTextField extends StatelessWidget {
   final int? maxLength;
   final List<TextInputFormatter>? inputFormatters;
   final bool? enabled;
+  final bool readOnly;
 
   const CustomTextField({
     super.key,
@@ -32,6 +33,7 @@ class CustomTextField extends StatelessWidget {
     this.maxLength,
     this.inputFormatters,
     this.enabled,
+    this.readOnly = false,
   });
 
   @override
@@ -63,6 +65,7 @@ class CustomTextField extends StatelessWidget {
         maxLength: maxLength,
         inputFormatters: inputFormatters,
         enabled: enabled,
+        readOnly: readOnly,
         style: GoogleFonts.inter(color: colors.textPrimary, fontSize: 16.sp),
         decoration: InputDecoration(
           hintText: hintText,

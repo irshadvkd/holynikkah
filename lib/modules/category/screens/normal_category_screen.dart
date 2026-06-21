@@ -9,7 +9,9 @@ import 'package:holynikkah/modules/category/controller/category_provider.dart';
 import 'package:holynikkah/modules/category/widgets/normal_category_card.dart';
 import 'package:holynikkah/modules/login/screens/login_screen.dart';
 import 'package:holynikkah/modules/registration/models/category_model.dart';
+import 'package:holynikkah/modules/login/providers/auth_provider.dart';
 import 'package:holynikkah/modules/registration/providers/registration_provider.dart';
+import 'package:holynikkah/modules/registration/services/normal_category_service.dart';
 import 'package:holynikkah/modules/registration/widgets/category_card.dart';
 import 'package:provider/provider.dart';
 
@@ -27,6 +29,8 @@ class NormalCategoryScreen extends StatefulWidget {
 }
 
 class _NormalCategoryScreenState extends State<NormalCategoryScreen> {
+  bool _isSubmitting = false;
+
   @override
   void initState() {
     super.initState();
@@ -60,28 +64,28 @@ class _NormalCategoryScreenState extends State<NormalCategoryScreen> {
         builder: (context, provider, child) {
           return Column(
             children: [
-              Align(
-                alignment: Alignment.centerRight,
-                child: Container(
-                  width: 85.w,
-                  height: 35.w,
-                  margin: EdgeInsets.only(bottom: 16.h, top: 8.h, right: 32.w),
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: Color(0xFFFAC60C),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: Colors.black),
-                  ),
-                  child: Text(
-                    "FREE",
-                    style: GoogleFonts.inter(
-                      fontSize: 20.sp,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black,
-                    ),
-                  ),
-                ),
-              ),
+              // Align(
+              //   alignment: Alignment.centerRight,
+              //   child: Container(
+              //     width: 85.w,
+              //     height: 35.w,
+              //     margin: EdgeInsets.only(bottom: 16.h, top: 8.h, right: 32.w),
+              //     alignment: Alignment.center,
+              //     decoration: BoxDecoration(
+              //       color: Color(0xFFFAC60C),
+              //       borderRadius: BorderRadius.circular(10),
+              //       border: Border.all(color: Colors.black),
+              //     ),
+              //     child: Text(
+              //       "FREE",
+              //       style: GoogleFonts.inter(
+              //         fontSize: 20.sp,
+              //         fontWeight: FontWeight.w600,
+              //         color: Colors.black,
+              //       ),
+              //     ),
+              //   ),
+              // ),
               if (provider.categoriesLoading)
                 Expanded(
                   child: const Center(child: CircularProgressIndicator()),
@@ -105,9 +109,8 @@ class _NormalCategoryScreenState extends State<NormalCategoryScreen> {
                           isVip: false,
                           category: category,
                           isSelectionRequired: widget.isSelectionRequired,
-                          isSelected: provider.selectedCategoryIds.contains(
-                            category.catId,
-                          ),
+                          isSelected:
+                              provider.selectedCategoryId == category.catId,
                           onTap: () => _selectCategory(category.catId ?? ""),
                         );
                       },
@@ -189,22 +192,8 @@ class _NormalCategoryScreenState extends State<NormalCategoryScreen> {
               if (widget.isSelectionRequired)
                 CommonButton(
                   title: "Continue",
-                  onTap: () async {
-                    if (provider.selectedCategoryIds.isNotEmpty) {
-                      /// 🔥 Update provider (THIS triggers UI instantly)
-                      await context.read<CategoryProvider>().setNormalSelected(
-                        true,
-                      );
-
-                      /// 🔥 Stay on same tab
-                      widget.onNavigate?.call(1);
-                    } else {
-                      CommonSnackBar.showError(
-                        context,
-                        'Please select category to continue',
-                      );
-                    }
-                  },
+                  isLoading: _isSubmitting,
+                  onTap: _isSubmitting ? () {} : _continueWithCategory,
                 )
               else
                 CommonButton(
@@ -289,19 +278,53 @@ class _NormalCategoryScreenState extends State<NormalCategoryScreen> {
     provider.selectCategory(categoryId);
   }
 
-  void _continue(context) async {
-    print("hhe");
+  Future<void> _continueWithCategory() async {
     final provider = context.read<RegistrationProvider>();
-    final success = await provider.submitRegistration();
-    if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Registration completed successfully!')),
-      );
-      Navigator.of(context).pushNamed(Routes.home);
-    } else {
-      ScaffoldMessenger.of(
+    final selectedCategoryId = provider.selectedCategoryId;
+
+    if (selectedCategoryId == null) {
+      CommonSnackBar.showError(
         context,
-      ).showSnackBar(SnackBar(content: Text('Registration failed')));
+        'Please select category to continue',
+      );
+      return;
+    }
+
+    final categoryId = int.tryParse(selectedCategoryId);
+    if (categoryId == null) {
+      CommonSnackBar.showError(context, 'Invalid category selected');
+      return;
+    }
+
+    setState(() => _isSubmitting = true);
+
+    try {
+      await context.read<AuthProvider>().ensureApiTokenFor(isVip: false);
+
+      final result =
+          await NormalCategoryService.instance.selectCategory(categoryId);
+
+      if (!mounted) return;
+
+      if (!result.status) {
+        CommonSnackBar.showError(
+          context,
+          result.message.isNotEmpty
+              ? result.message
+              : 'Failed to select category',
+        );
+        return;
+      }
+
+      await context.read<AuthProvider>().updateStoredNormalCategorySelected(
+        true,
+      );
+      await context.read<CategoryProvider>().setNormalSelected(true);
+      widget.onNavigate?.call(1);
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
     }
   }
 }

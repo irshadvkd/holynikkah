@@ -14,10 +14,18 @@ import 'package:holynikkah/core/theme/context_extension.dart';
 import 'package:holynikkah/core/utils/constants.dart';
 import 'package:holynikkah/core/utils/validation_utils.dart';
 import 'package:holynikkah/core/widgets/common_app_bar.dart';
-import 'package:holynikkah/core/widgets/gradient_border.dart';
 import 'package:holynikkah/core/widgets/widgets.dart';
+import 'package:holynikkah/modules/category/controller/category_provider.dart';
 import 'package:holynikkah/modules/login/providers/auth_provider.dart';
+import 'package:holynikkah/modules/registration/models/location_model.dart';
+import 'package:holynikkah/modules/registration/models/phone_visibility.dart';
+import 'package:holynikkah/modules/registration/models/vip_registration_model.dart';
 import 'package:holynikkah/modules/registration/providers/registration_provider.dart';
+import 'package:holynikkah/modules/registration/services/locations_service.dart';
+import 'package:holynikkah/modules/registration/services/normal_registration_service.dart';
+import 'package:holynikkah/modules/registration/services/vip_registration_service.dart';
+import 'package:holynikkah/modules/registration/widgets/phone_visibility_selector.dart';
+import 'package:holynikkah/modules/template/screens/common_image_picker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
@@ -39,41 +47,23 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   final _profileIdController = TextEditingController();
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
+  final _cityController = TextEditingController();
   final _informationController = TextEditingController();
   String gender = "";
-  final ValueNotifier<String?> stateNotifier = ValueNotifier<String?>(null);
-  final ValueNotifier<String?> districtNotifier = ValueNotifier<String?>(null);
-  final ValueNotifier<String?> cityNotifier = ValueNotifier<String?>(null);
+  PhoneVisibility _phoneVisibility = PhoneVisibility.visibleToAll;
+  final ValueNotifier<LocationState?> stateNotifier =
+      ValueNotifier<LocationState?>(null);
+  final ValueNotifier<LocationDistrict?> districtNotifier =
+      ValueNotifier<LocationDistrict?>(null);
+
+  /// Location data from API
+  List<LocationState> _states = [];
+  List<LocationDistrict> _districts = [];
+  bool _statesLoading = false;
+  bool _districtsLoading = false;
 
   /// Loading state
   bool _isLoading = false;
-
-  // Sample data - replace with your actual data source
-  final List<String> states = [
-    'Karnataka',
-    'Kerala',
-    'Tamil Nadu',
-    'Telangana',
-    'Maharashtra',
-    'Gujarat',
-    'Rajasthan',
-    'Uttar Pradesh',
-    'West Bengal',
-  ];
-
-  final Map<String, List<String>> districts = {
-    'Karnataka': ['Bangalore Urban', 'Mysore', 'Mangalore', 'Hubli'],
-    'Kerala': ['Thiruvananthapuram', 'Kochi', 'Kozhikode', 'Thrissur'],
-    'Tamil Nadu': ['Chennai', 'Coimbatore', 'Madurai', 'Salem'],
-    'Telangana': ['Hyderabad', 'Warangal', 'Nizamabad', 'Karimnagar'],
-  };
-
-  final Map<String, List<String>> cities = {
-    'Bangalore Urban': ['Bangalore', 'Whitefield', 'Electronic City'],
-    'Mysore': ['Mysore City', 'Mandya', 'Chamarajanagar'],
-    'Chennai': ['Chennai City', 'Tambaram', 'Velachery'],
-    'Hyderabad': ['Hyderabad City', 'Secunderabad', 'Gachibowli'],
-  };
 
   /// Secure storage
   final _storage = const FlutterSecureStorage();
@@ -93,16 +83,68 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       final provider = context.read<RegistrationProvider>();
       provider.clearRegistrationData();
       provider.setVipStatus(widget.isVip);
+      if (_phoneController.text.isNotEmpty) {
+        provider.updatePhoneNumber(_phoneController.text);
+      }
     });
 
-    /// Generate random profile id
     _profileIdController.text = generateProfileId();
 
-    /// Load phone number from previous screen
     if (widget.phoneNumber != null) {
       _phoneController.text = widget.phoneNumber!;
     } else {
       _loadPhoneNumber();
+    }
+
+    _loadStates();
+  }
+
+  Future<void> _loadStates() async {
+    setState(() => _statesLoading = true);
+
+    final states = await LocationsService.instance.getStates();
+
+    if (!mounted) return;
+
+    setState(() {
+      _states = states;
+      _statesLoading = false;
+    });
+
+    if (states.isEmpty) {
+      CommonSnackBar.showError(context, 'Failed to load states');
+    }
+  }
+
+  Future<void> _loadDistricts(int stateId) async {
+    setState(() {
+      _districtsLoading = true;
+      _districts = [];
+    });
+
+    final districts = await LocationsService.instance.getDistricts(stateId);
+
+    if (!mounted) return;
+
+    setState(() {
+      _districts = districts;
+      _districtsLoading = false;
+    });
+
+    if (districts.isEmpty) {
+      CommonSnackBar.showError(context, 'Failed to load districts');
+    }
+  }
+
+  void _onStateChanged(LocationState? value) {
+    stateNotifier.value = value;
+    districtNotifier.value = null;
+    _cityController.clear();
+
+    if (value != null) {
+      _loadDistricts(value.id);
+    } else {
+      setState(() => _districts = []);
     }
   }
 
@@ -116,30 +158,70 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   /// Load phone number from secure storage
   Future<void> _loadPhoneNumber() async {
     final phoneNumber = await _storage.read(key: 'phone_number');
-    if (phoneNumber != null) {
-      _phoneController.text = phoneNumber;
+    if (phoneNumber != null && mounted) {
+      setState(() {
+        _phoneController.text = phoneNumber;
+      });
+      context.read<RegistrationProvider>().updatePhoneNumber(phoneNumber);
     }
+  }
+
+  Widget _verifiedPhoneSuffix() {
+    return Padding(
+      padding: EdgeInsets.only(right: 12.w),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.verified,
+            color: const Color(0xFF2E7D32),
+            size: 22.sp,
+          ),
+          SizedBox(width: 4.w),
+          Text(
+            'Verified',
+            style: GoogleFonts.inter(
+              fontSize: 13.sp,
+              fontWeight: FontWeight.w600,
+              color: const Color(0xFF2E7D32),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   /// Pick profile image
   Future<void> _pickImage() async {
     final XFile? image = await _picker.pickImage(
       source: ImageSource.gallery,
-      imageQuality: 70,
+      imageQuality: 100,
     );
 
-    if (image != null) {
-      setState(() {
-        _profileImage = File(image.path);
-      });
-    }
+    if (image == null) return;
+
+    final croppedImage = await CommonImageCropper.cropImage(
+      imagePath: image.path,
+      ratioX: 1,
+      ratioY: 1,
+    );
+
+    if (croppedImage == null) return;
+
+    setState(() {
+      _profileImage = croppedImage;
+    });
   }
 
   @override
   void dispose() {
+    _profileIdController.dispose();
+    _nameController.dispose();
+    _phoneController.dispose();
+    _cityController.dispose();
+    _informationController.dispose();
     stateNotifier.dispose();
     districtNotifier.dispose();
-    cityNotifier.dispose();
     super.dispose();
   }
 
@@ -225,7 +307,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(50.r),
-                    color: Colors.white,
                     boxShadow: [
                       BoxShadow(
                         color: Color(0xFF303036).withOpacity(.7),
@@ -234,10 +315,13 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       ),
                     ],
                   ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: RadioListTile<String>(
+                  child: Material(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(50.r),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: RadioListTile<String>(
                           value: "Male",
                           groupValue: gender,
                           activeColor: Color(0xFF032544),
@@ -282,7 +366,29 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         ),
                       ),
                     ],
+                    ),
                   ),
+                ),
+
+                SizedBox(height: 16.h),
+
+                /// VERIFIED PHONE
+                CustomTextField(
+                  controller: _phoneController,
+                  hintText: 'Phone Number',
+                  keyboardType: TextInputType.phone,
+                  readOnly: true,
+                  suffixIcon: _verifiedPhoneSuffix(),
+                ),
+
+                SizedBox(height: 16.h),
+
+                /// PHONE VISIBILITY (sample UI)
+                PhoneVisibilitySelector(
+                  value: _phoneVisibility,
+                  onChanged: (value) {
+                    setState(() => _phoneVisibility = value);
+                  },
                 ),
 
                 SizedBox(height: 16.h),
@@ -299,34 +405,46 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 SizedBox(height: 16.h),
 
                 /// STATE DROPDOWN
-                CommonDropdown<String>(
-                  hintText: 'Select State',
+                CommonDropdown<LocationState>(
+                  hintText: _statesLoading
+                      ? 'Loading states...'
+                      : _states.isEmpty
+                          ? 'No states available'
+                          : 'Select State',
+                  searchHintText: 'Search state...',
+                  noResultsText: 'No state found',
+                  enabled: !_statesLoading && _states.isNotEmpty,
                   valueListenable: stateNotifier,
-                  items: states,
-                  itemLabel: (state) => state,
-                  onChanged: (value) {
-                    stateNotifier.value = value;
-                    districtNotifier.value = null;
-                    cityNotifier.value = null;
-                  },
+                  items: _states,
+                  itemLabel: (state) => state.name,
+                  onChanged: _onStateChanged,
                 ),
 
                 SizedBox(height: 16.h),
 
                 /// DISTRICT DROPDOWN
-                ValueListenableBuilder<String?>(
+                ValueListenableBuilder<LocationState?>(
                   valueListenable: stateNotifier,
                   builder: (context, selectedState, child) {
-                    return CommonDropdown<String>(
-                      hintText: 'Select District',
+                    return CommonDropdown<LocationDistrict>(
+                      hintText: selectedState == null
+                          ? 'Select state first'
+                          : _districtsLoading
+                              ? 'Loading districts...'
+                              : _districts.isEmpty
+                                  ? 'No districts available'
+                                  : 'Select District',
+                      searchHintText: 'Search district...',
+                      noResultsText: 'No district found',
+                      enabled: selectedState != null &&
+                          !_districtsLoading &&
+                          _districts.isNotEmpty,
                       valueListenable: districtNotifier,
-                      items: selectedState != null
-                          ? (districts[selectedState] ?? [])
-                          : [],
-                      itemLabel: (district) => district,
+                      items: selectedState != null ? _districts : [],
+                      itemLabel: (district) => district.name,
                       onChanged: (value) {
                         districtNotifier.value = value;
-                        cityNotifier.value = null;
+                        _cityController.clear();
                       },
                     );
                   },
@@ -334,22 +452,13 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
                 SizedBox(height: 16.h),
 
-                /// CITY DROPDOWN
-                ValueListenableBuilder<String?>(
-                  valueListenable: districtNotifier,
-                  builder: (context, selectedDistrict, child) {
-                    return CommonDropdown<String>(
-                      hintText: 'Select City',
-                      valueListenable: cityNotifier,
-                      items: selectedDistrict != null
-                          ? (cities[selectedDistrict] ?? [])
-                          : [],
-                      itemLabel: (city) => city,
-                      onChanged: (value) {
-                        cityNotifier.value = value;
-                      },
-                    );
-                  },
+                /// CITY
+                ValidatedTextField(
+                  controller: _cityController,
+                  hintText: 'City',
+                  type: TextFieldType.general,
+                  fieldName: 'City',
+                  textCapitalization: TextCapitalization.words,
                 ),
 
                 SizedBox(height: 16.h),
@@ -407,7 +516,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           'hasName': _nameController.text.trim().isNotEmpty,
           'hasState': stateNotifier.value != null,
           'hasDistrict': districtNotifier.value != null,
-          'hasCity': cityNotifier.value != null,
+          'hasCity': _cityController.text.trim().isNotEmpty,
           'hasInformation': _informationController.text.isNotEmpty,
         },
       );
@@ -444,11 +553,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         return;
       }
 
-      if (cityNotifier.value == null) {
+      if (_cityController.text.trim().isEmpty) {
         setState(() {
           _isLoading = false;
         });
-        CommonSnackBar.showError(context, 'Please select city');
+        CommonSnackBar.showError(context, 'Please enter city');
         return;
       }
 
@@ -499,17 +608,81 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           step: 'form_completed',
           data: {
             'name': _nameController.text.trim(),
-            'state': stateNotifier.value,
-            'district': districtNotifier.value,
-            'city': cityNotifier.value,
+            'state': stateNotifier.value?.name,
+            'district': districtNotifier.value?.name,
+            'city': _cityController.text.trim(),
             'informationLength': _informationController.text.trim().length,
           },
         );
 
         if (widget.isVip) {
-          await context.read<AuthProvider>().setVipLoggedIn();
+          final result = await VipRegistrationService.instance.register(
+            VipRegistrationRequest(
+              phoneNumber: _phoneController.text.trim(),
+              fullName: _nameController.text.trim(),
+              gender: gender,
+              stateId: stateNotifier.value!.id,
+              districtId: districtNotifier.value!.id,
+              city: _cityController.text.trim(),
+              information: _informationController.text.trim(),
+              mobVisibility: _phoneVisibility.mobVisibility,
+              profilePicPath: _profileImage?.path,
+            ),
+          );
+
+          if (!result.status) {
+            if (mounted) {
+              CommonSnackBar.showError(
+                context,
+                result.message.isNotEmpty
+                    ? result.message
+                    : 'Registration failed. Please try again.',
+              );
+            }
+            return;
+          }
+
+          await context.read<AuthProvider>().setVipLoggedIn(
+            token: result.token,
+            user: result.user,
+          );
+          await context.read<CategoryProvider>().applyVipCategoryFromUser(
+            result.user,
+          );
         } else {
-          await context.read<AuthProvider>().setNormalLoggedIn();
+          final result = await NormalRegistrationService.instance.register(
+            VipRegistrationRequest(
+              phoneNumber: _phoneController.text.trim(),
+              fullName: _nameController.text.trim(),
+              gender: gender,
+              stateId: stateNotifier.value!.id,
+              districtId: districtNotifier.value!.id,
+              city: _cityController.text.trim(),
+              information: _informationController.text.trim(),
+              mobVisibility: _phoneVisibility.mobVisibility,
+              profilePicPath: _profileImage?.path,
+            ),
+          );
+
+          if (!result.status) {
+            if (mounted) {
+              CommonSnackBar.showError(
+                context,
+                result.message.isNotEmpty
+                    ? result.message
+                    : 'Registration failed. Please try again.',
+              );
+            }
+            return;
+          }
+
+          await context.read<AuthProvider>().setNormalLoggedIn(
+            token: result.token,
+            user: result.user,
+          );
+          await context.read<CategoryProvider>().applyNormalCategoryFromUser(
+            result.user,
+          );
         }
 
         // Single navigation with delay and proper guard

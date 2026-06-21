@@ -2,15 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:holynikkah/core/utils/constants.dart';
 
 class CommonOtpField extends StatefulWidget {
-  final Function(String) onCompleted;
+  final ValueChanged<String> onCompleted;
+  final ValueChanged<String>? onChanged;
   final int length;
+  final bool hasError;
+  final bool autoFocus;
 
   const CommonOtpField({
     super.key,
     required this.onCompleted,
-    this.length = 6,
+    this.onChanged,
+    this.length = AppConstants.otpLength,
+    this.hasError = false,
+    this.autoFocus = true,
   });
 
   @override
@@ -18,88 +25,252 @@ class CommonOtpField extends StatefulWidget {
 }
 
 class CommonOtpFieldState extends State<CommonOtpField> {
-  final List<TextEditingController> _controllers = [];
-  final List<FocusNode> _focusNodes = [];
+  static const Color _brandPrimary = Color(0xFF032544);
+  static const Color _errorColor = Color(0xFFEF5350);
+  static const Color _borderDefault = Color(0xFFE0E0E0);
+  static const Color _fillDefault = Color(0xFFF7F7F7);
+  static const Color _fillActive = Color(0xFFEFE5E5);
 
-  String getCurrentOtp() {
-    return _controllers.map((c) => c.text).join();
-  }
+  final TextEditingController _controller = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
+
+  String? _lastCompletedOtp;
+
+  String get value => _controller.text;
 
   @override
   void initState() {
     super.initState();
-    for (int i = 0; i < widget.length; i++) {
-      _controllers.add(TextEditingController());
-      _focusNodes.add(FocusNode());
+    _focusNode.addListener(_onFocusChanged);
+    if (widget.autoFocus) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _focusNode.requestFocus();
+      });
+    }
+  }
+
+  @override
+  void didUpdateWidget(CommonOtpField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.hasError && !oldWidget.hasError) {
+      _lastCompletedOtp = null;
     }
   }
 
   @override
   void dispose() {
-    for (var controller in _controllers) {
-      controller.dispose();
-    }
-    for (var node in _focusNodes) {
-      node.dispose();
-    }
+    _focusNode.removeListener(_onFocusChanged);
+    _controller.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
-  void _onChanged(String value, int index) {
-    if (value.isNotEmpty) {
-      if (index < widget.length - 1) {
-        _focusNodes[index + 1].requestFocus();
-      }
-    } else {
-      if (index > 0) {
-        _focusNodes[index - 1].requestFocus();
-      }
+  void clear() {
+    _controller.clear();
+    _lastCompletedOtp = null;
+    _focusNode.requestFocus();
+    setState(() {});
+  }
+
+  void _onFocusChanged() => setState(() {});
+
+  void _onTextChanged(String value) {
+    final digits = value.replaceAll(RegExp(r'\D'), '');
+    if (digits != value) {
+      _controller.value = TextEditingValue(
+        text: digits,
+        selection: TextSelection.collapsed(offset: digits.length),
+      );
     }
 
-    String otp = getCurrentOtp();
+    final otp = _controller.text;
+    widget.onChanged?.call(otp);
+
     if (otp.length == widget.length) {
-      widget.onCompleted(otp);
+      if (_lastCompletedOtp != otp) {
+        _lastCompletedOtp = otp;
+        _focusNode.unfocus();
+        widget.onCompleted(otp);
+      }
+    } else {
+      _lastCompletedOtp = null;
     }
+
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: List.generate(
-        widget.length,
-        (index) => SizedBox(
-          width: 45.w,
-          height: 45.h,
-          child: TextFormField(
-            controller: _controllers[index],
-            focusNode: _focusNodes[index],
-            textAlign: TextAlign.center,
-            textAlignVertical: TextAlignVertical.center,
-            keyboardType: TextInputType.number,
-            maxLength: 1,
-            style: GoogleFonts.inter(
-              fontSize: 18.sp,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
-            decoration: InputDecoration(
-              counterText: '',
-              filled: true,
-              fillColor: Color(0xFFD9D9D9),
-              contentPadding: EdgeInsets.zero,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.r),
-                borderSide: BorderSide.none,
+    final text = _controller.text;
+    final focused = _focusNode.hasFocus;
+    final activeIndex = text.length < widget.length ? text.length : widget.length - 1;
+
+    return AutofillGroup(
+      child: Semantics(
+        label: 'Enter ${widget.length} digit verification code',
+        textField: true,
+        child: GestureDetector(
+          onTap: () => _focusNode.requestFocus(),
+          behavior: HitTestBehavior.opaque,
+        child: SizedBox(
+          height: 56.h,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(widget.length, (index) {
+                  final isFilled = index < text.length;
+                  final isActive = focused && index == activeIndex;
+                  final digit = isFilled ? text[index] : null;
+
+                  return Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 6.w),
+                    child: _OtpDigitBox(
+                      digit: digit,
+                      isActive: isActive,
+                      isFilled: isFilled,
+                      hasError: widget.hasError,
+                    ),
+                  );
+                }),
               ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.r),
-                borderSide: const BorderSide(color: Colors.amber),
+              Positioned.fill(
+                child: Opacity(
+                  opacity: 0.01,
+                  child: TextField(
+                    controller: _controller,
+                    focusNode: _focusNode,
+                    keyboardType: TextInputType.number,
+                    textInputAction: TextInputAction.done,
+                    autofillHints: const [AutofillHints.oneTimeCode],
+                    enableSuggestions: false,
+                    autocorrect: false,
+                    maxLength: widget.length,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(widget.length),
+                    ],
+                    decoration: const InputDecoration(
+                      counterText: '',
+                      border: InputBorder.none,
+                    ),
+                    onChanged: _onTextChanged,
+                  ),
+                ),
               ),
-            ),
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            onChanged: (value) => _onChanged(value, index),
+            ],
           ),
+        ),
+        ),
+      ),
+    );
+  }
+}
+
+class _OtpDigitBox extends StatelessWidget {
+  final String? digit;
+  final bool isActive;
+  final bool isFilled;
+  final bool hasError;
+
+  const _OtpDigitBox({
+    required this.digit,
+    required this.isActive,
+    required this.isFilled,
+    required this.hasError,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final borderColor = hasError
+        ? CommonOtpFieldState._errorColor
+        : isActive
+            ? CommonOtpFieldState._brandPrimary
+            : isFilled
+                ? CommonOtpFieldState._brandPrimary.withValues(alpha: 0.4)
+                : CommonOtpFieldState._borderDefault;
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 180),
+      curve: Curves.easeOut,
+      width: 56.w,
+      height: 56.h,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: isActive
+            ? CommonOtpFieldState._fillActive
+            : CommonOtpFieldState._fillDefault,
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(
+          color: borderColor,
+          width: isActive ? 2 : 1.5,
+        ),
+        boxShadow: isActive
+            ? [
+                BoxShadow(
+                  color: CommonOtpFieldState._brandPrimary.withValues(alpha: 0.12),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ]
+            : null,
+      ),
+      child: digit != null
+          ? Text(
+              digit!,
+              style: GoogleFonts.inter(
+                fontSize: 24.sp,
+                fontWeight: FontWeight.w600,
+                color: CommonOtpFieldState._brandPrimary,
+                height: 1,
+              ),
+            )
+          : isActive
+              ? _BlinkingCursor(color: CommonOtpFieldState._brandPrimary)
+              : null,
+    );
+  }
+}
+
+class _BlinkingCursor extends StatefulWidget {
+  final Color color;
+
+  const _BlinkingCursor({required this.color});
+
+  @override
+  State<_BlinkingCursor> createState() => _BlinkingCursorState();
+}
+
+class _BlinkingCursorState extends State<_BlinkingCursor>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _controller,
+      child: Container(
+        width: 2.w,
+        height: 24.h,
+        decoration: BoxDecoration(
+          color: widget.color,
+          borderRadius: BorderRadius.circular(1),
         ),
       ),
     );

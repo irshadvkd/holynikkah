@@ -6,7 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:holynikkah/modules/category/controller/category_provider.dart';
 import 'package:holynikkah/modules/category/screens/normal_category_screen.dart';
-import 'package:holynikkah/modules/extra/screens/extra_screen.dart';
+import 'package:holynikkah/modules/myprofile/screens/my_profile_screen.dart';
 import 'package:provider/provider.dart';
 
 import 'package:holynikkah/core/services/home_session_storage.dart';
@@ -130,7 +130,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       const ReelsScreen(),
       const AdsScreen(),
-      const ExtraScreen(),
+      const MyProfileScreen(),
     ];
 
     return Scaffold(
@@ -255,7 +255,7 @@ class _HomeScreenState extends State<HomeScreen> {
           icon: Padding(
             padding: const EdgeInsets.only(bottom: 8.0, top: 12),
             child: SvgPicture.asset(
-              AppConstants.icons.extra,
+              AppConstants.icons.menu,
               width: 24,
               height: 24,
               colorFilter: ColorFilter.mode(
@@ -266,7 +266,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-          label: 'Extra',
+          label: 'My Profile',
         ),
       ],
     );

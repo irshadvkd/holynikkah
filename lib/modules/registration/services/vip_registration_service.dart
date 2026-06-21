@@ -1,0 +1,75 @@
+import 'package:dio/dio.dart';
+import 'package:holynikkah/core/api/api_client.dart';
+import 'package:holynikkah/core/utils/app_logger.dart';
+import 'package:holynikkah/core/utils/constants.dart';
+import 'package:holynikkah/modules/registration/models/vip_registration_model.dart';
+
+class VipRegistrationService {
+  VipRegistrationService._();
+
+  static final VipRegistrationService instance = VipRegistrationService._();
+
+  Future<VipRegistrationResponse> register(VipRegistrationRequest request) async {
+    AppLogger.info(
+      'Submitting VIP registration for ${request.phoneNumber}',
+      tag: 'VipRegistrationService',
+    );
+
+    final fields = <String, dynamic>{
+      'phone_number': request.phoneNumber,
+      'full_name': request.fullName,
+      'gender': request.normalizedGender,
+      'state_id': request.stateId,
+      'district_id': request.districtId,
+      'city': request.city,
+      'information': request.information,
+      'mob_visibility': request.mobVisibility,
+    };
+
+    if (request.profilePicPath != null && request.profilePicPath!.isNotEmpty) {
+      fields['profile_pic'] = await MultipartFile.fromFile(
+        request.profilePicPath!,
+        filename: _fileName(request.profilePicPath!),
+      );
+    }
+
+    final formData = FormData.fromMap(fields);
+
+    final response = await ApiClient.instance.upload<dynamic>(
+      AppConstants.urls.vipUsersRegister,
+      formData: formData,
+      parser: (json) => json,
+    );
+
+    final rawBody = response.success ? response.data : response.error?.data;
+    final parsed = VipRegistrationResponse.fromJson(rawBody);
+
+    if (parsed.status) {
+      AppLogger.success(
+        'VIP registration completed for ${request.phoneNumber}',
+        tag: 'VipRegistrationService',
+      );
+      return parsed;
+    }
+
+    final message = parsed.message.isNotEmpty
+        ? parsed.message
+        : response.message ?? 'Registration failed';
+
+    AppLogger.warning(
+      'VIP registration failed for ${request.phoneNumber}: $message',
+      tag: 'VipRegistrationService',
+    );
+
+    return VipRegistrationResponse(
+      status: false,
+      message: message,
+      data: parsed.data,
+    );
+  }
+
+  String _fileName(String path) {
+    final segments = path.split('/');
+    return segments.isNotEmpty ? segments.last : 'profile_pic.jpg';
+  }
+}

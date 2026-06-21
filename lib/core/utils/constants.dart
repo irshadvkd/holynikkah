@@ -3,6 +3,9 @@
 final class AppConstants {
   const AppConstants._(); // private constructor (prevent instantiation)
 
+  /// OTP digit count used across login and verification flows.
+  static const int otpLength = 4;
+
   /// 🌐 API URLs
   static const urls = _Urls();
 
@@ -22,15 +25,47 @@ final class AppConstants {
 final class _Urls {
   const _Urls();
 
-  // Base URL should always end without a trailing slash
-  final String base = "https://api.example.com";
+  /// Base URL — no trailing slash.
+  final String base = "http://172.20.10.2:8000/api";
 
-  // Auth endpoints
+  // Auth
   final String login = "/login/login";
   final String register = "/login/register";
 
+  // Content
+  final String reels = "/reels";
+  final String reelsFeed = "/reels/feed";
+
+  String reelsView(int reelId) => "/reels/$reelId/views";
+
+  // Prayers
+  final String prayersFeed = "/prayers/feed";
+
+  String prayersView(int prayerId) => "/prayers/$prayerId/views";
+
   // User
   final String userProfile = "/user/profile";
+
+  // Categories
+  final String categories = "/categories";
+  final String vipCategories = "/vip-categories";
+
+  // Normal users
+  final String normalOtpSend = "/normal-users/otp/send";
+  final String normalOtpVerify = "/normal-users/otp/verify";
+  final String normalUsersRegister = "/normal-users/register";
+  final String normalCategorySelect = "/normal-users/category/select";
+
+  // VIP OTP
+  final String vipOtpSend = "/vip-users/otp/send";
+  final String vipOtpResend = "/vip-users/otp/resend";
+  final String vipOtpVerify = "/vip-users/otp/verify";
+  final String vipUsersRegister = "/vip-users/register";
+  final String vipCategorySelect = "/vip-users/category/select";
+
+  // Locations
+  final String locationStates = "/locations/states";
+  final String locationDistricts = "/locations/districts";
 }
 
 final class _JsonPaths {
@@ -54,6 +89,7 @@ final class _IconPaths {
   final String reels = "assets/icons/reels.svg";
   final String ads = "assets/icons/ads.svg";
   final String vipRegister = "assets/icons/vip_register.svg";
+  final String menu = "assets/icons/menu.svg";
   final String extra = "assets/icons/extra.svg";
   final String like = "assets/icons/like.svg";
   final String comment = "assets/icons/comment.svg";

@@ -1,6 +1,10 @@
 import 'dart:io';
 
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:holynikkah/core/api/api_client.dart';
+import 'package:holynikkah/core/services/firebase_auth_service.dart';
+import 'package:holynikkah/firebase_options.dart';
 import 'package:holynikkah/multi_provider.dart';
 
 /// ----------------------
@@ -15,6 +19,10 @@ class MyHttpOverrides extends HttpOverrides {
   }
 }
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await FirebaseAuthService.instance.ensureSignedIn();
+  ApiClient.instance.init();
   runApp(const MultiProviderSetup());
 }

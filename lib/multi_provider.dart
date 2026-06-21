@@ -3,7 +3,9 @@ import 'package:holynikkah/application.dart';
 import 'package:holynikkah/core/provider/theme_provider.dart';
 import 'package:holynikkah/modules/category/controller/category_provider.dart';
 import 'package:holynikkah/modules/login/providers/auth_provider.dart';
+import 'package:holynikkah/modules/myprofile/providers/profile_provider.dart';
 import 'package:holynikkah/modules/registration/providers/registration_provider.dart';
+import 'package:holynikkah/modules/template/providers/template_provider.dart';
 import 'package:provider/provider.dart';
 
 /// 🔹 Sets up all app-wide providers
@@ -17,6 +19,8 @@ class MultiProviderSetup extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => RegistrationProvider()),
+        ChangeNotifierProvider(create: (_) => ProfileProvider()),
+        ChangeNotifierProvider(create: (_) => TemplateProvider()),
         ChangeNotifierProvider(
           create: (_) => CategoryProvider()..loadCategory(),
         ),

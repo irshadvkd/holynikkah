@@ -1,4 +1,4 @@
-package com.holynikkah.holynikkah
+package com.holynikah.holynikah
 
 import io.flutter.embedding.android.FlutterActivity
 
