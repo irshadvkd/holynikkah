@@ -40,6 +40,8 @@ class Categories {
     this.bgColor,
     this.textColor,
     this.sortOrder,
+    this.gradientEndColor,
+    this.icon,
   });
 
   Categories.fromJson(dynamic json) {
@@ -49,12 +51,17 @@ class Categories {
     bgColor =
         json['bgColor'] ??
         json['bg_color'] ??
+        json['grad_color1'] ??
         json['button_bg_color'];
     textColor =
         json['textColor'] ??
         json['text_color'] ??
         json['button_text_color'];
     sortOrder = _int(json['sort_order']);
+    gradientEndColor = json['gradient_end_color'] ??
+        json['gradientEndColor'] ??
+        json['grad_color2'];
+    icon = json['icon'];
   }
   String? catId;
   String? name;
@@ -62,6 +69,8 @@ class Categories {
   String? bgColor;
   String? textColor;
   int? sortOrder;
+  String? gradientEndColor;
+  String? icon;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
@@ -69,8 +78,12 @@ class Categories {
     map['name'] = name;
     map['networth'] = networth;
     map['bgColor'] = bgColor;
+    map['grad_color1'] = bgColor;
     map['textColor'] = textColor;
     map['sort_order'] = sortOrder;
+    map['gradient_end_color'] = gradientEndColor;
+    map['grad_color2'] = gradientEndColor;
+    map['icon'] = icon;
     return map;
   }
 

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:holynikkah/modules/registration/models/category_model.dart';
+import 'package:holynikkah/modules/category/models/category_model.dart';
 import 'package:holynikkah/modules/registration/models/vip_otp_model.dart';
 
 void main() {

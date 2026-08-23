@@ -20,7 +20,9 @@ class MultiProviderSetup extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => RegistrationProvider()),
         ChangeNotifierProvider(create: (_) => ProfileProvider()),
-        ChangeNotifierProvider(create: (_) => TemplateProvider()),
+        ChangeNotifierProvider(
+          create: (_) => TemplateProvider()..loadTemplateSelection(),
+        ),
         ChangeNotifierProvider(
           create: (_) => CategoryProvider()..loadCategory(),
         ),

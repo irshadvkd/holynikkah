@@ -3,43 +3,68 @@
     {
       "catId": "1",
       "name": "Middle Class",
-      "networth": "(₹16.6Cr-207.5Cr)",
-      "bgColor": "#032544",
-      "textColor": "#CDBB32"
+      "networth": "₹16.6Cr–207.5Cr",
+      "grad_color1": "#12315A",
+      "grad_color2": "#0B2242",
+      "text_color": "#E8D28A",
+      "icon": "crown",
+      "sort_order": 1,
+      "status": "active"
     },
     {
       "catId": "2",
       "name": "Upper Middle Class",
-      "networth": "(₹415Cr-830Cr)",
-      "bgColor": "#ED7009",
-      "textColor": "#FFFFFF"
+      "networth": "₹415Cr–830Cr",
+      "grad_color1": "#F0863A",
+      "grad_color2": "#DE690A",
+      "text_color": "#FFE9D2",
+      "icon": "crown",
+      "sort_order": 2,
+      "status": "active"
     },
     {
       "catId": "3",
       "name": "HNI (Rich)",
-      "networth": "(₹16.6Cr-207.5Cr)",
-      "bgColor": "#F7DD36",
-      "textColor": "#6E6427"
+      "networth": "₹16.6Cr–207.5Cr",
+      "grad_color1": "#F6D949",
+      "grad_color2": "#EAC012",
+      "text_color": "#5B4A05",
+      "icon": "crown",
+      "sort_order": 3,
+      "status": "active"
     },
     {
       "catId": "4",
       "name": "Super Rich",
-      "networth": "(₹207.5Cr-415Cr)",
-      "bgColor": "#92CBD1",
-      "textColor": "#D48326"
+      "networth": "₹207.5Cr–415Cr",
+      "grad_color1": "#A9DBE2",
+      "grad_color2": "#7FBFC9",
+      "text_color": "#8A5A17",
+      "icon": "crown",
+      "sort_order": 4,
+      "status": "active"
     },
     {
       "catId": "5",
       "name": "Ultra Rich",
-      "networth": "(₹415Cr-830Cr)",
-      "bgColor": "#F297AC",
-      "textColor": "#FFFFFF"
+      "networth": "₹415Cr–830Cr",
+      "grad_color1": "#F5A0BB",
+      "grad_color2": "#E8688F",
+      "text_color": "#FFE9F0",
+      "icon": "crown",
+      "sort_order": 5,
+      "status": "active"
     },
     {
       "catId": "6",
       "name": "Billionaire",
-      "networth": "(₹6,640Cr)",
-      "bgColor": "#3FC575",
-      "textColor": "#FFFFFF"    }
+      "networth": "₹6,640Cr",
+      "grad_color1": "#5FC28D",
+      "grad_color2": "#3B9C68",
+      "text_color": "#E9FFF3",
+      "icon": "crown",
+      "sort_order": 6,
+      "status": "active"
+    }
   ]
 }

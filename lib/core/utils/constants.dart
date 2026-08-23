@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 /// Centralized app-wide constants.
 /// Use this to access URLs, asset paths, themes, icons, etc.
 final class AppConstants {
@@ -25,8 +27,29 @@ final class AppConstants {
 final class _Urls {
   const _Urls();
 
+  static const String _prodBase = 'https://admin.holynikah.com/api';
+  static const String _devBase = 'http://172.20.10.2:8000/api';
+
+  static const String _prodImageBase = 'https://admin.holynikah.com/';
+  static const String _devImageBase = 'http://172.20.10.2:8000/';
+
   /// Base URL — no trailing slash.
-  final String base = "http://172.20.10.2:8000/api";
+  /// Uses local server in debug mode and production server in release mode.
+  /// Can be overridden via: --dart-define=API_BASE_URL=...
+  String get base {
+    const envUrl = String.fromEnvironment('API_BASE_URL');
+    if (envUrl.isNotEmpty) return envUrl;
+    return kDebugMode ? _devBase : _prodBase;
+  }
+
+  /// Image base URL — with trailing slash.
+  /// Uses local server in debug mode and production server in release mode.
+  /// Can be overridden via: --dart-define=IMAGE_BASE_URL=...
+  String get imageBaseUrl {
+    const envUrl = String.fromEnvironment('IMAGE_BASE_URL');
+    if (envUrl.isNotEmpty) return envUrl;
+    return kDebugMode ? _devImageBase : _prodImageBase;
+  }
 
   // Auth
   final String login = "/login/login";
@@ -43,8 +66,38 @@ final class _Urls {
 
   String prayersView(int prayerId) => "/prayers/$prayerId/views";
 
+  // Antiaging
+  final String antiagingFeed = "/antiaging";
+  String antiagingView(int id) => "/antiaging/$id/views";
+
+  // Replenish Except His Own
+  final String replenishFeed = "/replenish-except-his-own";
+  String replenishView(int id) => "/replenish-except-his-own/$id/views";
+
+  // Aura
+  final String auraFeed = "/aura";
+  String auraView(int id) => "/aura/$id/views";
+
+  // Shadi Vibes
+  final String shadiVibesFeed = "/shadi-vibes";
+  String shadiVibesView(int id) => "/shadi-vibes/$id/views";
+  final String shaadiVibesFeed = "/shadi-vibes";
+  String shaadiVibesView(int id) => "/shadi-vibes/$id/views";
+
+  // Space Ad 1
+  final String spaceAd1Feed = "/space-ad-1";
+  String spaceAd1View(int id) => "/space-ad-1/$id/views";
+
+  // Space Ad 2
+  final String spaceAd2Feed = "/space-ad-2";
+  String spaceAd2View(int id) => "/space-ad-2/$id/views";
+
   // User
   final String userProfile = "/user/profile";
+
+  // Legal Pages
+  final String privacyPolicy = "/legal-pages/privacy-policy";
+  final String termsAndConditions = "/legal-pages/terms-and-conditions";
 
   // Categories
   final String categories = "/categories";
@@ -66,6 +119,55 @@ final class _Urls {
   // Locations
   final String locationStates = "/locations/states";
   final String locationDistricts = "/locations/districts";
+
+  // Matches (matrimony feed) — tier-prefixed, authenticated.
+  String matches(bool isVip) =>
+      isVip ? "/vip-users/matches" : "/normal-users/matches";
+
+  /// Request access to a match's contact info (`{profileId}`).
+  String matchContactRequest(bool isVip, String profileId) =>
+      "${matches(isVip)}/$profileId/contact-request";
+
+  // Phone-visibility requests — tier-prefixed, authenticated.
+
+  /// Create a phone request for a hidden profile (POST, body `{target_id}`).
+  String phoneRequests(bool isVip) => "${_savedPrefix(isVip)}/phone-requests";
+
+  /// Requests others made to view my phone (I can approve/reject these).
+  String phoneRequestsIncoming(bool isVip) =>
+      "${phoneRequests(isVip)}/incoming";
+
+  /// Requests I made; approved ones reveal `target.phone`.
+  String phoneRequestsOutgoing(bool isVip) =>
+      "${phoneRequests(isVip)}/outgoing";
+
+  /// Approve/reject an incoming phone request (`{requestId}`, body `{action}`).
+  String phoneRequestRespond(bool isVip, String requestId) =>
+      "${phoneRequests(isVip)}/$requestId/respond";
+
+  // Templates (Server-Driven UI)
+  final String templates = "/templates";
+
+  String templateById(String id) => "/templates/$id";
+
+  String templateAsset(String id) => "/templates/assets/$id";
+
+  // Saved (user-filled) templates — tier-prefixed, authenticated.
+  String _savedPrefix(bool isVip) => isVip ? "/vip-users" : "/normal-users";
+
+  /// Persist the user's chosen template on the server (`{template_id}`).
+  String templateSelect(bool isVip) => "${_savedPrefix(isVip)}/template/select";
+
+  String savedTemplates(bool isVip) => "${_savedPrefix(isVip)}/templates/saved";
+
+  String savedTemplateById(bool isVip, String id) =>
+      "${_savedPrefix(isVip)}/templates/saved/$id";
+
+  String savedTemplateDefault(bool isVip) =>
+      "${_savedPrefix(isVip)}/templates/saved/default";
+
+  String savedTemplateMakeDefault(bool isVip, String id) =>
+      "${_savedPrefix(isVip)}/templates/saved/$id/default";
 }
 
 final class _JsonPaths {
@@ -80,6 +182,8 @@ final class _IconPaths {
 
   final String appLogoLight = "assets/images/app_logo_light.png";
   final String appLogoDark = "assets/images/app_logo_dark.png";
+  final String vipRegisterBackground =
+      "assets/images/vip_register_background.svg";
   final String settings = "assets/icons/settings.png";
   final String profile = "assets/icons/profile.png";
   final String visible = "assets/icons/visible.svg";
@@ -89,6 +193,7 @@ final class _IconPaths {
   final String reels = "assets/icons/reels.svg";
   final String ads = "assets/icons/ads.svg";
   final String vipRegister = "assets/icons/vip_register.svg";
+  final String crown = "assets/icons/crown.svg";
   final String menu = "assets/icons/menu.svg";
   final String extra = "assets/icons/extra.svg";
   final String like = "assets/icons/like.svg";

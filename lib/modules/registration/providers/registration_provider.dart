@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:holynikkah/modules/registration/models/category_model.dart';
+import 'package:holynikkah/modules/category/models/category_model.dart';
 import 'package:holynikkah/modules/registration/models/registration_model.dart';
 import 'package:holynikkah/modules/registration/services/registration_service.dart';
 

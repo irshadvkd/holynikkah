@@ -15,6 +15,7 @@ import 'package:holynikkah/modules/login/providers/auth_provider.dart';
 import 'package:holynikkah/modules/registration/models/vip_otp_model.dart';
 import 'package:holynikkah/modules/registration/services/normal_otp_service.dart';
 import 'package:holynikkah/modules/registration/services/vip_otp_service.dart';
+import 'package:holynikkah/modules/template/providers/template_provider.dart';
 import 'package:provider/provider.dart';
 
 class VerificationScreen extends StatefulWidget {
@@ -138,10 +139,18 @@ class _VerificationScreenState extends State<VerificationScreen> {
         await context.read<CategoryProvider>().applyVipCategoryFromUser(
           data.user,
         );
+        if (!mounted) return;
+        await context.read<TemplateProvider>().applyVipTemplateFromUser(
+          data.user,
+        );
       } else {
         await auth.setNormalLoggedIn(token: data.token, user: data.user);
         if (!mounted) return;
         await context.read<CategoryProvider>().applyNormalCategoryFromUser(
+          data.user,
+        );
+        if (!mounted) return;
+        await context.read<TemplateProvider>().applyNormalTemplateFromUser(
           data.user,
         );
       }

@@ -1,0 +1,109 @@
+---
+description: Holy Nikkah Flutter app — architecture, conventions, and AI working rules. Always apply.
+alwaysApply: true
+---
+
+# Holy Nikkah — Project Rules
+
+> **PRIORITY:** These rules have the highest priority for this repository and must be followed in every response unless the user explicitly overrides them.
+
+## 1. Project Overview
+- Flutter app (Dart SDK `^3.8.1`), package name `holynikkah`. Matrimony/community app with VIP + Normal user tiers.
+- State management: **Provider (`ChangeNotifier`)**. No Bloc/Riverpod/GetX.
+- Networking: **Dio** via a single `ApiClient` wrapper returning `ApiResponse<T>`.
+- Auth/backend: Firebase (`firebase_core`, `firebase_auth`) for app-level auth bootstrap + a custom REST backend.
+- Architecture: **feature-first modules** under `lib/modules/<feature>/` + shared `lib/core/`.
+- Navigation: **manual named routes** via `MaterialApp.routes` + `Routes` constants. NOT auto_route.
+- `PROJECT_STRUCTURE.md` is OUTDATED (mentions auto_route/router). Trust the code, not that doc.
+
+## 2. Context Reduction Rules (CRITICAL — follow strictly)
+- NEVER scan the whole repo. Read only files directly relevant to the task.
+- Use the module map below to jump straight to the right file instead of searching.
+- For a feature change, read only that feature's `lib/modules/<feature>/` files + any shared core file it imports.
+- Ask the user for the specific file/log/error instead of broad exploration when unsure.
+- Prefer minimal diffs. Do not rewrite files or reformat unrelated code.
+- Reuse existing widgets/services/utils/models before creating anything new.
+- Do not read generated/build dirs: `build/`, `.dart_tool/`, `ios/`, `android/`, `assets/`.
+
+## 3. Directory Map (use to locate code fast)
+```
+lib/
+  main.dart                 # entry: Firebase init, FirebaseAuthService.ensureSignedIn, ApiClient.init
+  application.dart          # MaterialApp, ScreenUtilInit, named routes table
+  multi_provider.dart       # MultiProviderSetup — register all global providers here
+  core/
+    api/                    # ApiClient, ApiResponse, ApiException, interceptors/ (auth, logging, curl)
+    provider/               # ThemeProvider
+    services/               # session storage, firebase_auth_service, navigation_*, theme/
+    theme/                  # app_colors.dart (static consts), context_extension.dart
+    utils/                  # constants.dart (AppConstants), routes.dart (Routes), app_logger.dart, validation_utils.dart
+    widgets/                # common_*/custom_* shared widgets, widgets.dart (barrel export)
+  models/                   # cross-feature models (prayer_model, video_model)
+  modules/<feature>/        # ads, category, extra, home, login, myprofile, partner, reels, registration, settings, splash, template
+    models/ providers/ (or controller/) screens/ services/ widgets/
+```
+
+## 4. Architecture Rules
+- Each feature lives in `lib/modules/<feature>/` with subfolders: `models/`, `providers/` (some use `controller/`), `screens/`, `services/`, `widgets/`. Keep this layering; do not flatten.
+- **Provider** = UI state. `extends ChangeNotifier`, private `_field` + public getter, mutate then `notifyListeners()`. Register new global providers in `multi_provider.dart`.
+- **Service** = network/business logic. Singleton pattern: `ClassName._();` + `static final ClassName instance = ClassName._();`. Services call `ApiClient.instance`, return parsed results, and log via `AppLogger`.
+- **Model** = plain Dart class + `factory X.fromJson(Map<String,dynamic> json)`. Defensive parsing: `(json['x'] ?? default).toString()`, `int.tryParse`, `DateTime.tryParse`, null-tolerant. NO `json_serializable`/codegen (build_runner present but unused for models — do not introduce `.g.dart`).
+- Providers depend on Services; Services depend on `ApiClient`. Do not call Dio directly from widgets/providers.
+
+## 5. Networking Rules
+- All HTTP goes through `ApiClient.instance` (`get/post/put/patch/delete/upload`), each takes `parser: (json) => ...` and returns `ApiResponse<T>`.
+- `ApiResponse<T>`: `.success`, `.data`, `.error` (`ApiException`), `.message`, `.statusCode`, `.requireData`.
+- Errors are typed via `ApiException` + `ApiExceptionType`. Map new failures into these; do not throw raw strings.
+- Endpoint paths live ONLY in `AppConstants.urls` (`lib/core/utils/constants.dart`). Add new endpoints there; never hardcode URL strings in services.
+- Auth token flow: `ApiClient.instance.setAuthToken(token)`; `AuthInterceptor` injects bearer. VIP vs Normal tokens are separate (see `AuthProvider`).
+- Some legacy/feature services use their own envelope (e.g. `VipOtpResponse` with `status/message/data`). Match the envelope already used by that feature; prefer `ApiResponse<T>` for new code.
+- Template feature is ETag-cached, offline-fallback, read-only (`TemplateService` + `TemplateCache`). Never call `/admin/*` from the app.
+
+## 6. Code Generation Rules
+- Match existing style exactly: 2-space indent, single quotes, trailing commas, `const` where possible.
+- Naming: files `snake_case.dart`; classes `PascalCase`; providers `XProvider`, services `XService`, screens `XScreen`, models `XModel`/domain noun.
+- Reuse shared widgets from `core/widgets` (import barrel `widgets.dart`): `CommonButton`, `CommonTextField`, `CommonOtpField`, `CommonDropdown`, `CommonBadge`, `CommonBottomNav`, `CommonSnackBar`, `CustomNetworkImage`, `LogoWidget`. Do not recreate these.
+- Reuse `ValidationUtils` + `InputFormatters` for all form validation/input filtering.
+- Use `flutter_screenutil` extensions (`.sp .w .h .r`) for sizing — designSize is `375x812`. Don't hardcode raw pixels for new UI.
+- Colors from `AppColors` (`lib/core/theme/app_colors.dart`). Fonts via `GoogleFonts.inter*`. Don't introduce new color literals when a token exists.
+- Images: `cached_network_image` / `CustomNetworkImage` for network, `flutter_svg` for SVG icons (paths in `AppConstants.icons`).
+- Logging: use `AppLogger.info/warning/error/success/debug` with a `tag:` (usually the class name). Don't use `print`.
+- Generate complete, production-ready code. No TODOs, no placeholder stubs, no narrating comments.
+
+## 7. Debugging Rules
+- Read the exact error/stack trace first; identify root cause before editing.
+- Request only the specific file(s), log lines, or API response involved. Don't open unrelated modules.
+- Provide the minimal fix and list affected files. No speculative refactors.
+- Check the relevant interceptor/`ApiException` mapping for network bugs; check `notifyListeners()` placement for UI-not-updating bugs.
+
+## 8. Refactor Safety Rules
+Do NOT, without explicit approval:
+- Rename or move files/folders, or change the module layout.
+- Change public method signatures, provider getters, route names (`Routes`), or `AppConstants` keys used elsewhere.
+- Introduce new state-management, DI, routing, or serialization libraries.
+- Run `build_runner` codegen or add `.g.dart` files.
+- Mass-reformat or restyle files. Keep diffs scoped to the request.
+
+## 9. Performance Rules
+- Use `const` constructors aggressively. Scope `Consumer`/`context.watch` narrowly; prefer `context.read` for one-off actions to avoid rebuilds.
+- Use `ListView.builder` for lists; lazy-load. Cache network images. Reuse the template ETag/offline-cache pattern for cacheable reads.
+- Dispose `TextEditingController`s, `CancelToken`s, and players (`pod_player`/`video_player`) in `dispose()`.
+- Avoid heavy work in `build()`; do async init in `initState`/provider methods.
+
+## 10. Security Rules
+- Validate all user input via `ValidationUtils` before submit.
+- Store tokens/secrets ONLY in `flutter_secure_storage` (see `AuthProvider`). Never log raw tokens — use `AppLogger.secure()`.
+- Never commit secrets, API keys, or real base URLs. `AppConstants.urls.base` is a dev IP placeholder.
+- KNOWN DEV-ONLY ANTI-PATTERNS — do not propagate to release: `MyHttpOverrides` in `main.dart` accepts all TLS certs (`badCertificateCallback => true`); base URL is plain `http`. Flag/guard these for production rather than copying the pattern.
+- Sanitize/limit uploads via `image_picker`/`image_cropper`; send through `ApiClient.upload` with `FormData`.
+
+## 11. Known Inconsistencies (be careful, don't "fix" silently)
+- Two color sources exist: `core/theme/app_colors.dart` (static consts, used by `ThemeProvider`) and `core/services/theme/` (JSON-driven `ColorService`/`ThemeService`). Use `core/theme/app_colors.dart` unless told otherwise.
+- Some features use `controller/` instead of `providers/` (e.g. `category`). Follow the existing folder of that feature.
+- `PROJECT_STRUCTURE.md` references auto_route — ignore; routing is manual named routes.
+
+## 12. Response Rules (for the AI)
+- Be concise, technical, actionable, low-token. Minimal prose unless the user asks for explanation.
+- State which files you changed and why in 1–2 lines. Don't paste large unchanged code blocks.
+- Run `flutter analyze` mentally / check lints after edits; fix lints you introduce.
+- Ask before scope expansion or destructive actions; otherwise pick sensible defaults and proceed.

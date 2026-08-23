@@ -1,27 +1,47 @@
-import 'package:holynikkah/core/utils/constants.dart';
+import 'package:holynikkah/core/utils/utils.dart';
 
 class PrayerModel {
   const PrayerModel({
     this.id,
     required this.imageUrl,
+    this.title,
+    this.status,
     this.isWatched = false,
+    this.mediaType = 'image',
+    this.mediaPath,
+    this.createdAt,
+    this.updatedAt,
   });
 
   final int? id;
   final String imageUrl;
+  final String? title;
+  final String? status;
   final bool isWatched;
+  final String mediaType;
+  final String? mediaPath;
+  final String? createdAt;
+  final String? updatedAt;
 
   factory PrayerModel.fromJson(Map<String, dynamic> json) {
     return PrayerModel(
       id: json['id'] is int ? json['id'] as int : int.tryParse('${json['id']}'),
-      imageUrl: _normalizeUrl(_parseImageUrl(json)),
+      imageUrl: mediaUrl(_parseImageUrl(json)),
+      title: json['title']?.toString(),
+      status: json['status']?.toString(),
       isWatched: _bool(json['is_watched'] ?? json['watched']),
+      mediaType: json['media_type']?.toString() ?? 'image',
+      mediaPath: json['media_path']?.toString(),
+      createdAt: json['created_at']?.toString(),
+      updatedAt: json['updated_at']?.toString(),
     );
   }
 
   static String _parseImageUrl(Map<String, dynamic> json) {
     return _string(
-      json['image'] ??
+      json['media_url'] ??
+          json['media_path'] ??
+          json['image'] ??
           json['image_url'] ??
           json['url'] ??
           json['thumb'] ??
@@ -40,19 +60,6 @@ class PrayerModel {
       return value == '1' || value.toLowerCase() == 'true';
     }
     return false;
-  }
-
-  static String _normalizeUrl(String url) {
-    if (url.isEmpty) return url;
-
-    final uri = Uri.tryParse(url);
-    if (uri == null) return url;
-
-    if (uri.host == '127.0.0.1' || uri.host == 'localhost') {
-      final base = Uri.parse(AppConstants.urls.base);
-      return uri.replace(host: base.host, port: base.port).toString();
-    }
-    return url;
   }
 }
 

@@ -1,7 +1,6 @@
 // Registration Module Exports
 export 'models/location_model.dart';
 export 'models/registration_model.dart';
-export 'models/category_model.dart';
 export 'providers/registration_provider.dart';
 export 'models/phone_visibility.dart';
 export 'models/vip_user_fields.dart';

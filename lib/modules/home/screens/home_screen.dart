@@ -7,6 +7,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:holynikkah/modules/category/controller/category_provider.dart';
 import 'package:holynikkah/modules/category/screens/normal_category_screen.dart';
 import 'package:holynikkah/modules/myprofile/screens/my_profile_screen.dart';
+import 'package:holynikkah/modules/template/providers/template_provider.dart';
+import 'package:holynikkah/modules/template/screens/my_template_screen.dart';
 import 'package:provider/provider.dart';
 
 import 'package:holynikkah/core/services/home_session_storage.dart';
@@ -56,6 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildVipScreen({
     required bool isLoggedIn,
     required bool isCategorySelected,
+    required bool isTemplateSelected,
   }) {
     if (!isLoggedIn) {
       return const VipCategoryScreen(isSelectionRequired: false);
@@ -70,20 +73,18 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
 
-    return PartnerFullScreenView(
-      imageUrls: [
-        'assets/sample/partner1.png',
-        'assets/sample/partner2.png',
-        'assets/sample/partner3.png',
-        'assets/sample/partner4.png',
-      ],
-    );
+    if (!isTemplateSelected) {
+      return const MyTemplateScreen(isGate: true, gateIsVip: true);
+    }
+
+    return const PartnerFullScreenView(isVip: true);
   }
 
   /// 🔥 NORMAL LOGIC
   Widget _buildNormalScreen({
     required bool isLoggedIn,
     required bool isCategorySelected,
+    required bool isTemplateSelected,
   }) {
     if (!isLoggedIn) {
       return const NormalCategoryScreen(isSelectionRequired: false);
@@ -98,14 +99,11 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
 
-    return PartnerFullScreenView(
-      imageUrls: [
-        'assets/sample/partner1.png',
-        'assets/sample/partner2.png',
-        'assets/sample/partner3.png',
-        'assets/sample/partner4.png',
-      ],
-    );
+    if (!isTemplateSelected) {
+      return const MyTemplateScreen(isGate: true, gateIsVip: false);
+    }
+
+    return const PartnerFullScreenView(isVip: false);
   }
 
   @override
@@ -113,20 +111,25 @@ class _HomeScreenState extends State<HomeScreen> {
     final isVipLoggedIn = context.watch<AuthProvider>().isVipLoggedIn;
     final isNormalLoggedIn = context.watch<AuthProvider>().isNormalLoggedIn;
     final categoryProvider = context.watch<CategoryProvider>();
+    final templateProvider = context.watch<TemplateProvider>();
 
     /// 🔥 Loading state
-    if (!categoryProvider.isLoaded) {
+    if (!categoryProvider.isLoaded || !templateProvider.selectionLoaded) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
+
+
 
     final screens = <Widget>[
       _buildVipScreen(
         isLoggedIn: isVipLoggedIn,
         isCategorySelected: categoryProvider.isVipSelected,
+        isTemplateSelected: templateProvider.isVipTemplateSelected,
       ),
       _buildNormalScreen(
         isLoggedIn: isNormalLoggedIn,
         isCategorySelected: categoryProvider.isNormalSelected,
+        isTemplateSelected: templateProvider.isNormalTemplateSelected,
       ),
       const ReelsScreen(),
       const AdsScreen(),
@@ -169,6 +172,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
 
       onTap: (index) async {
+
+
         setState(() => _selectedIndex = index);
         await HomeSessionStorage().writeSelectedIndex(index);
       },

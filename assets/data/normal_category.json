@@ -4,57 +4,89 @@
       "catId": "1",
       "name": "Classic Family",
       "networth": "",
-      "bgColor": "#A98B76",
-      "textColor": "#F3E4C9"
+      "grad_color1": "#A68A72",
+      "grad_color2": "#7A6350",
+      "text_color": "#FFFFFF",
+      "icon": "home",
+      "sort_order": 1,
+      "status": "active"
     },
     {
       "catId": "2",
       "name": "Traditional Family",
       "networth": "",
-      "bgColor": "#91C6BC",
-      "textColor": "#122C6D"
+      "grad_color1": "#6F8F5F",
+      "grad_color2": "#3F5F34",
+      "text_color": "#FFFFFF",
+      "icon": "star",
+      "sort_order": 2,
+      "status": "active"
     },
     {
       "catId": "3",
       "name": "Professionals Family",
       "networth": "",
-      "bgColor": "#237227",
-      "textColor": "#DBB321"
+      "grad_color1": "#34521F",
+      "grad_color2": "#1C3010",
+      "text_color": "#FFFFFF",
+      "icon": "business",
+      "sort_order": 3,
+      "status": "active"
     },
     {
       "catId": "4",
       "name": "Religion Scholars Hafiz",
       "networth": "",
-      "bgColor": "#819067",
-      "textColor": "#FFF8D4"
+      "grad_color1": "#7E7A52",
+      "grad_color2": "#57543A",
+      "text_color": "#FFFFFF",
+      "icon": "description",
+      "sort_order": 4,
+      "status": "active"
     },
     {
       "catId": "5",
       "name": "Handicapped",
       "networth": "",
-      "bgColor": "#09637E",
-      "textColor": "#EDEDCE"
+      "grad_color1": "#4A7A5A",
+      "grad_color2": "#2C4A37",
+      "text_color": "#FFFFFF",
+      "icon": "person",
+      "sort_order": 5,
+      "status": "active"
     },
     {
       "catId": "6",
       "name": "Ahlubaith",
       "networth": "",
-      "bgColor": "#EDEDCE",
-      "textColor": "#0E720E"
+      "grad_color1": "#7F9C34",
+      "grad_color2": "#5A6F22",
+      "text_color": "#FFFFFF",
+      "icon": "star",
+      "sort_order": 6,
+      "status": "active"
     },
     {
       "catId": "7",
       "name": "Yatheem",
       "networth": "",
-      "bgColor": "#BFC9D1",
-      "textColor": "#25343F"
+      "grad_color1": "#B9BFC4",
+      "grad_color2": "#8B9298",
+      "text_color": "#FFFFFF",
+      "icon": "home",
+      "sort_order": 7,
+      "status": "active"
     },
     {
       "catId": "8",
       "name": "Divorced",
       "networth": "",
-      "bgColor": "#B5828C",
-      "textColor": "#533951"
+      "grad_color1": "#B5405A",
+      "grad_color2": "#7A2C40",
+      "text_color": "#FFFFFF",
+      "icon": "description",
+      "sort_order": 8,
+      "status": "active"
     }
   ]
 }

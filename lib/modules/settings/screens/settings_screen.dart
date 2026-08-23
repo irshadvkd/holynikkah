@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:holynikkah/core/widgets/legal_screens.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -56,11 +57,11 @@ class SettingsScreen extends StatelessWidget {
   }) {
     return Container(
       margin: EdgeInsets.only(bottom: 12.h),
-      decoration: BoxDecoration(
+      child: Material(
         color: Colors.grey[900],
         borderRadius: BorderRadius.circular(12.r),
-      ),
-      child: ListTile(
+        clipBehavior: Clip.antiAlias,
+        child: ListTile(
         leading: Icon(
           icon,
           color: isDestructive ? Colors.red : Colors.white,
@@ -79,7 +80,8 @@ class SettingsScreen extends StatelessWidget {
           color: Colors.grey[400],
           size: 16.sp,
         ),
-        onTap: onTap,
+          onTap: onTap,
+        ),
       ),
     );
   }
@@ -158,52 +160,4 @@ class ProfileScreen extends StatelessWidget {
   }
 }
 
-class TermsScreen extends StatelessWidget {
-  const TermsScreen({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        title: Text('Terms & Conditions', style: GoogleFonts.inter(color: Colors.white)),
-        iconTheme: IconThemeData(color: Colors.white),
-      ),
-      body: Padding(
-        padding: EdgeInsets.all(16.w),
-        child: SingleChildScrollView(
-          child: Text(
-            'Terms and Conditions content goes here...',
-            style: GoogleFonts.inter(color: Colors.white, fontSize: 14.sp),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class PrivacyScreen extends StatelessWidget {
-  const PrivacyScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        title: Text('Privacy Policy', style: GoogleFonts.inter(color: Colors.white)),
-        iconTheme: IconThemeData(color: Colors.white),
-      ),
-      body: Padding(
-        padding: EdgeInsets.all(16.w),
-        child: SingleChildScrollView(
-          child: Text(
-            'Privacy Policy content goes here...',
-            style: GoogleFonts.inter(color: Colors.white, fontSize: 14.sp),
-          ),
-        ),
-      ),
-    );
-  }
-}

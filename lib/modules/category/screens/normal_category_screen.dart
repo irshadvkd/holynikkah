@@ -1,19 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:holynikkah/modules/category/widgets/animated_pattern_background.dart';
+import 'package:holynikkah/modules/category/widgets/normal_category_card.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:holynikkah/core/utils/routes.dart';
-import 'package:holynikkah/core/widgets/common_button.dart';
 import 'package:holynikkah/core/widgets/common_snackbar.dart';
-import 'package:holynikkah/core/widgets/gradient_border.dart';
 import 'package:holynikkah/modules/category/controller/category_provider.dart';
-import 'package:holynikkah/modules/category/widgets/normal_category_card.dart';
 import 'package:holynikkah/modules/login/screens/login_screen.dart';
-import 'package:holynikkah/modules/registration/models/category_model.dart';
 import 'package:holynikkah/modules/login/providers/auth_provider.dart';
 import 'package:holynikkah/modules/registration/providers/registration_provider.dart';
 import 'package:holynikkah/modules/registration/services/normal_category_service.dart';
-import 'package:holynikkah/modules/registration/widgets/category_card.dart';
 import 'package:provider/provider.dart';
+
+class NormalCategoryColors {
+  static const Color background = Color(0xFF241A10);
+  static const Color inkDeep = Color(0xFF120E08);
+  static const Color ink = Color(0xFF1A140C);
+  static const Color gold1 = Color(0xFFF3D68A);
+  static const Color gold2 = Color(0xFFC9973F);
+  static const Color gold3 = Color(0xFF8A6A2A);
+  static const Color cream = Color(0xFFFFFAF0);
+  static const Color taupe = Color(0xFFA68A72);
+  static const Color sage = Color(0xFF6F8F5F);
+  static const Color glassLine = Color(0x38FFFAF0);
+  static const Color cardBg = Color(0x3D120E08);
+  static const Color cardSelectedBg = Color(0xFF382917);
+}
 
 class NormalCategoryScreen extends StatefulWidget {
   final bool isSelectionRequired;
@@ -34,6 +45,7 @@ class _NormalCategoryScreenState extends State<NormalCategoryScreen> {
   @override
   void initState() {
     super.initState();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<RegistrationProvider>().clearRegistrationData();
       context.read<RegistrationProvider>().setVipStatus(false);
@@ -44,231 +56,272 @@ class _NormalCategoryScreenState extends State<NormalCategoryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        toolbarHeight: 56,
-        titleSpacing: 32,
-        title: Text(
-          "REGISTER",
-          style: GoogleFonts.balooDa2(
-            color: Colors.black,
-            fontSize: 24.sp,
-            fontWeight: FontWeight.w700,
+      backgroundColor: NormalCategoryColors.cream,
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          AnimatedPatternBackground(
+            backgroundImage: 'assets/images/moroccan_pattern.jpg',
+            veilColor: NormalCategoryColors.ink.withValues(alpha: 0.5),
           ),
-        ),
-        centerTitle: false,
-      ),
-      body: Consumer<RegistrationProvider>(
-        builder: (context, provider, child) {
-          return Column(
-            children: [
-              // Align(
-              //   alignment: Alignment.centerRight,
-              //   child: Container(
-              //     width: 85.w,
-              //     height: 35.w,
-              //     margin: EdgeInsets.only(bottom: 16.h, top: 8.h, right: 32.w),
-              //     alignment: Alignment.center,
-              //     decoration: BoxDecoration(
-              //       color: Color(0xFFFAC60C),
-              //       borderRadius: BorderRadius.circular(10),
-              //       border: Border.all(color: Colors.black),
-              //     ),
-              //     child: Text(
-              //       "FREE",
-              //       style: GoogleFonts.inter(
-              //         fontSize: 20.sp,
-              //         fontWeight: FontWeight.w600,
-              //         color: Colors.black,
-              //       ),
-              //     ),
-              //   ),
-              // ),
-              if (provider.categoriesLoading)
-                Expanded(
-                  child: const Center(child: CircularProgressIndicator()),
-                )
-              else
-                Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 0),
-                    child: GridView.builder(
-                      itemCount: provider.categories.length,
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        childAspectRatio: 1.5.h,
-                        crossAxisSpacing: 16.sp,
-                        mainAxisSpacing: 16.sp,
+          SafeArea(
+            child: Consumer<RegistrationProvider>(
+              builder: (context, provider, child) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _buildHeader(),
+                    if (provider.categoriesLoading)
+                      const Expanded(
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            color: NormalCategoryColors.gold2,
+                          ),
+                        ),
+                      )
+                    else
+                      Expanded(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 20.w),
+                          child: GridView.builder(
+                            padding: EdgeInsets.only(top: 8.h, bottom: 16.h),
+                            itemCount: provider.categories.length,
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2,
+                                  childAspectRatio: 0.98,
+                                  crossAxisSpacing: 14.w,
+                                  mainAxisSpacing: 14.h,
+                                ),
+                            itemBuilder: (context, index) {
+                              final category = provider.categories[index];
+                              final isSelected = widget.isSelectionRequired &&
+                                  provider.selectedCategoryId == category.catId;
+                              return NormalCategoryCard(
+                                category: category,
+                                isSelected: isSelected,
+                                index: index,
+                                onTap: () =>
+                                    _selectCategory(category.catId ?? ""),
+                                isSelectionRequired: widget.isSelectionRequired,
+                              );
+                            },
+                          ),
+                        ),
                       ),
-                      itemBuilder: (context, index) {
-                        final category = provider.categories[index];
-                        // return _buildCategoryCard(category, provider);
-                        return CategoryCard(
-                          isVip: false,
-                          category: category,
-                          isSelectionRequired: widget.isSelectionRequired,
-                          isSelected:
-                              provider.selectedCategoryId == category.catId,
-                          onTap: () => _selectCategory(category.catId ?? ""),
-                        );
-                      },
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 20.h),
+                      child: _buildActionButton(),
                     ),
-                  ),
-                ),
-              SizedBox(height: 16.h),
-
-              // SearchCategoryCard(
-              //   category: Categories(
-              //     catId: "search_category",
-              //     icon: "",
-              //     name: "SEARCH BY LOCATION",
-              //     networth: "",
-              //   ),
-              //   padding: EdgeInsets.symmetric(
-              //     vertical: 50.h,
-              //     horizontal: 32.h,
-              //   ),
-              //   textStyle: GoogleFonts.inter(
-              //     color: Color(0xFFFFFFFF),
-              //     fontSize: 13.sp,
-              //     fontWeight: FontWeight.w500,
-              //   ),
-              //   isSelected:
-              //       provider.selectedCategoryId == "search_category",
-              //   onTap: () => _selectCategory("search_category"),
-              // ),
-              // SizedBox(height: 16.h),
-              // Padding(
-              //   padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
-              //   child: Row(
-              //     children: [
-              //       Expanded(
-              //         child: GradientBorderContainer(
-              //           borderRadius: 25.r,
-              //           onTap: () {
-              //             Navigator.of(context).pushNamed(Routes.login);
-              //           },
-              //           child: Text(
-              //             'Skip',
-              //             style: GoogleFonts.inter(
-              //               color: Color(0xFF000000),
-              //               fontWeight: FontWeight.w500,
-              //               fontSize: 20.sp,
-              //             ),
-              //           ),
-              //         ),
-              //       ),
-              //       SizedBox(width: 10.w),
-              //       Expanded(
-              //         child: GradientBorderContainer(
-              //           borderRadius: 25.r,
-              //           onTap: () async {
-              //             if (provider.selectedCategoryId != null) {
-              //               if (widget.isSelectionRequired) {
-              //                 await context
-              //                     .read<CategoryProvider>()
-              //                     .setNormalSelected(true);
-              //                 widget.onNavigate?.call(1);
-              //               } else {
-              //                 Navigator.of(context).pushNamed(Routes.login);
-              //               }
-              //             }
-              //           },
-              //           child: Text(
-              //             'Continue',
-              //             style: GoogleFonts.inter(
-              //               color: Color(0xFF000000),
-              //               fontWeight: FontWeight.w500,
-              //               fontSize: 20.sp,
-              //             ),
-              //           ),
-              //         ),
-              //       ),
-              //     ],
-              //   ),
-              // ),
-              if (widget.isSelectionRequired)
-                CommonButton(
-                  title: "Continue",
-                  isLoading: _isSubmitting,
-                  onTap: _isSubmitting ? () {} : _continueWithCategory,
-                )
-              else
-                CommonButton(
-                  title: "Next",
-                  onTap: () async {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => LoginScreen(type: "normal"),
-                      ),
-                    );
-                  },
-                ),
-              SizedBox(height: 16.h),
-            ],
-          );
-        },
+                  ],
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildCategoryCard(
-    Categories category,
-    RegistrationProvider provider,
-  ) {
-    final isSelected = provider.selectedCategoryIds.contains(category.catId);
+  Widget _buildHeader() {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(24.w, 20.h, 24.w, 16.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                'CHOOSE CATEGORY',
+                style: GoogleFonts.cormorantGaramond(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 4.0,
+                  color: Colors.white,
+                  // color: NormalCategoryColors.gold1,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black.withValues(alpha: 0.75),
+                      offset: const Offset(0, 2),
+                      blurRadius: 12,
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(width: 14.w),
+              Expanded(
+                child: Container(
+                  height: 1,
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [NormalCategoryColors.gold2, Colors.transparent],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 10.h),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Stack(
+                children: [
+                  // Drop shadow layer for the title text
+                  Text(
+                    'Register',
+                    style: GoogleFonts.italiana(
+                      fontSize: 44.sp,
+                      fontWeight: FontWeight.w400,
+                      height: 0.95,
+                      color: Colors.transparent,
+                      shadows: [
+                        Shadow(
+                          color: Colors.black.withValues(alpha: 0.75),
+                          offset: const Offset(0, 4),
+                          blurRadius: 18,
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Gradient-filled title text
+                  ShaderMask(
+                    shaderCallback: (bounds) => const LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Color(0xFFFFFFFF),
+                        NormalCategoryColors.cream,
+                        Color(0xFFF0DFB8),
+                      ],
+                      stops: [0.0, 0.55, 1.0],
+                    ).createShader(bounds),
+                    child: Text(
+                      'Register',
+                      style: GoogleFonts.italiana(
+                        fontSize: 44.sp,
+                        fontWeight: FontWeight.w400,
+                        height: 0.95,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 22.w, vertical: 10.h),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(999.r),
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      NormalCategoryColors.gold1,
+                      NormalCategoryColors.gold2,
+                      NormalCategoryColors.gold3,
+                    ],
+                    stops: [0.0, 0.55, 1.0],
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.45),
+                      blurRadius: 20,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
+                child: Text(
+                  'FREE',
+                  style: GoogleFonts.cormorantGaramond(
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 2.1,
+                    color: NormalCategoryColors.inkDeep,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+
+  Widget _buildActionButton() {
+    final title = widget.isSelectionRequired ? "Continue" : "Next";
 
     return GestureDetector(
-      onTap: () => _selectCategory(category.catId ?? ""),
+      onTap: _isSubmitting
+          ? null
+          : (widget.isSelectionRequired ? _continueWithCategory : _goToLogin),
       child: Container(
-        padding: EdgeInsets.all(12.w),
+        width: double.infinity,
+        padding: EdgeInsets.symmetric(vertical: 16.h),
         decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(30.r),
           gradient: const LinearGradient(
             begin: Alignment.centerLeft,
             end: Alignment.centerRight,
             colors: [
-              Color.fromRGBO(31, 36, 33, 0.94),
-              Color.fromRGBO(199, 199, 199, 0.6768),
+              NormalCategoryColors.gold1,
+              NormalCategoryColors.gold2,
+              Color(0xFFD98F3F),
             ],
+            stops: [0.0, 0.55, 1.0],
           ),
-          borderRadius: BorderRadius.circular(10.r),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFFF5F5F5),
-              offset: const Offset(0, 4),
-              blurRadius: 4,
+              color: NormalCategoryColors.gold2.withValues(alpha: 0.4),
+              offset: const Offset(0, 8),
+              blurRadius: 18,
+              spreadRadius: -4,
             ),
           ],
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Icon(
-              isSelected
-                  ? Icons.radio_button_checked
-                  : Icons.radio_button_unchecked,
-              color: isSelected ? Colors.green : Colors.white,
-              size: 20.sp,
-            ),
-            SizedBox(width: 8.h),
-            Expanded(
-              child: Text(
-                category.name ?? "",
-                style: GoogleFonts.inter(
-                  color: Color(0xFFFFFFFF),
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.w500,
+        child: _isSubmitting
+            ? Center(
+                child: SizedBox(
+                  height: 20.h,
+                  width: 20.w,
+                  child: const CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      NormalCategoryColors.inkDeep,
+                    ),
+                  ),
                 ),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+              )
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    title,
+                    style: GoogleFonts.cormorantGaramond(
+                      fontSize: 19.sp,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.14,
+                      color: NormalCategoryColors.inkDeep,
+                    ),
+                  ),
+                  SizedBox(width: 8.w),
+                  Icon(
+                    Icons.arrow_forward_rounded,
+                    size: 18.sp,
+                    color: NormalCategoryColors.inkDeep,
+                  ),
+                ],
               ),
-            ),
-          ],
-        ),
+      ),
+    );
+  }
+
+  void _goToLogin() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const LoginScreen(type: "normal"),
       ),
     );
   }
@@ -283,10 +336,7 @@ class _NormalCategoryScreenState extends State<NormalCategoryScreen> {
     final selectedCategoryId = provider.selectedCategoryId;
 
     if (selectedCategoryId == null) {
-      CommonSnackBar.showError(
-        context,
-        'Please select category to continue',
-      );
+      CommonSnackBar.showError(context, 'Please select category to continue');
       return;
     }
 
@@ -301,8 +351,9 @@ class _NormalCategoryScreenState extends State<NormalCategoryScreen> {
     try {
       await context.read<AuthProvider>().ensureApiTokenFor(isVip: false);
 
-      final result =
-          await NormalCategoryService.instance.selectCategory(categoryId);
+      final result = await NormalCategoryService.instance.selectCategory(
+        categoryId,
+      );
 
       if (!mounted) return;
 
@@ -319,6 +370,7 @@ class _NormalCategoryScreenState extends State<NormalCategoryScreen> {
       await context.read<AuthProvider>().updateStoredNormalCategorySelected(
         true,
       );
+      if (!mounted) return;
       await context.read<CategoryProvider>().setNormalSelected(true);
       widget.onNavigate?.call(1);
     } finally {

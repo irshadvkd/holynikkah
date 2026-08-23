@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:holynikkah/core/api/api_client.dart';
 import 'package:holynikkah/core/services/category_session_storage.dart';
+import 'package:holynikkah/core/services/template_session_storage.dart';
 import 'package:holynikkah/core/utils/app_logger.dart';
 import 'package:holynikkah/modules/login/domain/auth_service.dart';
 import 'package:holynikkah/modules/registration/models/vip_user_fields.dart';
@@ -70,6 +71,8 @@ class AuthProvider extends ChangeNotifier {
 
     await _syncVipCategoryFromStoredUser();
     await _syncNormalCategoryFromStoredUser();
+    await _syncVipTemplateFromStoredUser();
+    await _syncNormalTemplateFromStoredUser();
 
     AppLogger.info(
       "VIP: $_isVipLoggedIn | NORMAL: $_isNormalLoggedIn",
@@ -163,6 +166,9 @@ class AuthProvider extends ChangeNotifier {
       await CategorySessionStorage().setVipCategorySelected(
         VipUserFields.isCategorySelected(user),
       );
+      await TemplateSessionStorage().setVipTemplateSelected(
+        VipUserFields.isTemplateSelected(user),
+      );
     }
 
     AppLogger.success("VIP user logged in", tag: "AuthProvider");
@@ -191,6 +197,9 @@ class AuthProvider extends ChangeNotifier {
       await CategorySessionStorage().setNormalCategorySelected(
         VipUserFields.isCategorySelected(user),
       );
+      await TemplateSessionStorage().setNormalTemplateSelected(
+        VipUserFields.isTemplateSelected(user),
+      );
     }
 
     AppLogger.success("Normal user logged in", tag: "AuthProvider");
@@ -213,6 +222,7 @@ class AuthProvider extends ChangeNotifier {
     await _storage.delete(key: _vipUserKey);
     ApiClient.instance.setAuthToken(null);
     await CategorySessionStorage().setVipCategorySelected(false);
+    await TemplateSessionStorage().setVipTemplateSelected(false);
 
     notifyListeners();
   }
@@ -227,6 +237,7 @@ class AuthProvider extends ChangeNotifier {
     await _storage.delete(key: _normalAuthTokenKey);
     await _storage.delete(key: _normalUserKey);
     await CategorySessionStorage().setNormalCategorySelected(false);
+    await TemplateSessionStorage().setNormalTemplateSelected(false);
 
     notifyListeners();
   }
@@ -247,6 +258,7 @@ class AuthProvider extends ChangeNotifier {
     ApiClient.instance.setAuthToken(null);
     await CategorySessionStorage().setVipCategorySelected(false);
     await CategorySessionStorage().setNormalCategorySelected(false);
+    await TemplateSessionStorage().clearAllTemplateSelections();
 
     AppLogger.success("All users logged out", tag: "AuthProvider");
 
@@ -342,6 +354,86 @@ class AuthProvider extends ChangeNotifier {
     } catch (e) {
       AppLogger.warning(
         'Failed to update stored normal category flag: $e',
+        tag: 'AuthProvider',
+      );
+    }
+  }
+
+  Future<void> _syncVipTemplateFromStoredUser() async {
+    final userJson = await _storage.read(key: _vipUserKey);
+    if (userJson == null || userJson.isEmpty) return;
+
+    try {
+      final user = jsonDecode(userJson) as Map<String, dynamic>;
+      await TemplateSessionStorage().setVipTemplateSelected(
+        VipUserFields.isTemplateSelected(user),
+      );
+    } catch (e) {
+      AppLogger.warning(
+        'Failed to sync VIP template from stored user: $e',
+        tag: 'AuthProvider',
+      );
+    }
+  }
+
+  Future<void> _syncNormalTemplateFromStoredUser() async {
+    final userJson = await _storage.read(key: _normalUserKey);
+    if (userJson == null || userJson.isEmpty) return;
+
+    try {
+      final user = jsonDecode(userJson) as Map<String, dynamic>;
+      await TemplateSessionStorage().setNormalTemplateSelected(
+        VipUserFields.isTemplateSelected(user),
+      );
+    } catch (e) {
+      AppLogger.warning(
+        'Failed to sync normal template from stored user: $e',
+        tag: 'AuthProvider',
+      );
+    }
+  }
+
+  /// Persist template selection on the stored VIP user profile.
+  Future<void> updateStoredVipTemplateSelected(
+    bool isSelected, {
+    int? templateId,
+  }) async {
+    await TemplateSessionStorage().setVipTemplateSelected(isSelected);
+
+    final userJson = await _storage.read(key: _vipUserKey);
+    if (userJson == null || userJson.isEmpty) return;
+
+    try {
+      final user = Map<String, dynamic>.from(jsonDecode(userJson) as Map);
+      user['is_template_selected'] = isSelected;
+      if (templateId != null) user['template_id'] = templateId;
+      await _storage.write(key: _vipUserKey, value: jsonEncode(user));
+    } catch (e) {
+      AppLogger.warning(
+        'Failed to update stored VIP template flag: $e',
+        tag: 'AuthProvider',
+      );
+    }
+  }
+
+  /// Persist template selection on the stored normal user profile.
+  Future<void> updateStoredNormalTemplateSelected(
+    bool isSelected, {
+    int? templateId,
+  }) async {
+    await TemplateSessionStorage().setNormalTemplateSelected(isSelected);
+
+    final userJson = await _storage.read(key: _normalUserKey);
+    if (userJson == null || userJson.isEmpty) return;
+
+    try {
+      final user = Map<String, dynamic>.from(jsonDecode(userJson) as Map);
+      user['is_template_selected'] = isSelected;
+      if (templateId != null) user['template_id'] = templateId;
+      await _storage.write(key: _normalUserKey, value: jsonEncode(user));
+    } catch (e) {
+      AppLogger.warning(
+        'Failed to update stored normal template flag: $e',
         tag: 'AuthProvider',
       );
     }

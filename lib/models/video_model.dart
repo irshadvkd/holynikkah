@@ -1,4 +1,4 @@
-import 'package:holynikkah/core/utils/constants.dart';
+import 'package:holynikkah/core/utils/utils.dart';
 
 class VideoModel {
   final int? id;
@@ -45,12 +45,14 @@ class VideoModel {
   }
 
   static String _parseThumb(Map<String, dynamic> json) {
-    return _string(
-      json['thumb'] ??
-          json['thumbnail'] ??
-          json['thumbnail_url'] ??
-          json['image'] ??
-          json['poster'],
+    return mediaUrl(
+      _string(
+        json['thumb'] ??
+            json['thumbnail'] ??
+            json['thumbnail_url'] ??
+            json['image'] ??
+            json['poster'],
+      ),
     );
   }
 
@@ -74,18 +76,9 @@ class VideoModel {
     return [];
   }
 
-  /// Rewrites localhost URLs from the API to the configured base host.
+  /// Resolves host-less relative API paths to fully-qualified media URLs.
   static List<String> _normalizeUrls(List<String> urls) {
-    final base = Uri.parse(AppConstants.urls.base);
-    return urls.map((url) {
-      final uri = Uri.tryParse(url);
-      if (uri == null) return url;
-
-      if (uri.host == '127.0.0.1' || uri.host == 'localhost') {
-        return uri.replace(host: base.host, port: base.port).toString();
-      }
-      return url;
-    }).toList();
+    return urls.map(mediaUrl).where((url) => url.isNotEmpty).toList();
   }
 }
 

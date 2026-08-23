@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:holynikkah/core/api/api_client.dart';
 import 'package:holynikkah/core/utils/app_logger.dart';
 import 'package:holynikkah/core/utils/constants.dart';
-import 'package:holynikkah/modules/registration/models/category_model.dart';
+import 'package:holynikkah/modules/category/models/category_model.dart';
 import 'package:holynikkah/modules/registration/models/registration_model.dart';
 import 'package:holynikkah/modules/registration/services/normal_otp_service.dart';
 import 'package:holynikkah/modules/registration/services/vip_otp_service.dart';
