@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:holynikkah/core/theme/app_typography.dart';
 import 'package:holynikkah/core/theme/context_extension.dart';
 import 'package:holynikkah/core/utils/validation_utils.dart';
 import 'package:holynikkah/core/widgets/common_app_bar.dart';
@@ -169,7 +169,7 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
                 Center(
                   child: Text(
                     'Update profile photo',
-                    style: GoogleFonts.inter(
+                    style: AppTypography.marcellus(
                       color: AppColors.inputHint,
                       fontSize: 14.sp,
                     ),
@@ -204,7 +204,7 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
                           },
                           title: Text(
                             "Male",
-                            style: GoogleFonts.inter(
+                            style: AppTypography.marcellus(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w600,
                               color: AppColors.inputText,
@@ -229,7 +229,7 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
                           },
                           title: Text(
                             "Female",
-                            style: GoogleFonts.inter(
+                            style: AppTypography.marcellus(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w600,
                               color: AppColors.inputText,

@@ -57,7 +57,7 @@ class TemplateDefinition {
       id: (map['id'] ?? '').toString(),
       name: (map['name'] ?? '').toString(),
       type: (map['type'] ?? 'normal').toString(),
-      schemaVersion: (map['schemaVersion'] as num?)?.toInt() ?? 1,
+      schemaVersion: parseInt(map['schemaVersion']) ?? 1,
       status: map['status']?.toString(),
       thumbnail: mediaUrlOrNull(
         (map['previewImage'] ?? map['thumbnail'])?.toString(),

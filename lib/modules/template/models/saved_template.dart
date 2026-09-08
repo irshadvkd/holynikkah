@@ -91,7 +91,7 @@ class SavedTemplateListResult {
       final meta = Map<String, dynamic>.from(inner['meta'] as Map? ?? const {});
       return SavedTemplateListResult(
         items: items,
-        total: (meta['total'] as num?)?.toInt() ?? items.length,
+        total: parseInt(meta['total']) ?? items.length,
       );
     }
 
@@ -105,7 +105,7 @@ class SavedTemplateListResult {
 
     return SavedTemplateListResult(
       items: items,
-      total: (meta['total'] as num?)?.toInt() ?? items.length,
+      total: parseInt(meta['total']) ?? items.length,
     );
   }
 }

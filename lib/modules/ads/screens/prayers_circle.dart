@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:holynikkah/core/theme/app_colors.dart';
+import 'package:holynikkah/core/theme/app_typography.dart';
 
 class PrayersCircle extends StatelessWidget {
   const PrayersCircle({super.key});
@@ -42,10 +44,7 @@ class PrayersCircle extends StatelessWidget {
             Color(0x80231F8C), // highlight approximation
             Color(0x00231F8C),
           ],
-          stops: [
-            0.0,
-            0.45,
-          ],
+          stops: [0.0, 0.45],
         ),
       ),
 
@@ -55,28 +54,19 @@ class PrayersCircle extends StatelessWidget {
           gradient: RadialGradient(
             center: Alignment(0.32, 0.44),
             radius: 1.0,
-            colors: [
-              Color(0xFF2C7A61),
-              Color(0xFF14503F),
-              Color(0xFF1B0509),
-            ],
-            stops: [
-              0.0,
-              0.48,
-              1.0,
-            ],
+            colors: [Color(0xFF2C7A61), Color(0xFF14503F), Color(0xFF1B0509)],
+            stops: [0.0, 0.48, 1.0],
           ),
         ),
-        child: const Center(
+        child: Center(
           child: Text(
             'Prayers',
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: 'Georgia',
+            style: AppTypography.marcellus(
               fontWeight: FontWeight.w600,
               fontSize: 23,
               letterSpacing: 0.5,
-              color: Color(0xFFF6EFE2),
+              color: AppColors.textPrimary,
             ),
           ),
         ),

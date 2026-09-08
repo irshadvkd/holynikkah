@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:holynikkah/core/theme/app_typography.dart';
 import 'package:holynikkah/core/utils/constants.dart';
 import 'package:holynikkah/modules/category/models/category_model.dart';
 
@@ -168,7 +168,7 @@ class _VipCategoryCardState extends State<VipCategoryCard>
                           children: [
                             Text(
                               tierLabel,
-                              style: GoogleFonts.inter(
+                              style: AppTypography.marcellus(
                                 fontSize: 10.5.sp,
                                 fontWeight: FontWeight.w700,
                                 letterSpacing: 2,
@@ -178,7 +178,7 @@ class _VipCategoryCardState extends State<VipCategoryCard>
                             SizedBox(height: 9.h),
                             Text(
                               widget.category.name ?? '',
-                              style: GoogleFonts.playfairDisplay(
+                              style: AppTypography.marcellus(
                                 fontSize: 18.sp,
                                 fontWeight: FontWeight.w700,
                                 height: 1.15,
@@ -206,7 +206,7 @@ class _VipCategoryCardState extends State<VipCategoryCard>
                           children: [
                             Text(
                               'NET WORTH',
-                              style: GoogleFonts.inter(
+                              style: AppTypography.marcellus(
                                 fontSize: 10.sp,
                                 fontWeight: FontWeight.w600,
                                 letterSpacing: 1.6,
@@ -217,7 +217,7 @@ class _VipCategoryCardState extends State<VipCategoryCard>
                             Text(
                               netWorth,
                               textAlign: TextAlign.right,
-                              style: GoogleFonts.inter(
+                              style: AppTypography.marcellus(
                                 fontSize: 16.5.sp,
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: 0.2,

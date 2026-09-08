@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:holynikkah/core/theme/app_typography.dart';
 import 'package:holynikkah/core/widgets/custom_network_image.dart';
 import 'package:holynikkah/modules/home/screens/home_screen.dart';
 import 'package:holynikkah/modules/login/providers/auth_provider.dart';
@@ -127,8 +127,8 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
                 SizedBox(height: 30.h),
 
                 // SUPPORT group
-                _buildSupportGroup(context),
-                SizedBox(height: 30.h),
+                // _buildSupportGroup(context),
+                // SizedBox(height: 30.h),
 
                 // Logout
                 if (isLoggedIn) _buildLogoutButton(context),
@@ -173,7 +173,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
                 child: Center(
                   child: Text(
                     'VIP Profile',
-                    style: GoogleFonts.inter(
+                    style: AppTypography.marcellus(
                       fontSize: 13.5.sp,
                       fontWeight: FontWeight.w600,
                       color: isVip ? const Color(0xFF0A1220) : const Color(0xFFCBB388).withOpacity(0.8),
@@ -200,7 +200,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
                 child: Center(
                   child: Text(
                     'Normal Profile',
-                    style: GoogleFonts.inter(
+                    style: AppTypography.marcellus(
                       fontSize: 13.5.sp,
                       fontWeight: FontWeight.w600,
                       color: !isVip ? const Color(0xFFF4ECDD) : const Color(0xFFCBB388).withOpacity(0.8),
@@ -305,7 +305,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
                 children: [
                   Text(
                     'Profile Name',
-                    style: GoogleFonts.inter(
+                    style: AppTypography.marcellus(
                       fontSize: 12.sp,
                       letterSpacing: 0.12.w,
                       color: const Color(0xFFCBB388).withOpacity(0.62),
@@ -318,7 +318,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
                     isLoggedIn
                         ? (profileProvider.name.isEmpty ? 'Add your name' : profileProvider.name)
                         : 'Guest User',
-                    style: GoogleFonts.inter(
+                    style: AppTypography.marcellus(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w600,
                       color: const Color(0xFFF4ECDD),
@@ -329,7 +329,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
                   SizedBox(height: 8.h),
                   Text(
                     'Id Number',
-                    style: GoogleFonts.inter(
+                    style: AppTypography.marcellus(
                       fontSize: 12.sp,
                       letterSpacing: 0.12.w,
                       color: const Color(0xFFCBB388).withOpacity(0.62),
@@ -344,7 +344,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
                             ? 'Add your ID'
                             : profileProvider.profileId)
                         : 'Please Login',
-                    style: GoogleFonts.inter(
+                    style: AppTypography.marcellus(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w600,
                       color: const Color(0xFFF4ECDD),
@@ -395,14 +395,14 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
             }
           },
         ),
-        _buildRowItem(
-          icon: Icons.bolt,
-          title: 'Boost',
-          desc: 'Get seen more',
-          onTap: () {
-            _showComingSoonSnackBar(context, 'Boost feature is coming soon!');
-          },
-        ),
+        // _buildRowItem(
+        //   icon: Icons.bolt,
+        //   title: 'Boost',
+        //   desc: 'Get seen more',
+        //   onTap: () {
+        //     _showComingSoonSnackBar(context, 'Boost feature is coming soon!');
+        //   },
+        // ),
       ],
     );
   }
@@ -445,37 +445,37 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
     );
   }
 
-  Widget _buildSupportGroup(BuildContext context) {
-    return _buildGroupSection(
-      label: 'SUPPORT',
-      rows: [
-        _buildRowItem(
-          icon: Icons.diamond_outlined,
-          title: 'Holynikah Ceremony',
-          desc: 'Plan your ceremony details',
-          onTap: () {
-            _showComingSoonSnackBar(context, 'Ceremony planning dashboard is coming soon!');
-          },
-        ),
-        _buildRowItem(
-          icon: Icons.lightbulb_outline,
-          title: 'Suggestions',
-          desc: 'Help us improve Holynikah',
-          onTap: () {
-            _showComingSoonSnackBar(context, 'Suggestions feature is coming soon.');
-          },
-        ),
-        _buildRowItem(
-          icon: Icons.monetization_on_outlined,
-          title: 'Donate',
-          desc: 'Support the community',
-          onTap: () {
-            _showComingSoonSnackBar(context, 'Community donation portal is coming soon.');
-          },
-        ),
-      ],
-    );
-  }
+  // Widget _buildSupportGroup(BuildContext context) {
+  //   return _buildGroupSection(
+  //     label: 'SUPPORT',
+  //     rows: [
+  //       _buildRowItem(
+  //         icon: Icons.diamond_outlined,
+  //         title: 'Holynikah Ceremony',
+  //         desc: 'Plan your ceremony details',
+  //         onTap: () {
+  //           _showComingSoonSnackBar(context, 'Ceremony planning dashboard is coming soon!');
+  //         },
+  //       ),
+  //       _buildRowItem(
+  //         icon: Icons.lightbulb_outline,
+  //         title: 'Suggestions',
+  //         desc: 'Help us improve Holynikah',
+  //         onTap: () {
+  //           _showComingSoonSnackBar(context, 'Suggestions feature is coming soon.');
+  //         },
+  //       ),
+  //       _buildRowItem(
+  //         icon: Icons.monetization_on_outlined,
+  //         title: 'Donate',
+  //         desc: 'Support the community',
+  //         onTap: () {
+  //           _showComingSoonSnackBar(context, 'Community donation portal is coming soon.');
+  //         },
+  //       ),
+  //     ],
+  //   );
+  // }
 
   Widget _buildGroupSection({
     required String label,
@@ -508,7 +508,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
             SizedBox(width: 10.w),
             Text(
               label,
-              style: GoogleFonts.cormorantGaramond(
+              style: AppTypography.marcellus(
                 fontSize: 12.5.sp,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.28.w,
@@ -576,7 +576,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
                 children: [
                   Text(
                     title,
-                    style: GoogleFonts.cormorantGaramond(
+                    style: AppTypography.marcellus(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w700,
                       color: const Color(0xFFF4ECDD),
@@ -585,7 +585,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
                   SizedBox(height: 2.h),
                   Text(
                     desc,
-                    style: GoogleFonts.cormorantGaramond(
+                    style: AppTypography.marcellus(
                       fontSize: 14.sp,
                       color: const Color(0xFFCBB388).withOpacity(0.62),
                     ),
@@ -622,7 +622,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
           onPressed: () => _logout(context),
           child: Text(
             'Logout',
-            style: GoogleFonts.italiana(
+            style: AppTypography.marcellus(
               fontSize: 19.sp,
               fontWeight: FontWeight.w400,
               letterSpacing: 0.06.w,
@@ -644,7 +644,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
         ),
         title: Text(
           'Join HolyNikah',
-          style: GoogleFonts.italiana(
+          style: AppTypography.marcellus(
             color: const Color(0xFFF4ECDD), // var(--cream)
             fontSize: 22.sp,
             fontWeight: FontWeight.bold,
@@ -653,7 +653,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
         ),
         content: Text(
           'To access this feature, please log in to your account.',
-          style: GoogleFonts.cormorantGaramond(
+          style: AppTypography.marcellus(
             color: const Color(0xFFCBB388), // var(--champagne)
             fontSize: 16.sp,
           ),
@@ -682,7 +682,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
             },
             child: Text(
               'VIP Login',
-              style: GoogleFonts.cormorantGaramond(
+              style: AppTypography.marcellus(
                 fontSize: 16.sp,
                 fontWeight: FontWeight.bold,
               ),
@@ -709,7 +709,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
             },
             child: Text(
               'Normal Login',
-              style: GoogleFonts.cormorantGaramond(
+              style: AppTypography.marcellus(
                 fontSize: 16.sp,
                 fontWeight: FontWeight.bold,
               ),
@@ -726,7 +726,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
         backgroundColor: const Color(0xFF101D33),
         content: Text(
           message,
-          style: GoogleFonts.cormorantGaramond(
+          style: AppTypography.marcellus(
             color: const Color(0xFFF4ECDD),
             fontSize: 16.sp,
             fontWeight: FontWeight.w600,
@@ -753,7 +753,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
         ),
         title: Text(
           'Logout',
-          style: GoogleFonts.italiana(
+          style: AppTypography.marcellus(
             color: const Color(0xFFF4ECDD),
             fontSize: 22.sp,
             fontWeight: FontWeight.bold,
@@ -762,7 +762,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
         ),
         content: Text(
           'Are you sure you want to logout?',
-          style: GoogleFonts.cormorantGaramond(
+          style: AppTypography.marcellus(
             color: const Color(0xFFCBB388),
             fontSize: 16.sp,
           ),
@@ -773,7 +773,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
             onPressed: () => Navigator.pop(context),
             child: Text(
               'Cancel',
-              style: GoogleFonts.cormorantGaramond(
+              style: AppTypography.marcellus(
                 color: const Color(0xFFCBB388).withOpacity(0.7),
                 fontSize: 16.sp,
                 fontWeight: FontWeight.bold,
@@ -795,7 +795,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
             },
             child: Text(
               'Logout',
-              style: GoogleFonts.cormorantGaramond(
+              style: AppTypography.marcellus(
                 color: Colors.redAccent,
                 fontSize: 16.sp,
                 fontWeight: FontWeight.bold,

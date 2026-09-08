@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 class AnimatedPatternBackground extends StatefulWidget {
   final String backgroundImage;
   final double scale;
+  final BoxFit fit;
+  final ImageRepeat repeat;
   final Color veilColor;
   final List<Color>? shimmerColors;
   final List<double> shimmerStops;
@@ -14,7 +16,9 @@ class AnimatedPatternBackground extends StatefulWidget {
   const AnimatedPatternBackground({
     super.key,
     required this.backgroundImage,
-    this.scale = 1.5,
+    this.scale = 1.0,
+    this.fit = BoxFit.cover,
+    this.repeat = ImageRepeat.noRepeat,
     required this.veilColor,
     this.shimmerColors,
     this.shimmerStops = const [0.4, 0.48, 0.50, 0.52, 0.60],
@@ -65,12 +69,15 @@ class _AnimatedPatternBackgroundState extends State<AnimatedPatternBackground>
         return Positioned.fill(
           child: Opacity(
             opacity: 1,
-            child: Image.asset(
-              widget.backgroundImage,
-              repeat: ImageRepeat.repeat,
-              alignment: Alignment(math.sin(t) * 0.4, -math.sin(t) * 0.4),
-              scale: widget.scale,
-              fit: BoxFit.none,
+            child: Transform.scale(
+              scale: 1.05,
+              child: Image.asset(
+                widget.backgroundImage,
+                repeat: widget.repeat,
+                alignment: Alignment(math.sin(t) * 0.05, -math.sin(t) * 0.05),
+                scale: widget.scale,
+                fit: widget.fit,
+              ),
             ),
           ),
         );

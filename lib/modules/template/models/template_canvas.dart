@@ -44,7 +44,7 @@ class TemplateCanvas {
   factory TemplateCanvas.fromJson(Map<String, dynamic> json) {
     final rawBg = json['background'];
     return TemplateCanvas(
-      aspectRatio: (json['aspectRatio'] as num?)?.toDouble() ?? 0.75,
+      aspectRatio: parseDouble(json['aspectRatio']) ?? 0.75,
       background: rawBg is Map
           ? TemplateBackground.fromJson(Map<String, dynamic>.from(rawBg))
           : null,

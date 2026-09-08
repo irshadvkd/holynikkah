@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:holynikkah/core/theme/app_typography.dart';
 import 'package:holynikkah/core/utils/app_logger.dart';
 import 'package:holynikkah/models/video_model.dart';
 import 'package:holynikkah/modules/reels/services/reel_video_loader.dart';
@@ -332,12 +333,12 @@ class _ReelsScreenState extends State<ReelsScreen> with WidgetsBindingObserver {
                 Text(
                   _errorMessage!,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(color: Colors.white70),
+                  style: AppTypography.marcellus(color: Colors.white70),
                 ),
                 const SizedBox(height: 24),
                 FilledButton(
                   onPressed: () => loadVideos(refresh: true),
-                  child: const Text('Retry'),
+                  child: Text('Retry', style: AppTypography.marcellus()),
                 ),
               ],
             ),
@@ -353,14 +354,14 @@ class _ReelsScreenState extends State<ReelsScreen> with WidgetsBindingObserver {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text(
+              Text(
                 'No reels available',
-                style: TextStyle(color: Colors.white70),
+                style: AppTypography.marcellus(color: Colors.white70),
               ),
               const SizedBox(height: 16),
               FilledButton(
                 onPressed: () => loadVideos(refresh: true),
-                child: const Text('Refresh'),
+                child: Text('Refresh', style: AppTypography.marcellus()),
               ),
             ],
           ),
@@ -453,14 +454,14 @@ class _NextPageLoaderReelState extends State<_NextPageLoaderReel> {
                     children: [
                       const Icon(Icons.wifi_off, color: Colors.white54, size: 40),
                       const SizedBox(height: 12),
-                      const Text(
+                      Text(
                         'Could not load more reels',
-                        style: TextStyle(color: Colors.white70),
+                        style: AppTypography.marcellus(color: Colors.white70),
                       ),
                       const SizedBox(height: 16),
                       FilledButton(
                         onPressed: widget.onRetry,
-                        child: const Text('Retry'),
+                        child: Text('Retry', style: AppTypography.marcellus()),
                       ),
                     ],
                   )

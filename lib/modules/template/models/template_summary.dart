@@ -69,9 +69,9 @@ class TemplateListResult {
 
     return TemplateListResult(
       templates: data,
-      total: (meta['total'] as num?)?.toInt() ?? data.length,
-      page: (meta['page'] as num?)?.toInt() ?? 1,
-      pageSize: (meta['pageSize'] as num?)?.toInt() ?? 20,
+      total: parseInt(meta['total']) ?? data.length,
+      page: parseInt(meta['page']) ?? 1,
+      pageSize: parseInt(meta['pageSize']) ?? 20,
     );
   }
 }

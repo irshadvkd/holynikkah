@@ -4,7 +4,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:holynikkah/core/theme/app_typography.dart';
 import 'package:holynikkah/core/widgets/common_snackbar.dart';
 import 'package:holynikkah/core/widgets/common_text_field.dart';
 import 'package:holynikkah/modules/template/screens/common_image_picker.dart';
@@ -84,20 +84,6 @@ class _VipTemplateOneScreenState extends State<VipTemplateOneScreen> {
     return Scaffold(
       backgroundColor: Colors.black,
 
-      // appBar: AppBar(
-      //   backgroundColor: Colors.black,
-      //   elevation: 0,
-      //   centerTitle: true,
-      //   title: Text(
-      //     "VIP Template 1",
-      //     style: GoogleFonts.inter(
-      //       color: Colors.white,
-      //       fontSize: 18.sp,
-      //       fontWeight: FontWeight.w700,
-      //     ),
-      //   ),
-      // ),
-
       body: Column(
         children: [
           /// Preview Area
@@ -138,7 +124,7 @@ class _VipTemplateOneScreenState extends State<VipTemplateOneScreen> {
                                 ? "Type your description here..."
                                 : descriptionController.text,
                             textAlign: TextAlign.center,
-                            style: GoogleFonts.poppins(
+                            style: AppTypography.marcellus(
                               color: Colors.black87,
                               fontSize: 15.sp,
                               height: 1.5,
@@ -177,7 +163,7 @@ class _VipTemplateOneScreenState extends State<VipTemplateOneScreen> {
                   onChanged: (value) {
                     setState(() {});
                   },
-                  style: GoogleFonts.inter(color: Colors.black, fontSize: 14.sp),
+                  style: AppTypography.marcellus(color: Colors.black, fontSize: 14.sp),
                   decoration: InputDecoration(
                     hintText: "Enter Description",
                     filled: true,
@@ -207,7 +193,7 @@ class _VipTemplateOneScreenState extends State<VipTemplateOneScreen> {
                           ),
                           child: Text(
                             "Upload Image",
-                            style: GoogleFonts.inter(
+                            style: AppTypography.marcellus(
                               color: Colors.white,
                               fontSize: 15.sp,
                               fontWeight: FontWeight.w600,
@@ -232,7 +218,7 @@ class _VipTemplateOneScreenState extends State<VipTemplateOneScreen> {
                           ),
                           child: Text(
                             "Save",
-                            style: GoogleFonts.inter(
+                            style: AppTypography.marcellus(
                               color: Colors.white,
                               fontSize: 15.sp,
                               fontWeight: FontWeight.w600,

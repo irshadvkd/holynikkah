@@ -1,13 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:holynikkah/core/theme/app_typography.dart';
 import 'package:holynikkah/core/utils/constants.dart';
 import 'package:holynikkah/core/utils/routes.dart';
-import 'package:holynikkah/core/widgets/common_app_bar.dart';
-import 'package:holynikkah/core/widgets/common_button.dart';
 import 'package:holynikkah/core/widgets/common_otp_field.dart';
 import 'package:holynikkah/core/widgets/common_snackbar.dart';
 import 'package:holynikkah/modules/category/controller/category_provider.dart';
@@ -37,6 +36,17 @@ class _VerificationScreenState extends State<VerificationScreen> {
   int? _retryAfterSeconds;
   Timer? _retryTimer;
   String? _statusMessage;
+
+  static const Color _bgPrimary = Color(0xFF0E1F16);
+  static const Color _bgGradientTop = Color(0xFF142B1F);
+  static const Color _bgGradientBottom = Color(0xFF060D09);
+  static const Color _goldLight = Color(0xFFF3D68A);
+  static const Color _goldMain = Color(0xFFC9973F);
+  static const Color _goldDark = Color(0xFF9E7428);
+  static const Color _inputFill = Color(0xFF162E21);
+  static const Color _inputActiveFill = Color(0xFF1C3A2A);
+  static const Color _inputBorder = Color(0xFF28523C);
+  static const Color _textMuted = Color(0xFF8FAEA0);
 
   bool get _isBlocked => _retryAfterSeconds != null && _retryAfterSeconds! > 0;
 
@@ -130,7 +140,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
 
   Future<void> _handleVerifySuccess(VipOtpVerifyData data) async {
     final auth = context.read<AuthProvider>();
-    final isVip = _registrationType == 'vip';
+    final isVip = _registrationType.toLowerCase() == 'vip';
 
     if (data.loginSuccess) {
       if (isVip) {
@@ -211,7 +221,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
     });
 
     try {
-      if (_registrationType == 'vip') {
+      if (_registrationType.toLowerCase() == 'vip') {
         final response = await VipOtpService.instance.verifyOtp(
           phone: _phoneNumber,
           otp: _otp,
@@ -309,106 +319,385 @@ class _VerificationScreenState extends State<VerificationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isVip = _registrationType.toLowerCase() == 'vip';
     final inputsDisabled = _isLoading || _isBlocked;
 
-    return CommonAppBar(
-      title: "",
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 24.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(height: 160.h),
-
-            Text(
-              'Verification Code',
-              style: GoogleFonts.inter(
-                fontSize: 28.sp,
-                fontWeight: FontWeight.w600,
-                color: Colors.black,
-              ),
+    return Scaffold(
+      backgroundColor: _bgPrimary,
+      body: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.light,
+        child: Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                _bgGradientTop,
+                _bgPrimary,
+                _bgGradientBottom,
+              ],
             ),
-
-            SizedBox(height: 12.h),
-
-            Text(
-              'Please Enter Verification Code sent to your phone number',
-              style: GoogleFonts.inter(fontSize: 14.sp, color: Colors.black),
-            ),
-
-            if (_statusMessage != null) ...[
-              SizedBox(height: 12.h),
-              Text(
-                _statusMessage!,
-                style: GoogleFonts.inter(
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.w500,
-                  color: const Color(0xFFEF5350),
-                ),
-              ),
-            ],
-
-            SizedBox(height: 60.h),
-
-            Center(
-              child: IgnorePointer(
-                ignoring: inputsDisabled,
-                child: Opacity(
-                  opacity: inputsDisabled ? 0.5 : 1,
-                  child: CommonOtpField(
-                    key: _otpFieldKey,
-                    hasError: _hasOtpError,
-                    onChanged: (otp) {
-                      setState(() {
-                        _otp = otp;
-                        if (_hasOtpError) _hasOtpError = false;
-                      });
-                    },
-                    onCompleted: (otp) {
-                      _otp = otp;
-                      _verifyOtp();
-                    },
-                  ),
-                ),
-              ),
-            ),
-
-            SizedBox(height: 24.h),
-
-            if (!_isBlocked)
-              Center(
-                child: TextButton(
-                  onPressed: _isResending || _isLoading ? null : _resendOtp,
-                  child: _isResending
-                      ? SizedBox(
-                          height: 18.h,
-                          width: 18.w,
-                          child: const CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Text(
-                          'Resend OTP',
-                          style: GoogleFonts.inter(
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black,
+          ),
+          child: SafeArea(
+            child: SingleChildScrollView(
+              physics: const ClampingScrollPhysics(),
+              padding: EdgeInsets.symmetric(horizontal: 24.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(height: 8.h),
+                  // Top Back Navigation
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: GestureDetector(
+                      onTap: () => Navigator.of(context).pop(),
+                      behavior: HitTestBehavior.opaque,
+                      child: Container(
+                        width: 40.w,
+                        height: 40.w,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white.withValues(alpha: 0.08),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.12),
+                            width: 1,
                           ),
                         ),
-                ),
-              ),
+                        child: Icon(
+                          Icons.arrow_back_ios_new_rounded,
+                          color: _goldLight,
+                          size: 18.sp,
+                        ),
+                      ),
+                    ),
+                  ),
 
-            const Spacer(),
+                  SizedBox(height: 24.h),
 
-            Center(
-              child: CommonButton(
-                title: "Verify OTP",
-                isLoading: _isLoading,
-                onTap: inputsDisabled ? () {} : _verifyOtp,
+                  // Logo & Ambient Branding Container
+                  Image.asset(
+                    AppConstants.icons.logoHorizontal,
+                    width: 300.w,
+                    fit: BoxFit.contain,
+                  ),
+
+                  if (isVip) ...[
+                    SizedBox(height: 8.h),
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 14.w,
+                        vertical: 5.h,
+                      ),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [_goldLight, _goldMain],
+                        ),
+                        borderRadius: BorderRadius.circular(20.r),
+                        boxShadow: [
+                          BoxShadow(
+                            color: _goldMain.withValues(alpha: 0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.workspace_premium_rounded,
+                            size: 14.sp,
+                            color: _bgPrimary,
+                          ),
+                          SizedBox(width: 4.w),
+                          Text(
+                            'VIP ACCESS',
+                            style: AppTypography.marcellus(
+                              fontSize: 11.sp,
+                              fontWeight: FontWeight.w800,
+                              color: _bgPrimary,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+
+                  SizedBox(height: 48.h),
+
+                  // Form Content Box
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Verification Code',
+                          style: AppTypography.marcellus(
+                            color: Colors.white,
+                            fontSize: 28.sp,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: -0.3,
+                          ),
+                        ),
+                        SizedBox(height: 8.h),
+                        RichText(
+                          text: TextSpan(
+                            style: AppTypography.marcellus(
+                              color: _textMuted,
+                              fontSize: 14.sp,
+                              height: 1.4,
+                            ),
+                            children: [
+                              const TextSpan(
+                                text: 'Please enter the 4-digit code sent to ',
+                              ),
+                              TextSpan(
+                                text: _phoneNumber.isNotEmpty
+                                    ? '+91 $_phoneNumber'
+                                    : 'your phone number',
+                                style: AppTypography.marcellus(
+                                  color: _goldLight,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (_statusMessage != null) ...[
+                          SizedBox(height: 12.h),
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 12.w,
+                              vertical: 8.h,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFEF5350)
+                                  .withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(8.r),
+                              border: Border.all(
+                                color: const Color(0xFFEF5350)
+                                    .withValues(alpha: 0.3),
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.info_outline_rounded,
+                                  color: const Color(0xFFEF5350),
+                                  size: 16.sp,
+                                ),
+                                SizedBox(width: 8.w),
+                                Expanded(
+                                  child: Text(
+                                    _statusMessage!,
+                                    style: AppTypography.marcellus(
+                                      fontSize: 13.sp,
+                                      fontWeight: FontWeight.w500,
+                                      color: const Color(0xFFEF5350),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+
+                  SizedBox(height: 36.h),
+
+                  // OTP Input Boxes
+                  Center(
+                    child: IgnorePointer(
+                      ignoring: inputsDisabled,
+                      child: Opacity(
+                        opacity: inputsDisabled ? 0.5 : 1,
+                        child: CommonOtpField(
+                          key: _otpFieldKey,
+                          hasError: _hasOtpError,
+                          fillColor: _inputFill,
+                          activeFillColor: _inputActiveFill,
+                          borderColor: _inputBorder,
+                          activeBorderColor: _goldLight,
+                          textColor: Colors.white,
+                          cursorColor: _goldLight,
+                          activeBoxShadow: [
+                            BoxShadow(
+                              color: _goldMain.withValues(alpha: 0.25),
+                              blurRadius: 10,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                          onChanged: (otp) {
+                            setState(() {
+                              _otp = otp;
+                              if (_hasOtpError) _hasOtpError = false;
+                            });
+                          },
+                          onCompleted: (otp) {
+                            _otp = otp;
+                            _verifyOtp();
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  SizedBox(height: 24.h),
+
+                  // Resend OTP / Countdown section
+                  Center(
+                    child: _isBlocked
+                        ? Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.timer_outlined,
+                                size: 16.sp,
+                                color: _textMuted,
+                              ),
+                              SizedBox(width: 6.w),
+                              Text(
+                                'Resend code in ${_retryAfterSeconds}s',
+                                style: AppTypography.marcellus(
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.w500,
+                                  color: _textMuted,
+                                ),
+                              ),
+                            ],
+                          )
+                        : GestureDetector(
+                            onTap: _isResending || _isLoading ? null : _resendOtp,
+                            behavior: HitTestBehavior.opaque,
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(
+                                vertical: 8.h,
+                                horizontal: 16.w,
+                              ),
+                              child: _isResending
+                                  ? SizedBox(
+                                      height: 18.h,
+                                      width: 18.w,
+                                      child: const CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                          _goldLight,
+                                        ),
+                                      ),
+                                    )
+                                  : Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          "Didn't receive code? ",
+                                          style: AppTypography.marcellus(
+                                            fontSize: 14.sp,
+                                            color: _textMuted,
+                                          ),
+                                        ),
+                                        Text(
+                                          'Resend OTP',
+                                          style: AppTypography.marcellus(
+                                            fontSize: 14.sp,
+                                            fontWeight: FontWeight.w700,
+                                            color: _goldLight,
+                                            decoration:
+                                                TextDecoration.underline,
+                                            decorationColor: _goldLight,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                            ),
+                          ),
+                  ),
+
+                  SizedBox(height: 36.h),
+
+                  // Verify OTP Action Button
+                  GestureDetector(
+                    onTap: inputsDisabled ? null : _verifyOtp,
+                    child: Container(
+                      width: double.infinity,
+                      height: 52.h,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(50.r),
+                        gradient: const LinearGradient(
+                          colors: [
+                            _goldLight,
+                            _goldMain,
+                            _goldDark,
+                          ],
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: _goldMain.withValues(alpha: 0.4),
+                            offset: const Offset(0, 6),
+                            blurRadius: 16,
+                          ),
+                        ],
+                      ),
+                      child: _isLoading
+                          ? SizedBox(
+                              height: 22.h,
+                              width: 22.w,
+                              child: const CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  _bgPrimary,
+                                ),
+                              ),
+                            )
+                          : Text(
+                              'Verify OTP',
+                              style: AppTypography.marcellus(
+                                color: _bgPrimary,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 18.sp,
+                                letterSpacing: 0.3,
+                              ),
+                            ),
+                    ),
+                  ),
+
+                  SizedBox(height: 36.h),
+
+                  // Bottom Trust/Security Info
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.lock_outline_rounded,
+                        color: _textMuted.withValues(alpha: 0.7),
+                        size: 14.sp,
+                      ),
+                      SizedBox(width: 6.w),
+                      Text(
+                        'Secured with HolyNikah Verification',
+                        style: AppTypography.marcellus(
+                          color: _textMuted.withValues(alpha: 0.7),
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 16.h),
+                ],
               ),
             ),
-            SizedBox(height: 60.h),
-          ],
+          ),
         ),
       ),
     );
   }
 }
+

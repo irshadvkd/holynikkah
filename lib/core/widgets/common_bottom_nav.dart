@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:holynikkah/core/theme/app_typography.dart';
 
 class CommonBottomNav extends StatelessWidget {
   final List<BottomNavItem> items;
@@ -42,7 +42,7 @@ class CommonBottomNav extends StatelessWidget {
                 SizedBox(height: 2.h),
                 Text(
                   item.label,
-                  style: GoogleFonts.inter(
+                  style: AppTypography.marcellus(
                     color: isActive ? Colors.white : Colors.grey[400],
                     fontSize: 9.sp,
                   ),

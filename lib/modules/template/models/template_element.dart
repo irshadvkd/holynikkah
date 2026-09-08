@@ -1,3 +1,4 @@
+import 'package:holynikkah/core/utils/utils.dart';
 import 'package:holynikkah/modules/template/models/template_style.dart';
 
 /// Relative position/size of an element, expressed as `0.0..1.0` fractions of
@@ -17,10 +18,10 @@ class TemplateRect {
 
   factory TemplateRect.fromJson(Map<String, dynamic> json) {
     return TemplateRect(
-      x: (json['x'] as num?)?.toDouble() ?? 0,
-      y: (json['y'] as num?)?.toDouble() ?? 0,
-      w: (json['w'] as num?)?.toDouble() ?? 0,
-      h: (json['h'] as num?)?.toDouble() ?? 0,
+      x: parseDouble(json['x']) ?? 0,
+      y: parseDouble(json['y']) ?? 0,
+      w: parseDouble(json['w']) ?? 0,
+      h: parseDouble(json['h']) ?? 0,
     );
   }
 }
@@ -58,19 +59,30 @@ class TemplateElement {
     final rawStyle = json['style'];
     final rawChildren = json['children'];
 
+    TemplateStyle? style;
+    if (rawStyle is Map) {
+      style = TemplateStyle.fromJson(Map<String, dynamic>.from(rawStyle));
+    } else if (json['fit'] != null ||
+        json['cornerRadius'] != null ||
+        json['borderRadius'] != null) {
+      style = TemplateStyle.fromJson({
+        if (json['fit'] != null) 'fit': json['fit'],
+        if (json['cornerRadius'] != null) 'borderRadius': json['cornerRadius'],
+        if (json['borderRadius'] != null) 'borderRadius': json['borderRadius'],
+      });
+    }
+
     return TemplateElement(
       id: (json['id'] ?? '').toString(),
       type: (json['type'] ?? '').toString(),
       rect: rawRect is Map
           ? TemplateRect.fromJson(Map<String, dynamic>.from(rawRect))
           : null,
-      style: rawStyle is Map
-          ? TemplateStyle.fromJson(Map<String, dynamic>.from(rawStyle))
-          : null,
+      style: style,
       field: json['field']?.toString(),
       label: json['label']?.toString(),
       text: json['text']?.toString(),
-      aspectRatio: (json['aspectRatio'] as num?)?.toDouble(),
+      aspectRatio: parseDouble(json['aspectRatio']),
       children: rawChildren is List
           ? rawChildren
               .whereType<Map>()

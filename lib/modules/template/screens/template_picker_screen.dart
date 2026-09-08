@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:holynikkah/core/theme/app_colors.dart';
+import 'package:holynikkah/core/theme/app_typography.dart';
 import 'package:holynikkah/core/widgets/common_snackbar.dart';
 import 'package:holynikkah/core/widgets/custom_network_image.dart';
 import 'package:holynikkah/modules/template/models/template_summary.dart';
@@ -20,8 +22,6 @@ class TemplatePickerScreen extends StatefulWidget {
 }
 
 class _TemplatePickerScreenState extends State<TemplatePickerScreen> {
-  static const Color _primary = Color(0xFF032544);
-
   @override
   void initState() {
     super.initState();
@@ -39,7 +39,7 @@ class _TemplatePickerScreenState extends State<TemplatePickerScreen> {
       context: context,
       barrierDismissible: false,
       builder: (_) => const Center(
-        child: CircularProgressIndicator(color: _primary),
+        child: CircularProgressIndicator(color: AppColors.primary),
       ),
     );
 
@@ -72,30 +72,80 @@ class _TemplatePickerScreenState extends State<TemplatePickerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
-        leading: IconButton(
-          onPressed: () => Navigator.pop(context),
-          icon: const Icon(Icons.arrow_back_ios, color: _primary),
-        ),
-        title: Text(
-          'Choose a Template',
-          style: GoogleFonts.inter(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w700,
-            color: _primary,
+      backgroundColor: AppColors.secondary,
+      body: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.light,
+        child: Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                AppColors.secondaryLight,
+                AppColors.secondary,
+                AppColors.background,
+              ],
+            ),
+          ),
+          child: SafeArea(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
+              child: Column(
+                children: [
+                  _header(),
+                  SizedBox(height: 16.h),
+                  Expanded(
+                    child: Consumer<TemplateProvider>(
+                      builder: (context, provider, _) => _body(provider),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),
-      body: Padding(
-        padding: EdgeInsets.all(16.w),
-        child: Consumer<TemplateProvider>(
-          builder: (context, provider, _) => _body(provider),
+    );
+  }
+
+  Widget _header() {
+    return Row(
+      children: [
+        GestureDetector(
+          onTap: () => Navigator.of(context).pop(),
+          behavior: HitTestBehavior.opaque,
+          child: Container(
+            width: 40.w,
+            height: 40.w,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.white.withValues(alpha: 0.08),
+              border: Border.all(
+                color: AppColors.white.withValues(alpha: 0.12),
+                width: 1,
+              ),
+            ),
+            child: Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: AppColors.primary,
+              size: 18.sp,
+            ),
+          ),
         ),
-      ),
+        SizedBox(width: 12.w),
+        Expanded(
+          child: Text(
+            'Choose a Template',
+            style: AppTypography.headline(
+              color: AppColors.white,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+        SizedBox(width: 40.w),
+      ],
     );
   }
 
@@ -104,7 +154,7 @@ class _TemplatePickerScreenState extends State<TemplatePickerScreen> {
       case TemplateLoadStatus.loading:
       case TemplateLoadStatus.idle:
         return const Center(
-          child: CircularProgressIndicator(color: _primary),
+          child: CircularProgressIndicator(color: AppColors.primary),
         );
       case TemplateLoadStatus.error:
         return _errorState(provider);
@@ -119,20 +169,28 @@ class _TemplatePickerScreenState extends State<TemplatePickerScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.cloud_off, size: 48.sp, color: Colors.grey),
+          Icon(Icons.cloud_off, size: 48.sp, color: AppColors.textSecondary),
           SizedBox(height: 12.h),
           Text(
             provider.listError ?? 'Something went wrong',
             textAlign: TextAlign.center,
-            style: GoogleFonts.inter(fontSize: 14.sp, color: Colors.black54),
+            style: AppTypography.bodyMedium(color: AppColors.textSecondary),
           ),
           SizedBox(height: 16.h),
           ElevatedButton(
             onPressed: () => provider.loadTemplates(forceReload: true),
-            style: ElevatedButton.styleFrom(backgroundColor: _primary),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+            ),
             child: Text(
               'Retry',
-              style: GoogleFonts.inter(color: Colors.white),
+              style: AppTypography.button(
+                color: AppColors.onPrimary,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ],
@@ -144,7 +202,7 @@ class _TemplatePickerScreenState extends State<TemplatePickerScreen> {
     return Center(
       child: Text(
         'No templates available',
-        style: GoogleFonts.inter(fontSize: 14.sp, color: Colors.black54),
+        style: AppTypography.bodyMedium(color: AppColors.textSecondary),
       ),
     );
   }
@@ -153,7 +211,7 @@ class _TemplatePickerScreenState extends State<TemplatePickerScreen> {
     return GridView.builder(
       itemCount: templates.length,
       physics: const BouncingScrollPhysics(),
-      padding: EdgeInsets.zero,
+      padding: EdgeInsets.only(bottom: 24.h),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         crossAxisSpacing: 12.w,
@@ -167,19 +225,20 @@ class _TemplatePickerScreenState extends State<TemplatePickerScreen> {
   Widget _templateCard(TemplateSummary template) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.secondary,
         borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: AppColors.inputBorder),
         boxShadow: [
           BoxShadow(
             blurRadius: 10,
             spreadRadius: 1,
             offset: const Offset(0, 4),
-            color: Colors.black.withValues(alpha: 0.08),
+            color: AppColors.black.withValues(alpha: 0.35),
           ),
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(15.r),
         child: Stack(
           children: [
             Positioned.fill(
@@ -189,11 +248,11 @@ class _TemplatePickerScreenState extends State<TemplatePickerScreen> {
                       fit: BoxFit.cover,
                     )
                   : Container(
-                      color: Colors.grey.shade200,
+                      color: AppColors.inputBackground,
                       alignment: Alignment.center,
                       child: Icon(
                         Icons.image_outlined,
-                        color: Colors.grey.shade400,
+                        color: AppColors.textSecondary.withValues(alpha: 0.4),
                         size: 32.sp,
                       ),
                     ),
@@ -210,7 +269,7 @@ class _TemplatePickerScreenState extends State<TemplatePickerScreen> {
                     end: Alignment.bottomCenter,
                     colors: [
                       Colors.transparent,
-                      Colors.black.withValues(alpha: 0.7),
+                      AppColors.background.withValues(alpha: 0.95),
                     ],
                   ),
                 ),
@@ -221,22 +280,22 @@ class _TemplatePickerScreenState extends State<TemplatePickerScreen> {
               right: 12.w,
               bottom: 12.h,
               child: SizedBox(
-                height: 42.h,
+                height: 40.h,
                 child: ElevatedButton(
                   onPressed: () => _openTemplate(template),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: _primary,
-                    elevation: 0,
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: AppColors.onPrimary,
+                    elevation: 2,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12.r),
                     ),
                   ),
                   child: Text(
                     'Use Now',
-                    style: GoogleFonts.inter(
-                      fontSize: 14.sp,
+                    style: AppTypography.button(
                       fontWeight: FontWeight.w700,
+                      color: AppColors.onPrimary,
                     ),
                   ),
                 ),

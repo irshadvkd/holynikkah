@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:holynikkah/core/theme/app_typography.dart';
 
 class CommonBadge extends StatelessWidget {
   final String text;
@@ -24,7 +24,7 @@ class CommonBadge extends StatelessWidget {
       ),
       child: Text(
         text,
-        style: GoogleFonts.inter(
+        style: AppTypography.marcellus(
           fontSize: 10.sp,
           color: textColor,
           fontWeight: FontWeight.w500,

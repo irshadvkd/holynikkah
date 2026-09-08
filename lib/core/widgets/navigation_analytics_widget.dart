@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:holynikkah/core/services/navigation_logger.dart';
 import 'package:holynikkah/core/services/user_journey_tracker.dart';
+import 'package:holynikkah/core/theme/app_typography.dart';
 import 'package:holynikkah/core/theme/context_extension.dart';
 import 'package:holynikkah/core/widgets/common_snackbar.dart';
 
 /// 📊 Navigation Analytics Widget
-/// 
+///
 /// Shows navigation analytics and issues for debugging
 class NavigationAnalyticsWidget extends StatefulWidget {
   const NavigationAnalyticsWidget({super.key});
 
   @override
-  State<NavigationAnalyticsWidget> createState() => _NavigationAnalyticsWidgetState();
+  State<NavigationAnalyticsWidget> createState() =>
+      _NavigationAnalyticsWidgetState();
 }
 
 class _NavigationAnalyticsWidgetState extends State<NavigationAnalyticsWidget> {
@@ -28,7 +29,7 @@ class _NavigationAnalyticsWidgetState extends State<NavigationAnalyticsWidget> {
         backgroundColor: Colors.black,
         title: Text(
           'Navigation Analytics',
-          style: GoogleFonts.inter(
+          style: AppTypography.marcellus(
             color: Colors.white,
             fontSize: 18.sp,
             fontWeight: FontWeight.w600,
@@ -67,16 +68,28 @@ class _NavigationAnalyticsWidgetState extends State<NavigationAnalyticsWidget> {
 
   Widget _buildSessionAnalytics() {
     final analytics = _navLogger.getSessionAnalytics();
-    
+
     return _buildSection(
       title: 'Session Analytics',
       child: Column(
         children: [
-          _buildAnalyticsRow('Duration', '${analytics.sessionDuration.inMinutes}m ${analytics.sessionDuration.inSeconds % 60}s'),
-          _buildAnalyticsRow('Routes Visited', analytics.routesVisited.length.toString()),
-          _buildAnalyticsRow('Total Navigations', analytics.totalNavigations.toString()),
+          _buildAnalyticsRow(
+            'Duration',
+            '${analytics.sessionDuration.inMinutes}m ${analytics.sessionDuration.inSeconds % 60}s',
+          ),
+          _buildAnalyticsRow(
+            'Routes Visited',
+            analytics.routesVisited.length.toString(),
+          ),
+          _buildAnalyticsRow(
+            'Total Navigations',
+            analytics.totalNavigations.toString(),
+          ),
           _buildAnalyticsRow('Errors', analytics.errors.length.toString()),
-          _buildAnalyticsRow('Registration Steps', analytics.registrationSteps.length.toString()),
+          _buildAnalyticsRow(
+            'Registration Steps',
+            analytics.registrationSteps.length.toString(),
+          ),
         ],
       ),
     );
@@ -84,7 +97,7 @@ class _NavigationAnalyticsWidgetState extends State<NavigationAnalyticsWidget> {
 
   Widget _buildNavigationIssues() {
     final issues = _navLogger.detectIssues();
-    
+
     return _buildSection(
       title: 'Navigation Issues (${issues.length})',
       child: issues.isEmpty
@@ -97,20 +110,23 @@ class _NavigationAnalyticsWidgetState extends State<NavigationAnalyticsWidget> {
 
   Widget _buildNavigationHistory() {
     final history = _navLogger.getNavigationHistory();
-    
+
     return _buildSection(
       title: 'Navigation History (${history.length})',
       child: history.isEmpty
           ? _buildEmptyState('No navigation history')
           : Column(
-              children: history.reversed.take(10).map((event) => _buildHistoryCard(event)).toList(),
+              children: history.reversed
+                  .take(10)
+                  .map((event) => _buildHistoryCard(event))
+                  .toList(),
             ),
     );
   }
 
   Widget _buildJourneyAnalytics() {
     final analytics = _journeyTracker.getCurrentJourneyAnalytics();
-    
+
     return _buildSection(
       title: 'Current Journey',
       child: analytics == null
@@ -118,11 +134,23 @@ class _NavigationAnalyticsWidgetState extends State<NavigationAnalyticsWidget> {
           : Column(
               children: [
                 _buildAnalyticsRow('Type', analytics.type.name.toUpperCase()),
-                _buildAnalyticsRow('Duration', '${analytics.duration.inMinutes}m ${analytics.duration.inSeconds % 60}s'),
-                _buildAnalyticsRow('Progress', '${analytics.stepsCompleted}/${analytics.totalSteps} (${analytics.completionPercentage.toStringAsFixed(1)}%)'),
-                _buildAnalyticsRow('Current Step', analytics.currentStep ?? 'Unknown'),
+                _buildAnalyticsRow(
+                  'Duration',
+                  '${analytics.duration.inMinutes}m ${analytics.duration.inSeconds % 60}s',
+                ),
+                _buildAnalyticsRow(
+                  'Progress',
+                  '${analytics.stepsCompleted}/${analytics.totalSteps} (${analytics.completionPercentage.toStringAsFixed(1)}%)',
+                ),
+                _buildAnalyticsRow(
+                  'Current Step',
+                  analytics.currentStep ?? 'Unknown',
+                ),
                 if (analytics.dropOffPoints.isNotEmpty)
-                  _buildAnalyticsRow('Drop-off Points', analytics.dropOffPoints.join(', ')),
+                  _buildAnalyticsRow(
+                    'Drop-off Points',
+                    analytics.dropOffPoints.join(', '),
+                  ),
               ],
             ),
     );
@@ -163,7 +191,7 @@ class _NavigationAnalyticsWidgetState extends State<NavigationAnalyticsWidget> {
         children: [
           Text(
             title,
-            style: GoogleFonts.inter(
+            style: AppTypography.marcellus(
               color: AppColors.brandYellow,
               fontSize: 16.sp,
               fontWeight: FontWeight.w600,
@@ -184,14 +212,14 @@ class _NavigationAnalyticsWidgetState extends State<NavigationAnalyticsWidget> {
         children: [
           Text(
             label,
-            style: GoogleFonts.inter(
+            style: AppTypography.marcellus(
               color: Colors.grey[300],
               fontSize: 14.sp,
             ),
           ),
           Text(
             value,
-            style: GoogleFonts.inter(
+            style: AppTypography.marcellus(
               color: Colors.white,
               fontSize: 14.sp,
               fontWeight: FontWeight.w500,
@@ -205,7 +233,7 @@ class _NavigationAnalyticsWidgetState extends State<NavigationAnalyticsWidget> {
   Widget _buildIssueCard(NavigationIssue issue) {
     Color issueColor;
     IconData issueIcon;
-    
+
     switch (issue.type) {
       case NavigationIssueType.duplicateNavigation:
         issueColor = Colors.orange;
@@ -241,8 +269,13 @@ class _NavigationAnalyticsWidgetState extends State<NavigationAnalyticsWidget> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  issue.type.name.replaceAll(RegExp(r'([A-Z])'), ' \$1').trim(),
-                  style: GoogleFonts.inter(
+                  issue.type.name
+                      .replaceAllMapped(
+                        RegExp(r'([A-Z])'),
+                        (match) => ' ${match.group(1)}',
+                      )
+                      .trim(),
+                  style: AppTypography.marcellus(
                     color: issueColor,
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w600,
@@ -250,7 +283,7 @@ class _NavigationAnalyticsWidgetState extends State<NavigationAnalyticsWidget> {
                 ),
                 Text(
                   issue.description,
-                  style: GoogleFonts.inter(
+                  style: AppTypography.marcellus(
                     color: Colors.grey[300],
                     fontSize: 11.sp,
                   ),
@@ -285,7 +318,7 @@ class _NavigationAnalyticsWidgetState extends State<NavigationAnalyticsWidget> {
               Expanded(
                 child: Text(
                   '${event.from} → ${event.to}',
-                  style: GoogleFonts.inter(
+                  style: AppTypography.marcellus(
                     color: Colors.white,
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w500,
@@ -294,7 +327,7 @@ class _NavigationAnalyticsWidgetState extends State<NavigationAnalyticsWidget> {
               ),
               Text(
                 _formatTime(event.timestamp),
-                style: GoogleFonts.inter(
+                style: AppTypography.marcellus(
                   color: Colors.grey[400],
                   fontSize: 10.sp,
                 ),
@@ -306,7 +339,7 @@ class _NavigationAnalyticsWidgetState extends State<NavigationAnalyticsWidget> {
               padding: EdgeInsets.only(top: 4.h, left: 24.w),
               child: Text(
                 'Trigger: ${event.trigger}',
-                style: GoogleFonts.inter(
+                style: AppTypography.marcellus(
                   color: Colors.grey[400],
                   fontSize: 10.sp,
                 ),
@@ -317,7 +350,7 @@ class _NavigationAnalyticsWidgetState extends State<NavigationAnalyticsWidget> {
               padding: EdgeInsets.only(top: 4.h, left: 24.w),
               child: Text(
                 'Error: ${event.error}',
-                style: GoogleFonts.inter(
+                style: AppTypography.marcellus(
                   color: Colors.red,
                   fontSize: 10.sp,
                 ),
@@ -328,16 +361,17 @@ class _NavigationAnalyticsWidgetState extends State<NavigationAnalyticsWidget> {
     );
   }
 
-  Widget _buildActionButton(String text, IconData icon, VoidCallback onPressed) {
+  Widget _buildActionButton(
+    String text,
+    IconData icon,
+    VoidCallback onPressed,
+  ) {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton.icon(
         onPressed: onPressed,
         icon: Icon(icon, size: 18.sp),
-        label: Text(
-          text,
-          style: GoogleFonts.inter(fontSize: 14.sp),
-        ),
+        label: Text(text, style: AppTypography.marcellus(fontSize: 14.sp)),
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.brandYellow,
           foregroundColor: Colors.black,
@@ -356,7 +390,7 @@ class _NavigationAnalyticsWidgetState extends State<NavigationAnalyticsWidget> {
         padding: EdgeInsets.symmetric(vertical: 20.h),
         child: Text(
           message,
-          style: GoogleFonts.inter(
+          style: AppTypography.marcellus(
             color: Colors.grey[500],
             fontSize: 14.sp,
           ),
@@ -368,7 +402,7 @@ class _NavigationAnalyticsWidgetState extends State<NavigationAnalyticsWidget> {
   String _formatTime(DateTime time) {
     final now = DateTime.now();
     final diff = now.difference(time);
-    
+
     if (diff.inMinutes < 1) {
       return '${diff.inSeconds}s ago';
     } else if (diff.inHours < 1) {
@@ -383,7 +417,7 @@ class _NavigationAnalyticsWidgetState extends State<NavigationAnalyticsWidget> {
       final data = await _navLogger.exportSessionData();
       // In a real app, you would save this to a file or send to analytics
       debugPrint('Navigation Data Exported: ${data.length} characters');
-      
+
       if (mounted) {
         CommonSnackBar.showSuccess(
           context,
@@ -402,7 +436,7 @@ class _NavigationAnalyticsWidgetState extends State<NavigationAnalyticsWidget> {
       final data = await _journeyTracker.exportJourneyData();
       // In a real app, you would save this to a file or send to analytics
       debugPrint('Journey Data Exported: ${data.length} characters');
-      
+
       if (mounted) {
         CommonSnackBar.showSuccess(
           context,
@@ -419,7 +453,7 @@ class _NavigationAnalyticsWidgetState extends State<NavigationAnalyticsWidget> {
   Future<void> _clearData() async {
     await _navLogger.clearSession();
     setState(() {});
-    
+
     if (mounted) {
       CommonSnackBar.showInfo(context, 'Navigation data cleared');
     }

@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'package:holynikkah/core/theme/app_typography.dart';
 import 'package:holynikkah/core/widgets/widgets.dart';
 import 'package:holynikkah/modules/login/providers/auth_provider.dart';
 import 'package:holynikkah/modules/partner/models/match_model.dart';
@@ -343,7 +344,7 @@ class _MatchItemState extends State<_MatchItem> {
                           : _match.name!,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: AppTypography.marcellus(
                         color: Colors.white,
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
@@ -364,7 +365,7 @@ class _MatchItemState extends State<_MatchItem> {
                             _match.place!,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
+                            style: AppTypography.marcellus(
                               color: Colors.white60,
                               fontSize: 14,
                             ),
@@ -396,9 +397,9 @@ class _MatchItemState extends State<_MatchItem> {
           shape: const StadiumBorder(),
         ),
         icon: const Icon(Icons.call, size: 18),
-        label: const Text(
+        label: Text(
           'Call',
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+          style: AppTypography.marcellus(fontSize: 14, fontWeight: FontWeight.w700),
         ),
       );
     }
@@ -417,9 +418,9 @@ class _MatchItemState extends State<_MatchItem> {
           shape: const StadiumBorder(),
         ),
         icon: const Icon(Icons.check, size: 18),
-        label: const Text(
+        label: Text(
           'Sent',
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+          style: AppTypography.marcellus(fontSize: 14, fontWeight: FontWeight.w700),
         ),
       );
     }
@@ -447,7 +448,7 @@ class _MatchItemState extends State<_MatchItem> {
           : const Icon(Icons.lock_outline, size: 18),
       label: Text(
         _requesting ? 'Sending…' : 'Request',
-        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+        style: AppTypography.marcellus(fontSize: 14, fontWeight: FontWeight.w700),
       ),
     );
   }
@@ -479,10 +480,16 @@ class _MatchesMessage extends StatelessWidget {
             Text(
               message,
               textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.white70),
+              style: AppTypography.marcellus(color: Colors.white70),
             ),
             const SizedBox(height: 24),
-            FilledButton(onPressed: onAction, child: Text(actionLabel)),
+            FilledButton(
+              onPressed: onAction,
+              child: Text(
+                actionLabel,
+                style: AppTypography.marcellus(),
+              ),
+            ),
           ],
         ),
       ),
@@ -525,9 +532,9 @@ class _NextPageLoaderState extends State<_NextPageLoader> {
                 children: [
                   const Icon(Icons.wifi_off, color: Colors.white54, size: 40),
                   const SizedBox(height: 12),
-                  const Text(
+                  Text(
                     'Could not load more matches',
-                    style: TextStyle(color: Colors.white70),
+                    style: AppTypography.marcellus(color: Colors.white70),
                   ),
                   const SizedBox(height: 16),
                   FilledButton(

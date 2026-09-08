@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:holynikkah/core/provider/theme_provider.dart';
 import 'package:holynikkah/core/services/navigation_logger.dart';
 import 'package:holynikkah/core/services/user_journey_tracker.dart';
+import 'package:holynikkah/core/utils/constants.dart';
 import 'package:holynikkah/core/utils/routes.dart';
 import 'package:holynikkah/core/widgets/navigation_analytics_widget.dart';
 import 'package:holynikkah/modules/category/screens/normal_category_screen.dart';
@@ -47,10 +48,10 @@ class _ApplicationState extends State<Application> {
         return Consumer<ThemeProvider>(
           builder: (context, themeProvider, child) {
             return MaterialApp(
-              title: 'Holy Nikkah',
+              title: AppConstants.misc.appName,
               debugShowCheckedModeBanner: false,
               theme: themeProvider.currentTheme.copyWith(
-                textTheme: GoogleFonts.interTextTheme(themeProvider.currentTheme.textTheme),
+                textTheme: GoogleFonts.marcellusTextTheme(themeProvider.currentTheme.textTheme),
               ),
               initialRoute: Routes.splash,
               routes: {

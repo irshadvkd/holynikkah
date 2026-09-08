@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:holynikkah/core/theme/app_typography.dart';
 import 'package:holynikkah/core/utils/validation_utils.dart';
 
 class OvalTextField extends StatelessWidget {
@@ -40,14 +40,14 @@ class OvalTextField extends StatelessWidget {
         maxLines: maxLines,
         maxLength: maxLength,
         onChanged: onChanged,
-        style: GoogleFonts.inter(
+        style: AppTypography.marcellus(
           fontSize: 16.sp,
           color: Colors.black87,
         ),
         textCapitalization: textCapitalization ?? TextCapitalization.none,
         decoration: InputDecoration(
           hintText: hintText,
-          hintStyle: GoogleFonts.inter(
+          hintStyle: AppTypography.marcellus(
             fontSize: 16.sp,
             color: Colors.grey[600],
           ),

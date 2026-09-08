@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:holynikkah/core/theme/app_colors.dart';
+import 'package:holynikkah/core/theme/app_typography.dart';
 
 /// 🔹 Manages light/dark theme at runtime
 class ThemeProvider extends ChangeNotifier {
@@ -7,16 +8,25 @@ class ThemeProvider extends ChangeNotifier {
 
   bool get isDark => _isDark;
 
-  AppColors get colors => _isDark ? AppColors.dark : AppColors.light;
-
   ThemeData get lightThemeData => ThemeData(
     brightness: Brightness.light,
-    scaffoldBackgroundColor: Colors.white,
-    primaryColor: Colors.blue,
+    fontFamily: AppTypography.fontFamily,
+    textTheme: AppTypography.createTextTheme(),
+    scaffoldBackgroundColor: AppColors.background,
+    primaryColor: AppColors.primary,
+    cardColor: AppColors.surface,
+    dividerColor: AppColors.border,
+    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+      backgroundColor: AppColors.surface,
+      selectedItemColor: AppColors.primary,
+      unselectedItemColor: AppColors.iconDefault,
+      elevation: 0,
+      type: BottomNavigationBarType.fixed,
+    ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.amber,
-        foregroundColor: Colors.black,
+        backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.background,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     ),
@@ -24,12 +34,23 @@ class ThemeProvider extends ChangeNotifier {
 
   ThemeData get darkThemeData => ThemeData(
     brightness: Brightness.dark,
-    scaffoldBackgroundColor: Colors.black,
-    primaryColor: Colors.blue,
+    fontFamily: AppTypography.fontFamily,
+    textTheme: AppTypography.createTextTheme(ThemeData.dark().textTheme),
+    scaffoldBackgroundColor: AppColors.background,
+    primaryColor: AppColors.primary,
+    cardColor: AppColors.surface,
+    dividerColor: AppColors.border,
+    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+      backgroundColor: AppColors.surface,
+      selectedItemColor: AppColors.primary,
+      unselectedItemColor: AppColors.iconDefault,
+      elevation: 0,
+      type: BottomNavigationBarType.fixed,
+    ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.amber,
-        foregroundColor: Colors.black,
+        backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.background,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     ),

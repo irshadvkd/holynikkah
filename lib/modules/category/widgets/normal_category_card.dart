@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:holynikkah/core/theme/app_typography.dart';
 import 'package:holynikkah/modules/category/models/category_model.dart';
 
 /// A card widget representing a normal category with custom gradient styling,
@@ -140,7 +140,7 @@ class NormalCategoryCard extends StatelessWidget {
             const Spacer(),
             Text(
               number,
-              style: GoogleFonts.inter(
+              style: AppTypography.marcellus(
                 fontSize: 12.sp,
                 fontWeight: FontWeight.w600,
                 letterSpacing: 2.88,
@@ -150,8 +150,8 @@ class NormalCategoryCard extends StatelessWidget {
             SizedBox(height: 2.h),
             Text(
               name,
-              style: GoogleFonts.cormorantGaramond(
-                fontSize: 22.sp,
+              style: AppTypography.marcellus(
+                fontSize: 20.sp,
                 fontWeight: FontWeight.w700,
                 color: textColor,
                 height: 1.08,

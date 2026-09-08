@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:holynikkah/core/theme/app_typography.dart';
 import 'package:holynikkah/core/utils/constants.dart';
 
 class CommonOtpField extends StatefulWidget {
@@ -10,6 +10,14 @@ class CommonOtpField extends StatefulWidget {
   final int length;
   final bool hasError;
   final bool autoFocus;
+  final Color? fillColor;
+  final Color? activeFillColor;
+  final Color? borderColor;
+  final Color? activeBorderColor;
+  final Color? textColor;
+  final Color? cursorColor;
+  final Color? errorColor;
+  final List<BoxShadow>? activeBoxShadow;
 
   const CommonOtpField({
     super.key,
@@ -18,6 +26,14 @@ class CommonOtpField extends StatefulWidget {
     this.length = AppConstants.otpLength,
     this.hasError = false,
     this.autoFocus = true,
+    this.fillColor,
+    this.activeFillColor,
+    this.borderColor,
+    this.activeBorderColor,
+    this.textColor,
+    this.cursorColor,
+    this.errorColor,
+    this.activeBoxShadow,
   });
 
   @override
@@ -25,11 +41,11 @@ class CommonOtpField extends StatefulWidget {
 }
 
 class CommonOtpFieldState extends State<CommonOtpField> {
-  static const Color _brandPrimary = Color(0xFF032544);
-  static const Color _errorColor = Color(0xFFEF5350);
-  static const Color _borderDefault = Color(0xFFE0E0E0);
-  static const Color _fillDefault = Color(0xFFF7F7F7);
-  static const Color _fillActive = Color(0xFFEFE5E5);
+  static const Color _defaultBrandPrimary = Color(0xFF032544);
+  static const Color _defaultErrorColor = Color(0xFFEF5350);
+  static const Color _defaultBorderDefault = Color(0xFFE0E0E0);
+  static const Color _defaultFillDefault = Color(0xFFF7F7F7);
+  static const Color _defaultFillActive = Color(0xFFEFE5E5);
 
   final TextEditingController _controller = TextEditingController();
   final FocusNode _focusNode = FocusNode();
@@ -105,6 +121,14 @@ class CommonOtpFieldState extends State<CommonOtpField> {
     final focused = _focusNode.hasFocus;
     final activeIndex = text.length < widget.length ? text.length : widget.length - 1;
 
+    final fillDefault = widget.fillColor ?? _defaultFillDefault;
+    final fillActive = widget.activeFillColor ?? _defaultFillActive;
+    final borderDefault = widget.borderColor ?? _defaultBorderDefault;
+    final borderActive = widget.activeBorderColor ?? _defaultBrandPrimary;
+    final textCol = widget.textColor ?? _defaultBrandPrimary;
+    final cursorCol = widget.cursorColor ?? _defaultBrandPrimary;
+    final errColor = widget.errorColor ?? _defaultErrorColor;
+
     return AutofillGroup(
       child: Semantics(
         label: 'Enter ${widget.length} digit verification code',
@@ -112,56 +136,64 @@ class CommonOtpFieldState extends State<CommonOtpField> {
         child: GestureDetector(
           onTap: () => _focusNode.requestFocus(),
           behavior: HitTestBehavior.opaque,
-        child: SizedBox(
-          height: 56.h,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(widget.length, (index) {
-                  final isFilled = index < text.length;
-                  final isActive = focused && index == activeIndex;
-                  final digit = isFilled ? text[index] : null;
+          child: SizedBox(
+            height: 56.h,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(widget.length, (index) {
+                    final isFilled = index < text.length;
+                    final isActive = focused && index == activeIndex;
+                    final digit = isFilled ? text[index] : null;
 
-                  return Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 6.w),
-                    child: _OtpDigitBox(
-                      digit: digit,
-                      isActive: isActive,
-                      isFilled: isFilled,
-                      hasError: widget.hasError,
+                    return Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 6.w),
+                      child: _OtpDigitBox(
+                        digit: digit,
+                        isActive: isActive,
+                        isFilled: isFilled,
+                        hasError: widget.hasError,
+                        fillColor: fillDefault,
+                        activeFillColor: fillActive,
+                        borderColor: borderDefault,
+                        activeBorderColor: borderActive,
+                        textColor: textCol,
+                        cursorColor: cursorCol,
+                        errorColor: errColor,
+                        activeBoxShadow: widget.activeBoxShadow,
+                      ),
+                    );
+                  }),
+                ),
+                Positioned.fill(
+                  child: Opacity(
+                    opacity: 0.01,
+                    child: TextField(
+                      controller: _controller,
+                      focusNode: _focusNode,
+                      keyboardType: TextInputType.number,
+                      textInputAction: TextInputAction.done,
+                      autofillHints: const [AutofillHints.oneTimeCode],
+                      enableSuggestions: false,
+                      autocorrect: false,
+                      maxLength: widget.length,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(widget.length),
+                      ],
+                      decoration: const InputDecoration(
+                        counterText: '',
+                        border: InputBorder.none,
+                      ),
+                      onChanged: _onTextChanged,
                     ),
-                  );
-                }),
-              ),
-              Positioned.fill(
-                child: Opacity(
-                  opacity: 0.01,
-                  child: TextField(
-                    controller: _controller,
-                    focusNode: _focusNode,
-                    keyboardType: TextInputType.number,
-                    textInputAction: TextInputAction.done,
-                    autofillHints: const [AutofillHints.oneTimeCode],
-                    enableSuggestions: false,
-                    autocorrect: false,
-                    maxLength: widget.length,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                      LengthLimitingTextInputFormatter(widget.length),
-                    ],
-                    decoration: const InputDecoration(
-                      counterText: '',
-                      border: InputBorder.none,
-                    ),
-                    onChanged: _onTextChanged,
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
         ),
       ),
     );
@@ -173,23 +205,39 @@ class _OtpDigitBox extends StatelessWidget {
   final bool isActive;
   final bool isFilled;
   final bool hasError;
+  final Color fillColor;
+  final Color activeFillColor;
+  final Color borderColor;
+  final Color activeBorderColor;
+  final Color textColor;
+  final Color cursorColor;
+  final Color errorColor;
+  final List<BoxShadow>? activeBoxShadow;
 
   const _OtpDigitBox({
     required this.digit,
     required this.isActive,
     required this.isFilled,
     required this.hasError,
+    required this.fillColor,
+    required this.activeFillColor,
+    required this.borderColor,
+    required this.activeBorderColor,
+    required this.textColor,
+    required this.cursorColor,
+    required this.errorColor,
+    this.activeBoxShadow,
   });
 
   @override
   Widget build(BuildContext context) {
-    final borderColor = hasError
-        ? CommonOtpFieldState._errorColor
+    final borderCol = hasError
+        ? errorColor
         : isActive
-            ? CommonOtpFieldState._brandPrimary
+            ? activeBorderColor
             : isFilled
-                ? CommonOtpFieldState._brandPrimary.withValues(alpha: 0.4)
-                : CommonOtpFieldState._borderDefault;
+                ? activeBorderColor.withValues(alpha: 0.5)
+                : borderColor;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 180),
@@ -198,36 +246,35 @@ class _OtpDigitBox extends StatelessWidget {
       height: 56.h,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: isActive
-            ? CommonOtpFieldState._fillActive
-            : CommonOtpFieldState._fillDefault,
+        color: isActive ? activeFillColor : fillColor,
         borderRadius: BorderRadius.circular(12.r),
         border: Border.all(
-          color: borderColor,
+          color: borderCol,
           width: isActive ? 2 : 1.5,
         ),
         boxShadow: isActive
-            ? [
-                BoxShadow(
-                  color: CommonOtpFieldState._brandPrimary.withValues(alpha: 0.12),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ]
+            ? (activeBoxShadow ??
+                [
+                  BoxShadow(
+                    color: activeBorderColor.withValues(alpha: 0.15),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ])
             : null,
       ),
       child: digit != null
           ? Text(
               digit!,
-              style: GoogleFonts.inter(
+              style: AppTypography.marcellus(
                 fontSize: 24.sp,
                 fontWeight: FontWeight.w600,
-                color: CommonOtpFieldState._brandPrimary,
+                color: textColor,
                 height: 1,
               ),
             )
           : isActive
-              ? _BlinkingCursor(color: CommonOtpFieldState._brandPrimary)
+              ? _BlinkingCursor(color: cursorColor)
               : null,
     );
   }

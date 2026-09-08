@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:holynikkah/core/theme/app_colors.dart';
+import 'package:holynikkah/core/theme/app_typography.dart';
 import 'package:holynikkah/core/widgets/common_snackbar.dart';
 import 'package:holynikkah/core/widgets/custom_network_image.dart';
 import 'package:holynikkah/modules/login/providers/auth_provider.dart';
@@ -31,18 +33,48 @@ class MyTemplateScreen extends StatefulWidget {
 }
 
 class _MyTemplateScreenState extends State<MyTemplateScreen> {
-  static const Color _primary = Color(0xFF032544);
-
   bool? _isVipSelected;
 
-  bool get _isVip =>
-      _isVipSelected ?? (widget.gateIsVip ?? context.read<AuthProvider>().isVipLoggedIn);
+  bool get _isVip {
+    if (widget.gateIsVip != null) return widget.gateIsVip!;
+    final auth = context.read<AuthProvider>();
+    if (auth.isVipLoggedIn && !auth.isNormalLoggedIn) return true;
+    if (auth.isNormalLoggedIn && !auth.isVipLoggedIn) return false;
+    return _isVipSelected ?? auth.isVipLoggedIn;
+  }
 
   @override
   void initState() {
     super.initState();
-    _isVipSelected = widget.gateIsVip ?? context.read<AuthProvider>().isVipLoggedIn;
+    final auth = context.read<AuthProvider>();
+    if (widget.gateIsVip != null) {
+      _isVipSelected = widget.gateIsVip;
+    } else if (auth.isVipLoggedIn && !auth.isNormalLoggedIn) {
+      _isVipSelected = true;
+    } else if (auth.isNormalLoggedIn && !auth.isVipLoggedIn) {
+      _isVipSelected = false;
+    } else {
+      _isVipSelected = auth.isVipLoggedIn;
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) => _loadSaved());
+  }
+
+  @override
+  void didUpdateWidget(covariant MyTemplateScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.gateIsVip != oldWidget.gateIsVip) {
+      final auth = context.read<AuthProvider>();
+      if (widget.gateIsVip != null) {
+        _isVipSelected = widget.gateIsVip;
+      } else if (auth.isVipLoggedIn && !auth.isNormalLoggedIn) {
+        _isVipSelected = true;
+      } else if (auth.isNormalLoggedIn && !auth.isVipLoggedIn) {
+        _isVipSelected = false;
+      } else {
+        _isVipSelected = auth.isVipLoggedIn;
+      }
+      _loadSaved();
+    }
   }
 
   void _toggleVip(bool isVip) {
@@ -113,7 +145,7 @@ class _MyTemplateScreenState extends State<MyTemplateScreen> {
       context: context,
       barrierDismissible: false,
       builder: (_) => const Center(
-        child: CircularProgressIndicator(color: _primary),
+        child: CircularProgressIndicator(color: AppColors.primary),
       ),
     );
 
@@ -189,11 +221,12 @@ class _MyTemplateScreenState extends State<MyTemplateScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => Dialog(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.secondary,
         elevation: 0,
         insetPadding: EdgeInsets.symmetric(horizontal: 28.w),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(24.r),
+          side: const BorderSide(color: AppColors.inputBorder),
         ),
         child: Padding(
           padding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, 20.h),
@@ -209,25 +242,22 @@ class _MyTemplateScreenState extends State<MyTemplateScreen> {
                   shape: BoxShape.circle,
                 ),
                 child: Icon(Icons.delete_outline,
-                    color: Colors.red.shade400, size: 24.sp),
+                    color: AppColors.error, size: 24.sp),
               ),
               SizedBox(height: 16.h),
               Text(
                 'Delete template',
-                style: GoogleFonts.inter(
-                  fontSize: 18.sp,
+                style: AppTypography.headline(
+                  color: AppColors.white,
                   fontWeight: FontWeight.w700,
-                  color: _primary,
                 ),
               ),
               SizedBox(height: 4.h),
               Text(
                 'Delete $name? This action cannot be undone.',
-                style: GoogleFonts.inter(
-                  fontSize: 13.sp,
-                  color: Colors.black54,
-                  height: 1.4,
-                ),
+                style: AppTypography.bodySmall(
+                  color: AppColors.textSecondary,
+                ).copyWith(height: 1.4),
               ),
               SizedBox(height: 22.h),
               Row(
@@ -240,7 +270,7 @@ class _MyTemplateScreenState extends State<MyTemplateScreen> {
                     child: _dialogButton(
                       'Delete',
                       () => Navigator.pop(ctx, true),
-                      color: Colors.red.shade400,
+                      color: AppColors.error,
                     ),
                   ),
                 ],
@@ -269,16 +299,18 @@ class _MyTemplateScreenState extends State<MyTemplateScreen> {
         onPressed: onTap,
         style: ElevatedButton.styleFrom(
           elevation: 0,
-          backgroundColor: filled ? color : Colors.grey.shade100,
-          foregroundColor: filled ? Colors.white : _primary,
+          backgroundColor: filled ? color : AppColors.inputBackground,
+          foregroundColor: filled ? AppColors.white : AppColors.textSecondary,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14.r),
+            side: BorderSide(
+              color: filled ? Colors.transparent : AppColors.inputBorder,
+            ),
           ),
         ),
         child: Text(
           label,
-          style: GoogleFonts.inter(
-            fontSize: 14.sp,
+          style: AppTypography.button(
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -288,113 +320,187 @@ class _MyTemplateScreenState extends State<MyTemplateScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AuthProvider>();
+    final showTabs = !widget.isGate && auth.isVipLoggedIn && auth.isNormalLoggedIn;
+
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
-        automaticallyImplyLeading: !widget.isGate,
-        leading: widget.isGate
-            ? null
-            : IconButton(
-                onPressed: () => Navigator.pop(context),
-                icon: const Icon(Icons.arrow_back_ios, color: _primary),
+      backgroundColor: AppColors.secondary,
+      body: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.light,
+        child: Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                AppColors.secondaryLight,
+                AppColors.secondary,
+                AppColors.background,
+              ],
+            ),
+          ),
+          child: SafeArea(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
+              child: Column(
+                children: [
+                  _header(),
+                  SizedBox(height: 16.h),
+                  if (showTabs) ...[
+                    _tabSelector(),
+                    SizedBox(height: 18.h),
+                  ],
+                  Expanded(
+                    child: Consumer<TemplateProvider>(
+                      builder: (context, provider, _) => _body(provider),
+                    ),
+                  ),
+                ],
               ),
-        title: Text(
-          widget.isGate ? 'Choose Your Template' : 'My Templates',
-          style: GoogleFonts.inter(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w700,
-            color: _primary,
+            ),
           ),
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _addTemplate,
-        backgroundColor: _primary,
-        icon: const Icon(Icons.add, color: Colors.white),
+        backgroundColor: AppColors.primary,
+        elevation: 4,
+        icon: const Icon(Icons.add_rounded, color: AppColors.onPrimary),
         label: Text(
           'Add Template',
-          style: GoogleFonts.inter(
-            color: Colors.white,
-            fontWeight: FontWeight.w600,
+          style: AppTypography.button(
+            color: AppColors.onPrimary,
+            fontWeight: FontWeight.w700,
           ),
         ),
       ),
-      body: Padding(
-        padding: EdgeInsets.all(16.w),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () => _toggleVip(true),
-                    child: Container(
-                      height: 48.h,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: _isVip
-                            ? _primary
-                            : const Color(0xFFF5F5F5),
-                        borderRadius: BorderRadius.circular(10.r),
-                        border: Border.all(
-                          color: _isVip
-                              ? _primary
-                              : Colors.grey.shade300,
-                        ),
-                      ),
-                      child: Text(
-                        "VIP Template",
-                        style: GoogleFonts.inter(
-                          fontSize: 15.sp,
-                          fontWeight: FontWeight.w600,
-                          color: _isVip ? Colors.white : Colors.black87,
-                        ),
-                      ),
-                    ),
-                  ),
+    );
+  }
+
+  Widget _header() {
+    return Row(
+      children: [
+        if (!widget.isGate) ...[
+          GestureDetector(
+            onTap: () => Navigator.of(context).pop(),
+            behavior: HitTestBehavior.opaque,
+            child: Container(
+              width: 40.w,
+              height: 40.w,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.white.withValues(alpha: 0.08),
+                border: Border.all(
+                  color: AppColors.white.withValues(alpha: 0.12),
+                  width: 1,
                 ),
-                SizedBox(width: 14.w),
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () => _toggleVip(false),
-                    child: Container(
-                      height: 48.h,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: !_isVip
-                            ? _primary
-                            : const Color(0xFFF5F5F5),
-                        borderRadius: BorderRadius.circular(10.r),
-                        border: Border.all(
-                          color: !_isVip
-                              ? _primary
-                              : Colors.grey.shade300,
-                        ),
-                      ),
-                      child: Text(
-                        "Template",
-                        style: GoogleFonts.inter(
-                          fontSize: 15.sp,
-                          fontWeight: FontWeight.w600,
-                          color: !_isVip ? Colors.white : Colors.black87,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 24.h),
-            Expanded(
-              child: Consumer<TemplateProvider>(
-                builder: (context, provider, _) => _body(provider),
+              ),
+              child: Icon(
+                Icons.arrow_back_ios_new_rounded,
+                color: AppColors.primary,
+                size: 18.sp,
               ),
             ),
-          ],
+          ),
+          SizedBox(width: 12.w),
+        ],
+        Expanded(
+          child: Text(
+            widget.isGate ? 'Choose Your Template' : 'My Templates',
+            style: AppTypography.headline(
+              color: AppColors.white,
+              fontWeight: FontWeight.w700,
+            ),
+            textAlign: widget.isGate ? TextAlign.center : TextAlign.left,
+          ),
         ),
+        if (!widget.isGate) SizedBox(width: 40.w),
+      ],
+    );
+  }
+
+  Widget _tabSelector() {
+    return Container(
+      padding: EdgeInsets.all(4.w),
+      decoration: BoxDecoration(
+        color: AppColors.secondary,
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(color: AppColors.inputBorder),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: GestureDetector(
+              onTap: () => _toggleVip(true),
+              behavior: HitTestBehavior.opaque,
+              child: Container(
+                height: 42.h,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  gradient: _isVip
+                      ? const LinearGradient(
+                          colors: [AppColors.primary, AppColors.primaryDark],
+                        )
+                      : null,
+                  borderRadius: BorderRadius.circular(10.r),
+                  boxShadow: _isVip
+                      ? [
+                          BoxShadow(
+                            color: AppColors.primary.withValues(alpha: 0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ]
+                      : null,
+                ),
+                child: Text(
+                  "VIP Template",
+                  style: AppTypography.bodyMedium(
+                    fontWeight: FontWeight.w700,
+                    color: _isVip ? AppColors.onPrimary : AppColors.textSecondary,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          SizedBox(width: 4.w),
+          Expanded(
+            child: GestureDetector(
+              onTap: () => _toggleVip(false),
+              behavior: HitTestBehavior.opaque,
+              child: Container(
+                height: 42.h,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  gradient: !_isVip
+                      ? const LinearGradient(
+                          colors: [AppColors.primary, AppColors.primaryDark],
+                        )
+                      : null,
+                  borderRadius: BorderRadius.circular(10.r),
+                  boxShadow: !_isVip
+                      ? [
+                          BoxShadow(
+                            color: AppColors.primary.withValues(alpha: 0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ]
+                      : null,
+                ),
+                child: Text(
+                  "Template",
+                  style: AppTypography.bodyMedium(
+                    fontWeight: FontWeight.w700,
+                    color: !_isVip ? AppColors.onPrimary : AppColors.textSecondary,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -404,14 +510,15 @@ class _MyTemplateScreenState extends State<MyTemplateScreen> {
       case TemplateLoadStatus.loading:
       case TemplateLoadStatus.idle:
         return const Center(
-          child: CircularProgressIndicator(color: _primary),
+          child: CircularProgressIndicator(color: AppColors.primary),
         );
       case TemplateLoadStatus.error:
         return _errorState(provider);
       case TemplateLoadStatus.success:
         if (provider.savedTemplates.isEmpty) return _emptyState();
         return RefreshIndicator(
-          color: _primary,
+          color: AppColors.primary,
+          backgroundColor: AppColors.secondary,
           onRefresh: _loadSaved,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -429,20 +536,28 @@ class _MyTemplateScreenState extends State<MyTemplateScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.cloud_off, size: 48.sp, color: Colors.grey),
+          Icon(Icons.cloud_off, size: 48.sp, color: AppColors.textSecondary),
           SizedBox(height: 12.h),
           Text(
             provider.savedError ?? 'Something went wrong',
             textAlign: TextAlign.center,
-            style: GoogleFonts.inter(fontSize: 14.sp, color: Colors.black54),
+            style: AppTypography.bodyMedium(color: AppColors.textSecondary),
           ),
           SizedBox(height: 16.h),
           ElevatedButton(
             onPressed: _loadSaved,
-            style: ElevatedButton.styleFrom(backgroundColor: _primary),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+            ),
             child: Text(
               'Retry',
-              style: GoogleFonts.inter(color: Colors.white),
+              style: AppTypography.button(
+                color: AppColors.onPrimary,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ],
@@ -455,14 +570,17 @@ class _MyTemplateScreenState extends State<MyTemplateScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.bookmark_border, size: 56.sp, color: Colors.grey),
+          Icon(
+            Icons.bookmark_border_rounded,
+            size: 56.sp,
+            color: AppColors.textSecondary.withValues(alpha: 0.4),
+          ),
           SizedBox(height: 12.h),
           Text(
             'No saved templates yet',
-            style: GoogleFonts.inter(
-              fontSize: 15.sp,
-              fontWeight: FontWeight.w600,
-              color: Colors.black87,
+            style: AppTypography.subTitle(
+              fontWeight: FontWeight.w700,
+              color: AppColors.white,
             ),
           ),
           SizedBox(height: 6.h),
@@ -471,7 +589,7 @@ class _MyTemplateScreenState extends State<MyTemplateScreen> {
                 ? 'Tap "Add Template" to create one, then set it as\ndefault to continue.'
                 : 'Tap "Add Template" to create your first one.',
             textAlign: TextAlign.center,
-            style: GoogleFonts.inter(fontSize: 13.sp, color: Colors.black54),
+            style: AppTypography.bodySmall(color: AppColors.textSecondary),
           ),
         ],
       ),
@@ -482,28 +600,32 @@ class _MyTemplateScreenState extends State<MyTemplateScreen> {
     final hasDefault = templates.any((t) => t.isDefault);
     return Container(
       margin: EdgeInsets.only(bottom: 12.h),
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
       decoration: BoxDecoration(
-        color: _primary.withValues(alpha: 0.06),
+        color: AppColors.inputBackground,
         borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(
+          color: hasDefault
+              ? AppColors.primary.withValues(alpha: 0.5)
+              : AppColors.inputBorder,
+        ),
       ),
       child: Row(
         children: [
           Icon(
-            hasDefault ? Icons.check_circle : Icons.info_outline,
-            size: 18.sp,
-            color: _primary,
+            hasDefault ? Icons.check_circle_rounded : Icons.info_outline_rounded,
+            size: 20.sp,
+            color: hasDefault ? AppColors.primary : AppColors.textTertiary,
           ),
-          SizedBox(width: 8.w),
+          SizedBox(width: 10.w),
           Expanded(
             child: Text(
               hasDefault
                   ? 'Default template set. Open Matches from the menu below.'
                   : 'Set a template as default (⋮ menu) to continue.',
-              style: GoogleFonts.inter(
-                fontSize: 12.sp,
+              style: AppTypography.bodySmall(
                 fontWeight: FontWeight.w500,
-                color: _primary,
+                color: hasDefault ? AppColors.primary : AppColors.textSecondary,
               ),
             ),
           ),
@@ -534,19 +656,23 @@ class _MyTemplateScreenState extends State<MyTemplateScreen> {
       onTap: () => _openSaved(template),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.secondary,
           borderRadius: BorderRadius.circular(16.r),
+          border: Border.all(
+            color: template.isDefault ? AppColors.primary : AppColors.inputBorder,
+            width: template.isDefault ? 1.5 : 1,
+          ),
           boxShadow: [
             BoxShadow(
               blurRadius: 10,
               spreadRadius: 1,
               offset: const Offset(0, 4),
-              color: Colors.black.withValues(alpha: 0.08),
+              color: AppColors.black.withValues(alpha: 0.35),
             ),
           ],
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(16.r),
+          borderRadius: BorderRadius.circular(15.r),
           child: Stack(
             children: [
               Positioned.fill(
@@ -556,11 +682,11 @@ class _MyTemplateScreenState extends State<MyTemplateScreen> {
                         fit: BoxFit.cover,
                       )
                     : Container(
-                        color: Colors.grey.shade200,
+                        color: AppColors.inputBackground,
                         alignment: Alignment.center,
                         child: Icon(
                           Icons.description_outlined,
-                          color: Colors.grey.shade400,
+                          color: AppColors.textSecondary.withValues(alpha: 0.4),
                           size: 36.sp,
                         ),
                       ),
@@ -577,7 +703,7 @@ class _MyTemplateScreenState extends State<MyTemplateScreen> {
                       end: Alignment.bottomCenter,
                       colors: [
                         Colors.transparent,
-                        Colors.black.withValues(alpha: 0.75),
+                        AppColors.background.withValues(alpha: 0.95),
                       ],
                     ),
                   ),
@@ -593,22 +719,30 @@ class _MyTemplateScreenState extends State<MyTemplateScreen> {
                       vertical: 3.h,
                     ),
                     decoration: BoxDecoration(
-                      color: _primary,
+                      gradient: const LinearGradient(
+                        colors: [AppColors.primary, AppColors.primaryDark],
+                      ),
                       borderRadius: BorderRadius.circular(20.r),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary.withValues(alpha: 0.35),
+                          blurRadius: 6,
+                          offset: const Offset(0, 1),
+                        ),
+                      ],
                     ),
                     child: Text(
                       'Default',
-                      style: GoogleFonts.inter(
-                        color: Colors.white,
-                        fontSize: 10.sp,
-                        fontWeight: FontWeight.w600,
+                      style: AppTypography.caption(
+                        color: AppColors.onPrimary,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),
                 ),
               Positioned(
-                right: 2.w,
-                top: 2.h,
+                right: 4.w,
+                top: 4.h,
                 child: _menu(template),
               ),
               Positioned(
@@ -619,9 +753,8 @@ class _MyTemplateScreenState extends State<MyTemplateScreen> {
                   template.name.isEmpty ? 'Untitled' : template.name,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.inter(
-                    color: Colors.white,
-                    fontSize: 14.sp,
+                  style: AppTypography.bodyMedium(
+                    color: AppColors.white,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -635,13 +768,21 @@ class _MyTemplateScreenState extends State<MyTemplateScreen> {
 
   Widget _menu(SavedTemplate template) {
     return PopupMenuButton<String>(
-      icon: const Icon(Icons.more_vert, color: Colors.white),
-      color: Colors.white,
-      surfaceTintColor: Colors.white,
+      icon: Container(
+        padding: EdgeInsets.all(4.w),
+        decoration: BoxDecoration(
+          color: AppColors.background.withValues(alpha: 0.65),
+          shape: BoxShape.circle,
+        ),
+        child: const Icon(Icons.more_vert_rounded, color: AppColors.primary),
+      ),
+      color: AppColors.secondary,
+      surfaceTintColor: AppColors.secondary,
       elevation: 8,
-      shadowColor: Colors.black.withValues(alpha: 0.15),
+      shadowColor: AppColors.black.withValues(alpha: 0.5),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14.r),
+        side: const BorderSide(color: AppColors.inputBorder),
       ),
       padding: EdgeInsets.zero,
       onSelected: (value) {
@@ -662,7 +803,7 @@ class _MyTemplateScreenState extends State<MyTemplateScreen> {
             child: _menuRow(
               icon: Icons.push_pin_outlined,
               label: 'Set as default',
-              color: _primary,
+              color: AppColors.primary,
             ),
           ),
         PopupMenuItem(
@@ -671,7 +812,7 @@ class _MyTemplateScreenState extends State<MyTemplateScreen> {
           child: _menuRow(
             icon: Icons.delete_outline,
             label: 'Delete',
-            color: Colors.red.shade400,
+            color: AppColors.error,
           ),
         ),
       ],
@@ -689,9 +830,8 @@ class _MyTemplateScreenState extends State<MyTemplateScreen> {
         SizedBox(width: 10.w),
         Text(
           label,
-          style: GoogleFonts.inter(
-            fontSize: 13.sp,
-            fontWeight: FontWeight.w500,
+          style: AppTypography.bodySmall(
+            fontWeight: FontWeight.w600,
             color: color,
           ),
         ),

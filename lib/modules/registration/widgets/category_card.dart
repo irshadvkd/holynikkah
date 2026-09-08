@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:holynikkah/core/theme/app_typography.dart';
 import 'package:holynikkah/core/utils/constants.dart';
 import 'package:holynikkah/core/utils/utils.dart';
 import 'package:holynikkah/modules/category/models/category_model.dart';
@@ -75,7 +75,7 @@ class CategoryCard extends StatelessWidget {
                   if (isVip == true)
                     Text(
                       "Class",
-                      style: GoogleFonts.inter(
+                      style: AppTypography.marcellus(
                         color: hexToColor(category.textColor),
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w600,
@@ -85,7 +85,7 @@ class CategoryCard extends StatelessWidget {
                     category.name?.toUpperCase() ?? "",
                     style:
                         textStyle ??
-                        GoogleFonts.inter(
+                        AppTypography.marcellus(
                           color: hexToColor(category.textColor),
                           fontSize: 15.sp,
                           fontWeight: FontWeight.w600,
@@ -115,7 +115,7 @@ class CategoryCard extends StatelessWidget {
                   children: [
                     Text(
                       'Networth',
-                      style: GoogleFonts.inter(
+                      style: AppTypography.marcellus(
                         color: hexToColor(category.textColor),
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w600,
@@ -126,7 +126,7 @@ class CategoryCard extends StatelessWidget {
                       width: 125.w,
                       child: Text(
                         '${category.networth}',
-                        style: GoogleFonts.inter(
+                        style: AppTypography.marcellus(
                           color: hexToColor(category.textColor),
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w600,

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:holynikkah/core/theme/app_typography.dart';
 
 class CommonTextField extends StatelessWidget {
   final TextEditingController controller;
@@ -41,11 +41,11 @@ class CommonTextField extends StatelessWidget {
         keyboardType: keyboardType,
         maxLines: maxLines,
         enabled: enabled,
-        style: GoogleFonts.inter(color: Colors.black, fontSize: 14.sp),
+        style: AppTypography.marcellus(color: Colors.black, fontSize: 14.sp),
         textCapitalization: textCapitalization ?? TextCapitalization.sentences,
         decoration: InputDecoration(
           hintText: hintText,
-          hintStyle: GoogleFonts.inter(color: Colors.grey[600], fontSize: 14.sp),
+          hintStyle: AppTypography.marcellus(color: Colors.grey[600], fontSize: 14.sp),
           border: InputBorder.none,
           contentPadding: EdgeInsets.symmetric(
             horizontal: 20.w,

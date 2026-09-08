@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:holynikkah/core/theme/app_typography.dart';
 import 'package:holynikkah/modules/category/widgets/animated_pattern_background.dart';
 import 'package:holynikkah/core/widgets/common_snackbar.dart';
 import 'package:holynikkah/modules/category/controller/category_provider.dart';
@@ -48,7 +48,9 @@ class _VipCategoryScreenState extends State<VipCategoryScreen> {
         children: [
           AnimatedPatternBackground(
             backgroundImage: 'assets/images/vip_category_bg.jpeg',
-            veilColor: VipRegisterColors.ink.withValues(alpha: 0.5),
+            fit: BoxFit.cover,
+            repeat: ImageRepeat.noRepeat,
+            veilColor: VipRegisterColors.ink.withValues(alpha: 0.35),
           ),
           SafeArea(
             bottom: false,
@@ -94,20 +96,9 @@ class _VipCategoryScreenState extends State<VipCategoryScreen> {
                           ),
                         ),
                       Padding(
-                        padding: EdgeInsets.fromLTRB(20.w, 26.h, 20.w, 12.h),
-                        child: _VipContinueButton(
-                          label: widget.isSelectionRequired
-                              ? 'Continue'
-                              : 'Next',
-                          isLoading: _isSubmitting,
-                          onTap: widget.isSelectionRequired
-                              ? (_isSubmitting
-                                  ? null
-                                  : _continueWithCategory)
-                              : _goToLogin,
-                        ),
+                        padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 20.h),
+                        child: _buildActionButton(),
                       ),
-                      SizedBox(height: 8.h),
                     ],
                   );
                 },
@@ -128,11 +119,11 @@ class _VipCategoryScreenState extends State<VipCategoryScreen> {
             children: [
               Text(
                 'MEMBERSHIP DIRECTORY',
-                style: GoogleFonts.inter(
-                  fontSize: 11.sp,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 3.5,
-                  color: const Color(0xFFF3D68A).withValues(alpha: 0.85),
+                style: AppTypography.marcellus(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 3.0,
+                  color: const Color(0xFFF3D68A).withValues(alpha: 0.9),
                 ),
               ),
               SizedBox(width: 10.w),
@@ -154,7 +145,7 @@ class _VipCategoryScreenState extends State<VipCategoryScreen> {
           SizedBox(height: 8.h),
           RichText(
             text: TextSpan(
-              style: GoogleFonts.playfairDisplay(
+              style: AppTypography.marcellus(
                 fontSize: 34.sp,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.3,
@@ -168,27 +159,13 @@ class _VipCategoryScreenState extends State<VipCategoryScreen> {
                 ],
               ),
               children: [
-                const TextSpan(text: 'VIP '),
+                TextSpan(
+                  text: 'VIP ',
+                  style: AppTypography.marcellus(color: const Color(0xFFF3D68A)),
+                ),
                 TextSpan(
                   text: 'Register',
-                  style: TextStyle(color: const Color(0xFFF3D68A)),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(height: 6.h),
-          Text(
-            'Six tiers of net worth, ranked by standing',
-            style: GoogleFonts.inter(
-              fontSize: 13.sp,
-              fontWeight: FontWeight.w400,
-              letterSpacing: 0.2,
-              color: Colors.white.withValues(alpha: 0.7),
-              shadows: [
-                Shadow(
-                  color: Colors.black.withValues(alpha: 0.6),
-                  offset: const Offset(0, 1),
-                  blurRadius: 4,
+                  style: AppTypography.marcellus(color: Colors.white),
                 ),
               ],
             ),
@@ -247,8 +224,12 @@ class _VipCategoryScreenState extends State<VipCategoryScreen> {
         return;
       }
 
-      await context.read<AuthProvider>().updateStoredVipCategorySelected(true);
-      await context.read<CategoryProvider>().setVipSelected(true);
+      final authProvider = context.read<AuthProvider>();
+      final categoryProvider = context.read<CategoryProvider>();
+
+      await authProvider.updateStoredVipCategorySelected(true);
+      await categoryProvider.setVipSelected(true);
+      if (!mounted) return;
       widget.onNavigate?.call(0);
     } finally {
       if (mounted) {
@@ -256,59 +237,45 @@ class _VipCategoryScreenState extends State<VipCategoryScreen> {
       }
     }
   }
-}
 
-class _VipContinueButton extends StatelessWidget {
-  const _VipContinueButton({
-    required this.label,
-    required this.onTap,
-    this.isLoading = false,
-  });
+  Widget _buildActionButton() {
+    final title = widget.isSelectionRequired ? "Continue" : "Next";
 
-  final String label;
-  final VoidCallback? onTap;
-  final bool isLoading;
-
-  @override
-  Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: _isSubmitting
+          ? null
+          : (widget.isSelectionRequired ? _continueWithCategory : _goToLogin),
       child: Container(
         width: double.infinity,
-        padding: EdgeInsets.symmetric(vertical: 17.h),
+        padding: EdgeInsets.symmetric(vertical: 16.h),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(999.r),
+          borderRadius: BorderRadius.circular(30.r),
           gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
             colors: [
-              Color(0xFFF3E3AC),
-              VipRegisterColors.gold,
-              Color(0xFFB8871F),
+              Color(0xFFF3D68A),
+              Color(0xFFC9973F),
+              Color(0xFFD98F3F),
             ],
-            stops: [0, 0.55, 1],
+            stops: [0.0, 0.55, 1.0],
           ),
           boxShadow: [
             BoxShadow(
-              color: VipRegisterColors.gold.withValues(alpha: 0.55),
-              offset: Offset(0, 14.h),
-              blurRadius: 26.r,
-              spreadRadius: -10.r,
-            ),
-            BoxShadow(
-              color: Colors.white.withValues(alpha: 0.4),
-              offset: const Offset(0, 1),
-              blurRadius: 0,
+              color: const Color(0xFFC9973F).withValues(alpha: 0.4),
+              offset: const Offset(0, 8),
+              blurRadius: 18,
+              spreadRadius: -4,
             ),
           ],
         ),
-        child: isLoading
+        child: _isSubmitting
             ? Center(
                 child: SizedBox(
                   height: 20.h,
                   width: 20.w,
                   child: const CircularProgressIndicator(
-                    strokeWidth: 2,
+                    strokeWidth: 2.5,
                     valueColor: AlwaysStoppedAnimation<Color>(
                       VipRegisterColors.ink,
                     ),
@@ -319,18 +286,18 @@ class _VipContinueButton extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    label,
-                    style: GoogleFonts.inter(
-                      fontSize: 15.5.sp,
+                    title,
+                    style: AppTypography.marcellus(
+                      fontSize: 19.sp,
                       fontWeight: FontWeight.w700,
-                      letterSpacing: 0.4,
+                      letterSpacing: 1.14,
                       color: VipRegisterColors.ink,
                     ),
                   ),
                   SizedBox(width: 8.w),
                   Icon(
                     Icons.arrow_forward_rounded,
-                    size: 16.sp,
+                    size: 18.sp,
                     color: VipRegisterColors.ink,
                   ),
                 ],

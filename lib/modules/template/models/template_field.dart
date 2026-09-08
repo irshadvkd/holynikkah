@@ -1,3 +1,5 @@
+import 'package:holynikkah/core/utils/utils.dart';
+
 /// Optional validation rules attached to a [TemplateField].
 class TemplateValidation {
   TemplateValidation({
@@ -18,10 +20,10 @@ class TemplateValidation {
 
   factory TemplateValidation.fromJson(Map<String, dynamic> json) {
     return TemplateValidation(
-      minLength: (json['minLength'] as num?)?.toInt(),
-      maxLength: (json['maxLength'] as num?)?.toInt(),
-      min: json['min'] as num?,
-      max: json['max'] as num?,
+      minLength: parseInt(json['minLength']),
+      maxLength: parseInt(json['maxLength']),
+      min: parseDouble(json['min']),
+      max: parseDouble(json['max']),
       regex: json['regex']?.toString(),
       errorMessage: json['errorMessage']?.toString(),
     );
@@ -66,7 +68,7 @@ class TemplateField {
       keyboard: (json['keyboard'] ?? 'text').toString(),
       required: json['required'] == true,
       defaultValue: json['defaultValue']?.toString(),
-      maxLength: (json['maxLength'] as num?)?.toInt(),
+      maxLength: parseInt(json['maxLength']),
       validation: rawValidation is Map
           ? TemplateValidation.fromJson(
               Map<String, dynamic>.from(rawValidation),

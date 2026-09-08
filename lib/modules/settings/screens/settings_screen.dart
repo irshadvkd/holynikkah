@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:holynikkah/core/theme/app_typography.dart';
 import 'package:holynikkah/core/widgets/legal_screens.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -69,7 +69,7 @@ class SettingsScreen extends StatelessWidget {
         ),
         title: Text(
           title,
-          style: GoogleFonts.inter(
+          style: AppTypography.marcellus(
             color: isDestructive ? Colors.red : Colors.white,
             fontSize: 16.sp,
             fontWeight: FontWeight.w500,
@@ -112,15 +112,15 @@ class SettingsScreen extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: Colors.grey[900],
-        title: Text('Logout', style: GoogleFonts.inter(color: Colors.white)),
+        title: Text('Logout', style: AppTypography.marcellus(color: Colors.white)),
         content: Text(
           'Are you sure you want to logout?',
-          style: GoogleFonts.inter(color: Colors.grey[300]),
+          style: AppTypography.marcellus(color: Colors.grey[300]),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Cancel', style: GoogleFonts.inter(color: Colors.grey[400])),
+            child: Text('Cancel', style: AppTypography.marcellus(color: Colors.grey[400])),
           ),
           TextButton(
             onPressed: () async {
@@ -130,7 +130,7 @@ class SettingsScreen extends StatelessWidget {
                 (route) => false,
               );
             },
-            child: Text('Logout', style: GoogleFonts.inter(color: Colors.red)),
+            child: Text('Logout', style: AppTypography.marcellus(color: Colors.red)),
           ),
         ],
       ),
@@ -147,13 +147,13 @@ class ProfileScreen extends StatelessWidget {
       backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.black,
-        title: Text('Profile', style: GoogleFonts.inter(color: Colors.white)),
-        iconTheme: IconThemeData(color: Colors.white),
+        title: Text('Profile', style: AppTypography.marcellus(color: Colors.white)),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Center(
         child: Text(
           'Profile Screen',
-          style: GoogleFonts.inter(color: Colors.white, fontSize: 18.sp),
+          style: AppTypography.marcellus(color: Colors.white, fontSize: 18.sp),
         ),
       ),
     );

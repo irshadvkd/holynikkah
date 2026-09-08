@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:holynikkah/core/services/legal_service.dart';
+import 'package:holynikkah/core/theme/app_typography.dart';
 
 class TermsScreen extends StatefulWidget {
   const TermsScreen({super.key});
@@ -84,7 +84,7 @@ class _TermsScreenState extends State<TermsScreen> {
                   iconTheme: const IconThemeData(color: Color(0xFFCBB388)),
                   title: Text(
                     _page?.title ?? 'Terms & Conditions',
-                    style: GoogleFonts.italiana(
+                    style: AppTypography.marcellus(
                       color: const Color(0xFFF4ECDD),
                       fontSize: 20.sp,
                       fontWeight: FontWeight.bold,
@@ -120,7 +120,7 @@ class _TermsScreenState extends State<TermsScreen> {
             children: [
               Text(
                 _error!,
-                style: GoogleFonts.cormorantGaramond(
+                style: AppTypography.marcellus(
                   color: Colors.redAccent,
                   fontSize: 18.sp,
                   fontWeight: FontWeight.w600,
@@ -139,7 +139,7 @@ class _TermsScreenState extends State<TermsScreen> {
                 onPressed: _fetchContent,
                 child: Text(
                   'Retry',
-                  style: GoogleFonts.cormorantGaramond(
+                  style: AppTypography.marcellus(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.bold,
                   ),
@@ -156,7 +156,7 @@ class _TermsScreenState extends State<TermsScreen> {
       physics: const BouncingScrollPhysics(),
       child: Text(
         _page?.content ?? '',
-        style: GoogleFonts.inter(
+        style: AppTypography.marcellus(
           color: const Color(0xFFF4ECDD),
           fontSize: 14.5.sp,
           height: 1.6,
@@ -248,7 +248,7 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
                   iconTheme: const IconThemeData(color: Color(0xFFCBB388)),
                   title: Text(
                     _page?.title ?? 'Privacy Policy',
-                    style: GoogleFonts.italiana(
+                    style: AppTypography.marcellus(
                       color: const Color(0xFFF4ECDD),
                       fontSize: 20.sp,
                       fontWeight: FontWeight.bold,
@@ -284,7 +284,7 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
             children: [
               Text(
                 _error!,
-                style: GoogleFonts.cormorantGaramond(
+                style: AppTypography.marcellus(
                   color: Colors.redAccent,
                   fontSize: 18.sp,
                   fontWeight: FontWeight.w600,
@@ -303,7 +303,7 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
                 onPressed: _fetchContent,
                 child: Text(
                   'Retry',
-                  style: GoogleFonts.cormorantGaramond(
+                  style: AppTypography.marcellus(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.bold,
                   ),
@@ -320,7 +320,7 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
       physics: const BouncingScrollPhysics(),
       child: Text(
         _page?.content ?? '',
-        style: GoogleFonts.inter(
+        style: AppTypography.marcellus(
           color: const Color(0xFFF4ECDD),
           fontSize: 14.5.sp,
           height: 1.6,

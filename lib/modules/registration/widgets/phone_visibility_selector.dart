@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:holynikkah/core/theme/app_typography.dart';
 import 'package:holynikkah/core/theme/context_extension.dart';
 import 'package:holynikkah/modules/registration/models/phone_visibility.dart';
 
@@ -34,7 +34,7 @@ class PhoneVisibilitySelector extends StatelessWidget {
             children: [
               Text(
                 'Phone visibility',
-                style: GoogleFonts.inter(
+                style: AppTypography.marcellus(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w600,
                   color: AppColors.inputText,
@@ -101,7 +101,7 @@ class PhoneVisibilitySelector extends StatelessWidget {
             child: Text(
               _description(value),
               key: ValueKey(value),
-              style: GoogleFonts.inter(
+              style: AppTypography.marcellus(
                 fontSize: 12.sp,
                 height: 1.35,
                 color: AppColors.inputHint,
@@ -175,7 +175,7 @@ class _SegmentButton extends StatelessWidget {
                     label,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.inter(
+                    style: AppTypography.marcellus(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
                       color: isSelected ? Colors.white : AppColors.inputText,

@@ -1,10 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:holynikkah/core/theme/app_colors.dart';
+import 'package:holynikkah/core/theme/app_typography.dart';
 import 'package:holynikkah/core/utils/app_logger.dart';
 import 'package:holynikkah/models/prayer_model.dart';
 import 'package:holynikkah/modules/ads/services/prayers_service.dart';
-import 'package:holynikkah/modules/reels/screens/reels_screen.dart';
 import 'package:shimmer/shimmer.dart';
 
 class PrayersScreen extends StatefulWidget {
@@ -166,26 +168,37 @@ class _PrayersScreenState extends State<PrayersScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppColors.secondary,
       extendBodyBehindAppBar: true,
-      body: _buildBody(context),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              AppColors.secondaryLight,
+              AppColors.secondary,
+              AppColors.background,
+            ],
+          ),
+        ),
+        child: _buildBody(context),
+      ),
     );
   }
 
   Widget _buildBody(BuildContext context) {
     if (_isLoading) {
-      return Stack(
+      return const Stack(
         fit: StackFit.expand,
         children: [
-          const ColoredBox(color: Colors.black),
-          const Center(
-            child: CircularProgressIndicator(color: Colors.white),
+          Center(
+            child: CircularProgressIndicator(color: AppColors.primary),
           ),
           _PrayerOverlay(
-            currentIndex: 0,
-            totalCount: 0,
             showSwipeHint: false,
-            showProgress: false,
           ),
         ],
       );
@@ -197,31 +210,43 @@ class _PrayersScreenState extends State<PrayersScreen> {
         children: [
           Center(
             child: Padding(
-              padding: const EdgeInsets.all(24),
+              padding: EdgeInsets.all(24.w),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.wifi_off, color: Colors.white54, size: 48),
-                  const SizedBox(height: 16),
+                  Icon(Icons.wifi_off_rounded, color: AppColors.textSecondary, size: 48.sp),
+                  SizedBox(height: 16.h),
                   Text(
                     _errorMessage!,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(color: Colors.white70),
+                    style: AppTypography.bodyMedium(color: AppColors.textSecondary),
                   ),
-                  const SizedBox(height: 24),
-                  FilledButton(
+                  SizedBox(height: 20.h),
+                  ElevatedButton(
                     onPressed: () => _loadPrayers(refresh: true),
-                    child: const Text('Retry'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: AppColors.onPrimary,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
+                      padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
+                    ),
+                    child: Text(
+                      'Retry',
+                      style: AppTypography.button(
+                        color: AppColors.onPrimary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
                 ],
               ),
             ),
           ),
           const _PrayerOverlay(
-            currentIndex: 0,
-            totalCount: 0,
             showSwipeHint: false,
-            showProgress: false,
           ),
         ],
       );
@@ -232,26 +257,48 @@ class _PrayersScreenState extends State<PrayersScreen> {
         fit: StackFit.expand,
         children: [
           Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text(
-                  'No prayers available',
-                  style: TextStyle(color: Colors.white70),
-                ),
-                const SizedBox(height: 16),
-                FilledButton(
-                  onPressed: () => _loadPrayers(refresh: true),
-                  child: const Text('Refresh'),
-                ),
-              ],
+            child: Padding(
+              padding: EdgeInsets.all(24.w),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.inbox_outlined,
+                    color: AppColors.textSecondary,
+                    size: 48.sp,
+                  ),
+                  SizedBox(height: 16.h),
+                  Text(
+                    'No prayers available',
+                    textAlign: TextAlign.center,
+                    style: AppTypography.bodyMedium(color: AppColors.textSecondary),
+                  ),
+                  SizedBox(height: 20.h),
+                  ElevatedButton(
+                    onPressed: () => _loadPrayers(refresh: true),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: AppColors.onPrimary,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
+                      padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
+                    ),
+                    child: Text(
+                      'Refresh',
+                      style: AppTypography.button(
+                        color: AppColors.onPrimary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           const _PrayerOverlay(
-            currentIndex: 0,
-            totalCount: 0,
             showSwipeHint: false,
-            showProgress: false,
           ),
         ],
       );
@@ -281,10 +328,7 @@ class _PrayersScreenState extends State<PrayersScreen> {
           },
         ),
         _PrayerOverlay(
-          currentIndex: _currentIndex,
-          totalCount: _prayers.length,
           showSwipeHint: _showSwipeHint && canSwipeNext,
-          showProgress: true,
         ),
       ],
     );
@@ -294,16 +338,10 @@ class _PrayersScreenState extends State<PrayersScreen> {
 /// Floating chrome — no solid AppBar (Stories / Reels pattern).
 class _PrayerOverlay extends StatelessWidget {
   const _PrayerOverlay({
-    required this.currentIndex,
-    required this.totalCount,
     required this.showSwipeHint,
-    required this.showProgress,
   });
 
-  final int currentIndex;
-  final int totalCount;
   final bool showSwipeHint;
-  final bool showProgress;
 
   @override
   Widget build(BuildContext context) {
@@ -332,7 +370,7 @@ class _PrayerOverlay extends StatelessWidget {
                   stops: const [0, 0.6, 1],
                 ),
               ),
-              child: SizedBox(height: topPadding + 96),
+              child: SizedBox(height: topPadding + 64.h),
             ),
           ),
 
@@ -353,50 +391,49 @@ class _PrayerOverlay extends StatelessWidget {
                     ],
                   ),
                 ),
-                child: SizedBox(height: bottomPadding + 72),
+                child: SizedBox(height: bottomPadding + 72.h),
               ),
             ),
 
           /// Top controls
           Positioned(
-            top: topPadding + 8,
-            left: 16,
-            right: 16,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            top: topPadding + 8.h,
+            left: 20.w,
+            right: 20.w,
+            child: Row(
               children: [
-                if (showProgress && totalCount > 0) ...[
-                  _PrayerProgressIndicator(
-                    total: totalCount,
-                    currentIndex: currentIndex,
-                  ),
-                  const SizedBox(height: 12),
-                ],
-                Row(
-                  children: [
-                    const CustomBackButton(),
-                    const SizedBox(width: 12),
-                    const Text(
-                      'Prayers',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.3,
+                GestureDetector(
+                  onTap: () => Navigator.of(context).pop(),
+                  behavior: HitTestBehavior.opaque,
+                  child: Container(
+                    width: 40.w,
+                    height: 40.w,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.white.withValues(alpha: 0.08),
+                      border: Border.all(
+                        color: AppColors.white.withValues(alpha: 0.12),
+                        width: 1,
                       ),
                     ),
-                    const Spacer(),
-                    if (showProgress && totalCount > 0)
-                      Text(
-                        '${currentIndex + 1} / $totalCount',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.85),
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                  ],
+                    child: Icon(
+                      Icons.arrow_back_ios_new_rounded,
+                      color: AppColors.primary,
+                      size: 18.sp,
+                    ),
+                  ),
                 ),
+                SizedBox(width: 12.w),
+                Expanded(
+                  child: Text(
+                    'Prayers',
+                    style: AppTypography.headline(
+                      color: AppColors.white,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                SizedBox(width: 40.w),
               ],
             ),
           ),
@@ -404,7 +441,7 @@ class _PrayerOverlay extends StatelessWidget {
           /// Swipe hint
           if (showSwipeHint)
             Positioned(
-              bottom: bottomPadding + 24,
+              bottom: bottomPadding + 24.h,
               left: 0,
               right: 0,
               child: Center(
@@ -416,15 +453,15 @@ class _PrayerOverlay extends StatelessWidget {
                     children: [
                       Icon(
                         Icons.keyboard_arrow_up_rounded,
-                        color: Colors.white.withValues(alpha: 0.8),
-                        size: 20,
+                        color: AppColors.white.withValues(alpha: 0.8),
+                        size: 20.sp,
                       ),
-                      const SizedBox(width: 4),
+                      SizedBox(width: 4.w),
                       Text(
                         'Swipe up for next',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.8),
-                          fontSize: 13,
+                        style: AppTypography.marcellus(
+                          color: AppColors.white.withValues(alpha: 0.8),
+                          fontSize: 13.sp,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -439,79 +476,6 @@ class _PrayerOverlay extends StatelessWidget {
   }
 }
 
-/// Progress indicator — segments for small feeds, single bar for large feeds.
-class _PrayerProgressIndicator extends StatelessWidget {
-  const _PrayerProgressIndicator({
-    required this.total,
-    required this.currentIndex,
-  });
-
-  final int total;
-  final int currentIndex;
-
-  /// Stories-style segments only make sense for short sequences.
-  static const int _segmentThreshold = 12;
-
-  @override
-  Widget build(BuildContext context) {
-    if (total <= _segmentThreshold) {
-      return _SegmentProgressBar(
-        total: total,
-        currentIndex: currentIndex,
-      );
-    }
-
-    final progress = total > 1 ? (currentIndex + 1) / total : 1.0;
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(2),
-      child: LinearProgressIndicator(
-        value: progress.clamp(0.0, 1.0),
-        minHeight: 2.5,
-        backgroundColor: Colors.white.withValues(alpha: 0.35),
-        valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
-      ),
-    );
-  }
-}
-
-/// Stories-style segment progress — one bar per prayer (≤12 only).
-class _SegmentProgressBar extends StatelessWidget {
-  const _SegmentProgressBar({
-    required this.total,
-    required this.currentIndex,
-  });
-
-  final int total;
-  final int currentIndex;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: List.generate(total, (i) {
-        final isPast = i < currentIndex;
-        final isCurrent = i == currentIndex;
-
-        return Expanded(
-          child: Padding(
-            padding: EdgeInsets.only(right: i < total - 1 ? 4 : 0),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              height: 2.5,
-              decoration: BoxDecoration(
-                color: isPast || isCurrent
-                    ? Colors.white
-                    : Colors.white.withValues(alpha: 0.35),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-        );
-      }),
-    );
-  }
-}
-
 class _PrayerItem extends StatelessWidget {
   const _PrayerItem({required this.prayer});
 
@@ -520,29 +484,23 @@ class _PrayerItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (prayer.imageUrl.isEmpty) {
-      return const ColoredBox(
-        color: Colors.black,
-        child: Center(
-          child: Icon(Icons.image_not_supported, color: Colors.white54, size: 48),
-        ),
+      return Center(
+        child: Icon(Icons.image_not_supported_outlined, color: AppColors.textSecondary, size: 48.sp),
       );
     }
 
-    return ColoredBox(
-      color: Colors.black,
-      child: CachedNetworkImage(
-        imageUrl: prayer.imageUrl,
-        fit: BoxFit.cover,
-        width: double.infinity,
-        height: double.infinity,
-        placeholder: (context, url) => Shimmer.fromColors(
-          baseColor: Colors.grey[850]!,
-          highlightColor: Colors.grey[700]!,
-          child: const ColoredBox(color: Colors.black),
-        ),
-        errorWidget: (context, url, error) => const Center(
-          child: Icon(Icons.broken_image, color: Colors.white54, size: 48),
-        ),
+    return CachedNetworkImage(
+      imageUrl: prayer.imageUrl,
+      fit: BoxFit.cover,
+      width: double.infinity,
+      height: double.infinity,
+      placeholder: (context, url) => Shimmer.fromColors(
+        baseColor: AppColors.secondary,
+        highlightColor: AppColors.secondaryLight,
+        child: const ColoredBox(color: AppColors.secondary),
+      ),
+      errorWidget: (context, url, error) => Center(
+        child: Icon(Icons.broken_image_outlined, color: AppColors.textSecondary, size: 48.sp),
       ),
     );
   }
@@ -576,28 +534,40 @@ class _NextPageLoaderState extends State<_NextPageLoader> {
 
   @override
   Widget build(BuildContext context) {
-    return ColoredBox(
-      color: Colors.black,
-      child: Center(
-        child: widget.hasFailed
-            ? Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.wifi_off, color: Colors.white54, size: 40),
-                  const SizedBox(height: 12),
-                  const Text(
-                    'Could not load more prayers',
-                    style: TextStyle(color: Colors.white70),
+    return Center(
+      child: widget.hasFailed
+          ? Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.wifi_off_rounded, color: AppColors.textSecondary, size: 40.sp),
+                SizedBox(height: 12.h),
+                Text(
+                  'Could not load more prayers',
+                  style: AppTypography.bodyMedium(color: AppColors.textSecondary),
+                ),
+                SizedBox(height: 16.h),
+                ElevatedButton(
+                  onPressed: widget.onRetry,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: AppColors.onPrimary,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                    padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
                   ),
-                  const SizedBox(height: 16),
-                  FilledButton(
-                    onPressed: widget.onRetry,
-                    child: const Text('Retry'),
+                  child: Text(
+                    'Retry',
+                    style: AppTypography.button(
+                      color: AppColors.onPrimary,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
-                ],
-              )
-            : const CircularProgressIndicator(color: Colors.white),
-      ),
+                ),
+              ],
+            )
+          : const CircularProgressIndicator(color: AppColors.primary),
     );
   }
 }

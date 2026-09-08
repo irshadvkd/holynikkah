@@ -180,8 +180,12 @@ final class _JsonPaths {
 final class _IconPaths {
   const _IconPaths();
 
-  final String appLogoLight = "assets/images/app_logo_light.png";
-  final String appLogoDark = "assets/images/app_logo_dark.png";
+  final String appIcon = "assets/logo/app_icon.png";
+  final String logoIcon = "assets/logo/logo_icon.png";
+  final String logoHorizontal = "assets/logo/logo_horizontal.png";
+  final String appLogo = "assets/logo/logo_icon.png";
+  final String appLogoLight = "assets/logo/logo_horizontal.png";
+  final String appLogoDark = "assets/logo/logo_horizontal.png";
   final String vipRegisterBackground =
       "assets/images/vip_register_background.svg";
   final String settings = "assets/icons/settings.png";
@@ -212,7 +216,7 @@ final class _Misc {
   const _Misc();
 
   // General constants (you can extend later)
-  final String appName = "Holy Nikkah";
+  final String appName = "Holy Nikah";
   final String defaultLanguage = "en";
   final Duration apiTimeout = const Duration(seconds: 30);
 }

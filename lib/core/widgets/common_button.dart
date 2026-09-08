@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:holynikkah/core/theme/app_typography.dart';
 
 class CommonButton extends StatelessWidget {
   final String title;
@@ -26,8 +26,8 @@ class CommonButton extends StatelessWidget {
           color: Colors.white,
           boxShadow: [
             BoxShadow(
-              color: Color(0xFF303036).withOpacity(.7),
-              offset: Offset(0, 4),
+              color: const Color(0xFF303036).withValues(alpha: 0.7),
+              offset: const Offset(0, 4),
               blurRadius: 8,
             ),
           ],
@@ -36,14 +36,14 @@ class CommonButton extends StatelessWidget {
             ? SizedBox(
                 height: 20.h,
                 width: 20.w,
-                child: CircularProgressIndicator(
+                child: const CircularProgressIndicator(
                   strokeWidth: 2,
                   valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
                 ),
               )
             : Text(
                 title,
-                style: GoogleFonts.inter(
+                style: AppTypography.marcellus(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w600,
                   color: Colors.black,

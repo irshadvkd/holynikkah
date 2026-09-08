@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 /// Centralized app color definitions
 class AppColors {
@@ -41,7 +42,34 @@ class AppColors {
   static const Color bottomIconActive = Color(0xFFFFFFFF);
   static const Color bottomHighlight = Color(0xFFFAC60C);
 
-  static  Color shimmerBase = Colors.grey[800]!;
-  static  Color shimmerHighlight = Colors.grey[700]!;
+  static Color shimmerBase = Colors.grey[800]!;
+  static Color shimmerHighlight = Colors.grey[700]!;
+}
 
+/// 🔹 Extension on [BuildContext] for easy access to theme & typography
+extension ThemeContextExtension on BuildContext {
+  /// Access ThemeData
+  ThemeData get theme => Theme.of(this);
+
+  /// Access TextTheme (which defaults to Marcellus)
+  TextTheme get textTheme => Theme.of(this).textTheme;
+
+  /// Quick helper to create Marcellus TextStyle directly from context
+  TextStyle marcellus({
+    double? fontSize,
+    FontWeight? fontWeight,
+    Color? color,
+    double? letterSpacing,
+    double? height,
+    TextDecoration? decoration,
+  }) {
+    return GoogleFonts.marcellus(
+      fontSize: fontSize,
+      fontWeight: fontWeight,
+      color: color,
+      letterSpacing: letterSpacing,
+      height: height,
+      decoration: decoration,
+    );
+  }
 }

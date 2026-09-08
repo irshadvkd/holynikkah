@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:holynikkah/core/theme/app_typography.dart';
 import 'package:holynikkah/core/widgets/common_snackbar.dart';
 import 'package:holynikkah/modules/template/screens/common_image_picker.dart';
 import 'package:image_picker/image_picker.dart';
@@ -193,7 +193,7 @@ class _VipTemplateTwoScreenState extends State<VipTemplateTwoScreen> {
                   child: Text(
                     "Create VIP Template",
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.inter(
+                    style: AppTypography.marcellus(
                       color: const Color(0xFF032544),
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w700,
@@ -249,7 +249,7 @@ class _VipTemplateTwoScreenState extends State<VipTemplateTwoScreen> {
                     /// Image upload
                     Text(
                       "Image",
-                      style: GoogleFonts.inter(
+                      style: AppTypography.marcellus(
                         color: Colors.black87,
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
@@ -286,7 +286,7 @@ class _VipTemplateTwoScreenState extends State<VipTemplateTwoScreen> {
                                   SizedBox(height: 8.h),
                                   Text(
                                     "Upload Image",
-                                    style: GoogleFonts.inter(
+                                    style: AppTypography.marcellus(
                                       color: Colors.black54,
                                       fontSize: 14.sp,
                                       fontWeight: FontWeight.w500,
@@ -318,7 +318,7 @@ class _VipTemplateTwoScreenState extends State<VipTemplateTwoScreen> {
                 ),
                 child: Text(
                   "Preview",
-                  style: GoogleFonts.inter(
+                  style: AppTypography.marcellus(
                     color: Colors.white,
                     fontSize: 15.sp,
                     fontWeight: FontWeight.w600,
@@ -346,7 +346,7 @@ class _VipTemplateTwoScreenState extends State<VipTemplateTwoScreen> {
         children: [
           Text(
             label,
-            style: GoogleFonts.notoSansMalayalam(
+            style: AppTypography.marcellus(
               color: Colors.black87,
               fontSize: 14.sp,
               fontWeight: FontWeight.w600,
@@ -358,10 +358,10 @@ class _VipTemplateTwoScreenState extends State<VipTemplateTwoScreen> {
             keyboardType: keyboardType,
             validator: (value) =>
                 (value == null || value.trim().isEmpty) ? "Required" : null,
-            style: GoogleFonts.inter(color: Colors.black, fontSize: 14.sp),
+            style: AppTypography.marcellus(color: Colors.black, fontSize: 14.sp),
             decoration: InputDecoration(
               hintText: "Enter $label",
-              hintStyle: GoogleFonts.notoSansMalayalam(
+              hintStyle: AppTypography.marcellus(
                 color: Colors.grey.shade500,
                 fontSize: 13.sp,
               ),
@@ -404,7 +404,7 @@ class _VipTemplateTwoScreenState extends State<VipTemplateTwoScreen> {
                 child: Text(
                   "Preview",
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.inter(
+                  style: AppTypography.marcellus(
                     color: const Color(0xFF032544),
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w700,
@@ -456,7 +456,7 @@ class _VipTemplateTwoScreenState extends State<VipTemplateTwoScreen> {
                               Text(
                                 titleController.text,
                                 textAlign: TextAlign.center,
-                                style: GoogleFonts.notoSansMalayalam(
+                                style: AppTypography.marcellus(
                                   color: const Color(0xFF032544),
                                   fontSize: 16.sp,
                                   fontWeight: FontWeight.w700,
@@ -503,7 +503,7 @@ class _VipTemplateTwoScreenState extends State<VipTemplateTwoScreen> {
                     ),
                     child: Text(
                       "Edit",
-                      style: GoogleFonts.inter(
+                      style: AppTypography.marcellus(
                         color: Colors.white,
                         fontSize: 15.sp,
                         fontWeight: FontWeight.w600,
@@ -526,7 +526,7 @@ class _VipTemplateTwoScreenState extends State<VipTemplateTwoScreen> {
                     ),
                     child: Text(
                       "Save",
-                      style: GoogleFonts.inter(
+                      style: AppTypography.marcellus(
                         color: Colors.white,
                         fontSize: 15.sp,
                         fontWeight: FontWeight.w600,
@@ -554,7 +554,7 @@ class _VipTemplateTwoScreenState extends State<VipTemplateTwoScreen> {
         children: [
           Text(
             "$label : ",
-            style: GoogleFonts.notoSansMalayalam(
+            style: AppTypography.marcellus(
               color: Colors.black87,
               fontSize: 13.sp,
               fontWeight: FontWeight.w700,
@@ -563,7 +563,7 @@ class _VipTemplateTwoScreenState extends State<VipTemplateTwoScreen> {
           Expanded(
             child: Text(
               value,
-              style: GoogleFonts.notoSansMalayalam(
+              style: AppTypography.marcellus(
                 color: Colors.black87,
                 fontSize: 13.sp,
                 fontWeight: FontWeight.w400,

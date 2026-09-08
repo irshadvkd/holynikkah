@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:holynikkah/core/provider/theme_provider.dart';
-import 'package:provider/provider.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:holynikkah/core/theme/app_colors.dart';
+import 'package:holynikkah/core/theme/app_typography.dart';
 
 /// 🔹 Reusable text field with optional validation, prefix/suffix icons, and theming
 class CustomTextField extends StatelessWidget {
@@ -20,6 +19,13 @@ class CustomTextField extends StatelessWidget {
   final bool? enabled;
   final bool readOnly;
 
+  final Color? backgroundColor;
+  final Color? textColor;
+  final Color? hintColor;
+  final Color? borderColor;
+  final List<BoxShadow>? boxShadow;
+  final Color? cursorColor;
+
   const CustomTextField({
     super.key,
     required this.controller,
@@ -34,27 +40,32 @@ class CustomTextField extends StatelessWidget {
     this.inputFormatters,
     this.enabled,
     this.readOnly = false,
+    this.backgroundColor,
+    this.textColor,
+    this.hintColor,
+    this.borderColor,
+    this.boxShadow,
+    this.cursorColor,
   });
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.watch<ThemeProvider>().colors;
-
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: backgroundColor ?? Colors.white,
         borderRadius: BorderRadius.circular(50.r),
         border: Border.all(
-          color: Colors.grey.withOpacity(0.2),
+          color: borderColor ?? Colors.grey.withValues(alpha: 0.2),
           width: 1,
         ),
-        boxShadow: [
-          BoxShadow(
-            color:  Color(0xFF303036).withOpacity(.7),
-            offset: const Offset(0, 4),
-            blurRadius: 8,
-          ),
-        ],
+        boxShadow: boxShadow ??
+            [
+              BoxShadow(
+                color: const Color(0xFF303036).withValues(alpha: 0.7),
+                offset: const Offset(0, 4),
+                blurRadius: 8,
+              ),
+            ],
       ),
       child: TextFormField(
         controller: controller,
@@ -66,11 +77,15 @@ class CustomTextField extends StatelessWidget {
         inputFormatters: inputFormatters,
         enabled: enabled,
         readOnly: readOnly,
-        style: GoogleFonts.inter(color: colors.textPrimary, fontSize: 16.sp),
+        cursorColor: cursorColor,
+        style: AppTypography.marcellus(
+          color: textColor ?? AppColors.textPrimary,
+          fontSize: 16.sp,
+        ),
         decoration: InputDecoration(
           hintText: hintText,
-          hintStyle: GoogleFonts.inter(
-            color: colors.textSecondary,
+          hintStyle: AppTypography.marcellus(
+            color: hintColor ?? AppColors.textSecondary,
             fontSize: 16.sp,
           ),
           filled: false,

@@ -50,3 +50,22 @@ Color hexToColor(String? hex) {
 
   return Color(int.parse(buffer.toString(), radix: 16));
 }
+
+/// Safely parses dynamic [value] (num, string, etc.) into a [double?].
+double? parseDouble(dynamic value) {
+  if (value == null) return null;
+  if (value is num) return value.toDouble();
+  if (value is String) return double.tryParse(value.trim());
+  return null;
+}
+
+/// Safely parses dynamic [value] (num, string, etc.) into an [int?].
+int? parseInt(dynamic value) {
+  if (value == null) return null;
+  if (value is num) return value.toInt();
+  if (value is String) {
+    final trimmed = value.trim();
+    return int.tryParse(trimmed) ?? double.tryParse(trimmed)?.toInt();
+  }
+  return null;
+}

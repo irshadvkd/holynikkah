@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:holynikkah/core/theme/app_colors.dart';
+import 'package:holynikkah/core/theme/app_typography.dart';
 import 'package:holynikkah/core/utils/constants.dart';
 import 'package:holynikkah/modules/ads/screens/common_ad_feed_screen.dart';
 
@@ -24,7 +25,7 @@ class _AdsScreenState extends State<AdsScreen>
       viewUrlPrefix: '/antiaging',
     ),
     _OrbitItem(
-      label: 'REPLENISH EXCEPT\nHIS OWN',
+      label: 'REPLENISH\nEXCEPT HIS OWN',
       angleDeg: 307.5,
       title: 'Replenish Except His Own',
       feedUrl: AppConstants.urls.replenishFeed,
@@ -45,14 +46,14 @@ class _AdsScreenState extends State<AdsScreen>
       viewUrlPrefix: '/shadi-vibes',
     ),
     _OrbitItem(
-      label: 'SPACE 4 ADVERTISEMENT',
+      label: 'SPACE 4\nADVERTISEMENT',
       angleDeg: 52.5,
       title: 'Space Advertisement',
       feedUrl: AppConstants.urls.spaceAd1Feed,
       viewUrlPrefix: '/space-ad-1',
     ),
     _OrbitItem(
-      label: 'SPACE 4 ADVERTISEMENT',
+      label: 'SPACE 4\nADVERTISEMENT',
       angleDeg: 87.5,
       title: 'Space Advertisement',
       feedUrl: AppConstants.urls.spaceAd2Feed,
@@ -77,146 +78,164 @@ class _AdsScreenState extends State<AdsScreen>
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final bottomNavHeight = kBottomNavigationBarHeight;
-    final usableHeight =
-        size.height - bottomNavHeight - MediaQuery.of(context).padding.bottom;
-
-    final center = Offset(60, usableHeight / 2);
-
-    const double orbitRadiusX = 240;
-    const double orbitRadiusY = 230;
-    const double mainRadius = 230;
-    const double smallRadius = 40;
-
     return Scaffold(
-      body: Stack(
-        alignment: Alignment.topLeft,
-        children: [
-          // 1. Base Background Image (combines radial gradient and Khatam pattern)
-          Positioned.fill(
-            child: Image.asset('assets/images/ads_bg1.png', fit: BoxFit.cover),
-          ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final width = constraints.maxWidth;
+          final height = constraints.maxHeight;
 
-          // 3. Rotating Astrolabe Rim (Circle + 24 Ticks, spinning slowly)
-          Positioned.fill(
-            child: AnimatedBuilder(
-              animation: _animationController,
-              builder: (context, child) {
-                return CustomPaint(
-                  painter: _RotatingRimPainter(
-                    center: center,
-                    animationValue: _animationController.value,
-                  ),
-                );
-              },
-            ),
-          ),
+          // Responsive scale factor based on reference screen size (390 x 720)
+          final scaleX = width / 390.0;
+          final scaleY = height / 720.0;
+          final scale = math.min(scaleX, scaleY).clamp(0.65, 1.25);
 
-          // 4. Static Orbit Ring (Styled Gold/Brass)
-          Positioned.fill(
-            child: CustomPaint(
-              painter: _OrbitPainter(
-                center: center,
-                radiusX: orbitRadiusX,
-                radiusY: orbitRadiusY,
+          final centerX = (width * 0.15).clamp(35.0, 70.0);
+          final centerY = height / 2;
+          final center = Offset(centerX, centerY);
+
+          final double orbitRadiusX = 240.0 * scale;
+          final double orbitRadiusY = 230.0 * scale;
+          final double mainRadius = 230.0 * scale;
+          final double smallRadius = 40.0 * scale;
+          final double rimRadius = 175.0 * scale;
+
+          return Stack(
+            alignment: Alignment.topLeft,
+            children: [
+              // 1. Base Background Image (combines radial gradient and Khatam pattern)
+              Positioned.fill(
+                child: Image.asset(
+                  'assets/images/ads_bg.png',
+                  fit: BoxFit.cover,
+                ),
               ),
-            ),
-          ),
 
-          // 6. Center Circle (Prayers - Background Image)
-          Positioned(
-            left: center.dx - mainRadius,
-            top: center.dy - mainRadius,
-            child: GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => CommonAdFeedScreen(
-                      title: 'Prayers',
-                      feedUrl: AppConstants.urls.prayersFeed,
-                      viewUrlBuilder: (id) => AppConstants.urls.prayersView(id),
-                    ),
-                  ),
-                );
-              },
-              child: Image.asset(
-                'assets/icons/ads/prayers.png',
-                width: mainRadius * 2,
-                height: mainRadius * 2,
-                fit: BoxFit.contain,
-              ),
-            ),
-          ),
-
-          // 7. Prayers Text Overlay (Centered exactly on the circle)
-          Positioned(
-            left: center.dx - mainRadius + 30,
-            top: center.dy - mainRadius,
-            width: mainRadius * 2,
-            height: mainRadius * 2,
-            child: Center(
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => CommonAdFeedScreen(
-                        title: 'Prayers',
-                        feedUrl: AppConstants.urls.prayersFeed,
-                        viewUrlBuilder: (id) => AppConstants.urls.prayersView(id),
+              // 3. Rotating Astrolabe Rim (Circle + 24 Ticks, spinning slowly)
+              Positioned.fill(
+                child: AnimatedBuilder(
+                  animation: _animationController,
+                  builder: (context, child) {
+                    return CustomPaint(
+                      painter: _RotatingRimPainter(
+                        center: center,
+                        rimRadius: rimRadius,
+                        animationValue: _animationController.value,
                       ),
-                    ),
-                  );
-                },
-                child: Text(
-                  'Prayers',
-                  style: GoogleFonts.fraunces(
-                    fontSize: 27,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFFF6EFE2), // Ivory text color
-                    letterSpacing: 0.5,
+                    );
+                  },
+                ),
+              ),
+
+              // 4. Static Orbit Ring (Styled Gold/Brass)
+              Positioned.fill(
+                child: CustomPaint(
+                  painter: _OrbitPainter(
+                    center: center,
+                    radiusX: orbitRadiusX,
+                    radiusY: orbitRadiusY,
                   ),
                 ),
               ),
-            ),
-          ),
 
-          // 5. Orbit Items (Globes)
-          ..._orbitItems.asMap().entries.map((entry) {
-            final index = entry.key;
-            final item = entry.value;
-            final angle = item.angleDeg * math.pi / 180;
+              // 6. Center Circle (Prayers - Background Image)
+              Positioned(
+                left: center.dx - mainRadius,
+                top: center.dy - mainRadius,
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CommonAdFeedScreen(
+                          title: 'Prayers',
+                          feedUrl: AppConstants.urls.prayersFeed,
+                          viewUrlBuilder: (id) =>
+                              AppConstants.urls.prayersView(id),
+                        ),
+                      ),
+                    );
+                  },
+                  child: Image.asset(
+                    'assets/icons/ads/prayers.png',
+                    width: mainRadius * 2,
+                    height: mainRadius * 2,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
 
-            final globeCenter =
-                center +
-                Offset(
-                  orbitRadiusX * math.cos(angle),
-                  orbitRadiusY * math.sin(angle),
-                );
-
-            return _OrbitGlobe(
-              center: globeCenter,
-              radius: smallRadius,
-              label: item.label,
-              angleDeg: item.angleDeg,
-              index: index,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => CommonAdFeedScreen(
-                      title: item.title,
-                      feedUrl: item.feedUrl,
-                      viewUrlBuilder: (id) => "${item.viewUrlPrefix}/$id/views",
+              // 7. Prayers Text Overlay (Centered exactly on the circle)
+              Positioned(
+                left: center.dx - mainRadius + (30 * scale),
+                top: center.dy - mainRadius,
+                width: mainRadius * 2,
+                height: mainRadius * 2,
+                child: Center(
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => CommonAdFeedScreen(
+                            title: 'Prayers',
+                            feedUrl: AppConstants.urls.prayersFeed,
+                            viewUrlBuilder: (id) =>
+                                AppConstants.urls.prayersView(id),
+                          ),
+                        ),
+                      );
+                    },
+                    child: Text(
+                      'Prayers',
+                      style: AppTypography.marcellus(
+                        fontSize: (27 * scale).clamp(18.0, 32.0),
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                        letterSpacing: 0.5,
+                      ),
                     ),
                   ),
+                ),
+              ),
+
+              // 5. Orbit Items (Globes)
+              ..._orbitItems.asMap().entries.map((entry) {
+                final index = entry.key;
+                final item = entry.value;
+                final angle = item.angleDeg * math.pi / 180;
+
+                final globeCenter =
+                    center +
+                    Offset(
+                      orbitRadiusX * math.cos(angle),
+                      orbitRadiusY * math.sin(angle),
+                    );
+
+                return _OrbitGlobe(
+                  center: globeCenter,
+                  radius: smallRadius,
+                  scale: scale,
+                  label: item.label,
+                  angleDeg: item.angleDeg,
+                  index: index,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CommonAdFeedScreen(
+                          title: item.title,
+                          feedUrl: item.feedUrl,
+                          viewUrlBuilder: (id) =>
+                              "${item.viewUrlPrefix}/$id/views",
+                        ),
+                      ),
+                    );
+                  },
                 );
-              },
-            );
-          }),
-        ],
+              }),
+            ],
+          );
+        },
       ),
     );
   }
@@ -241,6 +260,7 @@ class _OrbitItem {
 class _OrbitGlobe extends StatelessWidget {
   final Offset center;
   final double radius;
+  final double scale;
   final String label;
   final double angleDeg;
   final int index;
@@ -249,6 +269,7 @@ class _OrbitGlobe extends StatelessWidget {
   const _OrbitGlobe({
     required this.center,
     required this.radius,
+    required this.scale,
     required this.label,
     required this.angleDeg,
     required this.index,
@@ -260,7 +281,9 @@ class _OrbitGlobe extends StatelessWidget {
     final angleRad = angleDeg * math.pi / 180;
     final dx = math.cos(angleRad);
     final dy = math.sin(angleRad);
-    const double labelDistance = 14;
+    final double labelDistance = 14 * scale;
+    final double labelWidth = 125 * scale;
+    final double fontSize = (10 * scale).clamp(8.0, 12.5);
 
     return Stack(
       children: [
@@ -280,28 +303,28 @@ class _OrbitGlobe extends StatelessWidget {
         ),
         Positioned(
           left: index == 0
-              ? center.dx + (radius + labelDistance) * dx - 55
+              ? center.dx + (radius + labelDistance) * dx - (55 * scale)
               : index == 1
-              ? center.dx + (radius + labelDistance) * dx - 85
+              ? center.dx + (radius + labelDistance) * dx - (62.5 * scale)
               : index == 2
-              ? center.dx + (radius + labelDistance) * dx - 45
+              ? center.dx + (radius + labelDistance) * dx - (45 * scale)
               : index == 3
-              ? center.dx + (radius + labelDistance) * dx - 40
+              ? center.dx + (radius + labelDistance) * dx - (40 * scale)
               : index == 4
-              ? center.dx + (radius + labelDistance) * dx - 85
+              ? center.dx + (radius + labelDistance) * dx - (85 * scale)
               : index == 5
-              ? center.dx + (radius + labelDistance) * dx - 55
+              ? center.dx + (radius + labelDistance) * dx - (55 * scale)
               : center.dx + (radius + labelDistance) * dx,
           top: index == 0
-              ? center.dy + (radius + labelDistance) * dy - 12
+              ? center.dy + (radius + labelDistance) * dy - (12 * scale)
               : index == 1
-              ? center.dy + (radius + labelDistance) * dy - 32
+              ? center.dy + (radius + labelDistance) * dy - (36 * scale)
               : index == 2
-              ? center.dy + (radius + labelDistance) * dy + 8
+              ? center.dy + (radius + labelDistance) * dy + (8 * scale)
               : index == 3
-              ? center.dy + (radius + labelDistance) * dy - 28
+              ? center.dy + (radius + labelDistance) * dy - (28 * scale)
               : index == 4
-              ? center.dy + (radius + labelDistance) * dy + 8
+              ? center.dy + (radius + labelDistance) * dy + (8 * scale)
               : index == 5
               ? center.dy + (radius + labelDistance) * dy
               : center.dy + (radius + labelDistance) * dy,
@@ -310,15 +333,15 @@ class _OrbitGlobe extends StatelessWidget {
             child: GestureDetector(
               onTap: onTap,
               child: SizedBox(
-                width: 110,
+                width: labelWidth,
                 child: Text(
                   label,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 10,
+                  style: AppTypography.marcellus(
+                    fontSize: fontSize,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.5,
-                    color: Color(0xFFF6EFE2), // Ivory readable color on dark bg
+                    color: AppColors.textPrimary,
                     height: 1.3,
                   ),
                 ),
@@ -358,7 +381,7 @@ class _OrbitPainter extends CustomPainter {
     canvas.drawOval(
       Rect.fromCenter(center: center, width: radiusX * 2, height: radiusY * 2),
       Paint()
-        ..color = const Color(0xFFE7CE8C)
+        ..color = AppColors.primary
             .withValues(alpha: 0.35) // Gold soft color matching the theme
         ..style = PaintingStyle.stroke
         ..strokeWidth = 0.8, // Reverted back to original
@@ -375,10 +398,12 @@ class _OrbitPainter extends CustomPainter {
 
 class _RotatingRimPainter extends CustomPainter {
   final Offset center;
+  final double rimRadius;
   final double animationValue;
 
   const _RotatingRimPainter({
     required this.center,
+    required this.rimRadius,
     required this.animationValue,
   });
 
@@ -388,28 +413,25 @@ class _RotatingRimPainter extends CustomPainter {
     canvas.translate(center.dx, center.dy);
     canvas.rotate(animationValue * 2 * math.pi);
 
-    const double rimRadius =
-        175.0; // Positioned in between the center core (140) and outer globes (230/240)
-
-    // 1. Astrolabe rim circle (radius 175)
+    // 1. Astrolabe rim circle
     final limbPaint = Paint()
-      ..color = const Color(0xFFE7CE8C)
-          .withValues(alpha: 0.22) // stroke="rgba(231,206,140,0.22)"
+      ..color = AppColors.primary
+          .withValues(alpha: 0.22)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.7; // Reverted back to original
+      ..strokeWidth = 0.7;
     canvas.drawCircle(Offset.zero, rimRadius, limbPaint);
 
     // 2. 24 ticks around the circle
     final tickPaint = Paint()
-      ..color = const Color(0xFFE7CE8C)
-          .withValues(alpha: 0.5) // stroke="rgba(231,206,140,0.5)"
+      ..color = AppColors.primary
+          .withValues(alpha: 0.5)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.0; // Reverted back to original
+      ..strokeWidth = 1.0;
     final majorTickPaint = Paint()
-      ..color = const Color(0xFFE7CE8C)
-          .withValues(alpha: 0.75) // stroke="rgba(231,206,140,0.75)"
+      ..color = AppColors.primary
+          .withValues(alpha: 0.75)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.3; // Reverted back to original
+      ..strokeWidth = 1.3;
 
     for (int i = 0; i < 24; i++) {
       final double angle = i * (2 * math.pi / 24);
@@ -436,6 +458,7 @@ class _RotatingRimPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _RotatingRimPainter oldDelegate) {
     return oldDelegate.animationValue != animationValue ||
-        oldDelegate.center != center;
+        oldDelegate.center != center ||
+        oldDelegate.rimRadius != rimRadius;
   }
 }

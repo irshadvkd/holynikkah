@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:holynikkah/core/theme/app_typography.dart';
 import 'package:holynikkah/core/utils/validation_utils.dart';
 
 enum TextFieldType {
@@ -82,8 +82,8 @@ class _ValidatedTextFieldState extends State<ValidatedTextField> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Color(0xFF303036).withOpacity(.7),
-            offset: Offset(0, 4),
+            color: const Color(0xFF303036).withValues(alpha: 0.7),
+            offset: const Offset(0, 4),
             blurRadius: 8,
           ),
         ],
@@ -99,14 +99,14 @@ class _ValidatedTextFieldState extends State<ValidatedTextField> {
         enabled: widget.enabled,
         onTap: widget.onTap,
         onChanged: widget.onChanged,
-        style: GoogleFonts.inter(
+        style: AppTypography.marcellus(
           fontSize: 16.sp,
           color: Colors.black87,
         ),
         textCapitalization: widget.textCapitalization ?? TextCapitalization.none,
         decoration: InputDecoration(
           hintText: widget.hintText,
-          hintStyle: GoogleFonts.inter(
+          hintStyle: AppTypography.marcellus(
             fontSize: 16.sp,
             color: Colors.grey[600],
           ),

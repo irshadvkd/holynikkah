@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:holynikkah/core/theme/app_typography.dart';
 
 enum SnackBarType { success, error, warning, info }
 
@@ -209,7 +209,7 @@ class _SnackBarOverlayState extends State<_SnackBarOverlay>
                         widget.message,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.inter(
+                        style: AppTypography.marcellus(
                           color: Colors.white,
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w500,
@@ -226,7 +226,7 @@ class _SnackBarOverlayState extends State<_SnackBarOverlay>
                         },
                         child: Text(
                           widget.actionLabel!,
-                          style: GoogleFonts.inter(
+                          style: AppTypography.marcellus(
                             color: accentColor,
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w600,

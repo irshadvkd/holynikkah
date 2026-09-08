@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:holynikkah/core/theme/app_typography.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -56,7 +56,7 @@ class _PhoneRequestsScreenState extends State<PhoneRequestsScreen> {
         ),
         title: Text(
           'Phone Requests',
-          style: GoogleFonts.inter(
+          style: AppTypography.marcellus(
             color: _navy,
             fontSize: 18.sp,
             fontWeight: FontWeight.w700,
@@ -151,7 +151,7 @@ class _Segmented extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: GoogleFonts.inter(
+          style: AppTypography.marcellus(
             color: selected ? AppColors.pureWhite : AppColors.inputText,
             fontSize: 15.sp,
             fontWeight: FontWeight.w600,
@@ -384,7 +384,7 @@ class _PhoneRequestListState extends State<_PhoneRequestList> {
               ),
               child: Text(
                 filter.label,
-                style: GoogleFonts.inter(
+                style: AppTypography.marcellus(
                   color: selected ? AppColors.pureWhite : AppColors.inputText,
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w600,
@@ -508,7 +508,7 @@ class _RequestCard extends StatelessWidget {
                       name,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.inter(
+                      style: AppTypography.marcellus(
                         color: _navy,
                         fontSize: 15.sp,
                         fontWeight: FontWeight.w700,
@@ -529,7 +529,7 @@ class _RequestCard extends StatelessWidget {
                               place,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: GoogleFonts.inter(
+                              style: AppTypography.marcellus(
                                 color: AppColors.inputHint,
                                 fontSize: 12.sp,
                               ),
@@ -577,7 +577,7 @@ class _RequestCard extends StatelessWidget {
               ),
               child: Text(
                 'Reject',
-                style: GoogleFonts.inter(
+                style: AppTypography.marcellus(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w700,
                   color: _rejectRed,
@@ -609,7 +609,7 @@ class _RequestCard extends StatelessWidget {
                     )
                   : Text(
                       'Approve',
-                      style: GoogleFonts.inter(
+                      style: AppTypography.marcellus(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w700,
                         color: AppColors.pureWhite,
@@ -639,7 +639,7 @@ class _RequestCard extends StatelessWidget {
           icon: Icon(Icons.call, size: 15.sp, color: AppColors.pureWhite),
           label: Text(
             'Call',
-            style: GoogleFonts.inter(
+            style: AppTypography.marcellus(
               fontSize: 13.sp,
               fontWeight: FontWeight.w700,
               color: AppColors.pureWhite,
@@ -728,7 +728,7 @@ class _StatusBadge extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: GoogleFonts.inter(
+        style: AppTypography.marcellus(
           color: color,
           fontSize: 11.sp,
           fontWeight: FontWeight.w700,
@@ -769,7 +769,7 @@ class _ResultLine extends StatelessWidget {
         Expanded(
           child: Text(
             text,
-            style: GoogleFonts.inter(
+            style: AppTypography.marcellus(
               color: color,
               fontSize: 12.sp,
               fontWeight: FontWeight.w600,
@@ -807,7 +807,7 @@ class _EmptyMessage extends StatelessWidget {
             Text(
               message,
               textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
+              style: AppTypography.marcellus(
                 color: AppColors.inputText,
                 fontSize: 14.sp,
               ),
@@ -826,7 +826,7 @@ class _EmptyMessage extends StatelessWidget {
                 ),
                 child: Text(
                   actionLabel!,
-                  style: GoogleFonts.inter(
+                  style: AppTypography.marcellus(
                     color: AppColors.pureWhite,
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,

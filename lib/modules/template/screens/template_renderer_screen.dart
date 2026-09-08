@@ -6,6 +6,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:holynikkah/core/theme/app_colors.dart';
+import 'package:holynikkah/core/theme/app_typography.dart';
 import 'package:holynikkah/core/utils/app_logger.dart';
 import 'package:holynikkah/core/utils/utils.dart';
 import 'package:holynikkah/core/widgets/common_snackbar.dart';
@@ -89,14 +91,6 @@ class _TemplateRendererScreenState extends State<TemplateRendererScreen> {
     for (final e in (widget.initialSlots ?? const {}).entries)
       if (e.value.isNotEmpty) e.key: e.value,
   };
-
-  static const Color _primary = Color(0xFF032544);
-
-  static const SystemUiOverlayStyle _lightStatusBar = SystemUiOverlayStyle(
-    statusBarColor: Colors.white,
-    statusBarIconBrightness: Brightness.dark,
-    statusBarBrightness: Brightness.light,
-  );
 
   TemplateDefinition get _template => widget.template;
 
@@ -247,7 +241,7 @@ class _TemplateRendererScreenState extends State<TemplateRendererScreen> {
       context: context,
       barrierDismissible: false,
       builder: (_) => const Center(
-        child: CircularProgressIndicator(color: _primary),
+        child: CircularProgressIndicator(color: AppColors.primary),
       ),
     );
 
@@ -331,16 +325,31 @@ class _TemplateRendererScreenState extends State<TemplateRendererScreen> {
   @override
   Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: _lightStatusBar,
+      value: SystemUiOverlayStyle.light,
       child: Scaffold(
-        backgroundColor: Colors.white,
-        body: PageView(
-          controller: _pageController,
-          physics: const NeverScrollableScrollPhysics(),
-          children: [
-            _buildFormPage(),
-            _buildPreviewPage(),
-          ],
+        backgroundColor: AppColors.secondary,
+        body: Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                AppColors.secondaryLight,
+                AppColors.secondary,
+                AppColors.background,
+              ],
+            ),
+          ),
+          child: PageView(
+            controller: _pageController,
+            physics: const NeverScrollableScrollPhysics(),
+            children: [
+              _buildFormPage(),
+              _buildPreviewPage(),
+            ],
+          ),
         ),
       ),
     );
@@ -358,7 +367,7 @@ class _TemplateRendererScreenState extends State<TemplateRendererScreen> {
           ),
           Expanded(
             child: SingleChildScrollView(
-              padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 16.h),
+              padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 16.h),
               child: Form(
                 key: _formKey,
                 child: Column(
@@ -393,9 +402,8 @@ class _TemplateRendererScreenState extends State<TemplateRendererScreen> {
         children: [
           Text(
             field.label,
-            style: GoogleFonts.notoSansMalayalam(
-              color: Colors.black87,
-              fontSize: 14.sp,
+            style: AppTypography.bodyMedium(
+              color: AppColors.textPrimary,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -414,16 +422,27 @@ class _TemplateRendererScreenState extends State<TemplateRendererScreen> {
   InputDecoration _inputDecoration(TemplateField field) {
     return InputDecoration(
       hintText: field.hint ?? 'Enter ${field.label}',
-      hintStyle: GoogleFonts.notoSansMalayalam(
-        color: Colors.grey.shade500,
-        fontSize: 13.sp,
+      hintStyle: AppTypography.bodyMedium(
+        color: AppColors.textTertiary,
       ),
       filled: true,
-      fillColor: Colors.grey.shade100,
-      contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-      border: OutlineInputBorder(
+      fillColor: AppColors.inputBackground,
+      contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+      enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14.r),
-        borderSide: BorderSide.none,
+        borderSide: const BorderSide(color: AppColors.inputBorder),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14.r),
+        borderSide: const BorderSide(color: AppColors.primary, width: 1.4),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14.r),
+        borderSide: const BorderSide(color: AppColors.error),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14.r),
+        borderSide: const BorderSide(color: AppColors.error, width: 1.4),
       ),
     );
   }
@@ -436,7 +455,7 @@ class _TemplateRendererScreenState extends State<TemplateRendererScreen> {
       maxLength: field.maxLength,
       maxLines: multiline ? 4 : 1,
       validator: (value) => _validate(field, value),
-      style: GoogleFonts.inter(color: Colors.black, fontSize: 14.sp),
+      style: AppTypography.bodyMedium(color: AppColors.white),
       decoration: _inputDecoration(field).copyWith(counterText: ''),
     );
   }
@@ -447,12 +466,18 @@ class _TemplateRendererScreenState extends State<TemplateRendererScreen> {
     return DropdownButtonFormField<String>(
       initialValue: field.options.contains(current) ? current : null,
       isExpanded: true,
+      dropdownColor: AppColors.secondary,
+      icon: const Icon(Icons.arrow_drop_down, color: AppColors.primary),
+      style: AppTypography.bodyMedium(color: AppColors.white),
       items: field.options
           .map((o) => DropdownMenuItem(
                 value: o,
                 child: Text(
                   o,
-                  style: GoogleFonts.notoSansMalayalam(fontSize: 14.sp),
+                  style: AppTypography.marcellus(
+                    fontSize: 14.sp,
+                    color: AppColors.white,
+                  ),
                 ),
               ))
           .toList(),
@@ -468,9 +493,9 @@ class _TemplateRendererScreenState extends State<TemplateRendererScreen> {
       controller: controller,
       readOnly: true,
       validator: (value) => _validate(field, value),
-      style: GoogleFonts.inter(color: Colors.black, fontSize: 14.sp),
+      style: AppTypography.bodyMedium(color: AppColors.white),
       decoration: _inputDecoration(field).copyWith(
-        suffixIcon: const Icon(Icons.calendar_today, color: _primary),
+        suffixIcon: const Icon(Icons.calendar_today, color: AppColors.primary),
       ),
       onTap: () async {
         FocusScope.of(context).unfocus();
@@ -480,6 +505,19 @@ class _TemplateRendererScreenState extends State<TemplateRendererScreen> {
           initialDate: now,
           firstDate: DateTime(now.year - 100),
           lastDate: DateTime(now.year + 100),
+          builder: (context, child) {
+            return Theme(
+              data: Theme.of(context).copyWith(
+                colorScheme: const ColorScheme.dark(
+                  primary: AppColors.primary,
+                  onPrimary: AppColors.onPrimary,
+                  surface: AppColors.secondary,
+                  onSurface: AppColors.white,
+                ),
+              ),
+              child: child!,
+            );
+          },
         );
         if (picked != null) {
           controller.text =
@@ -497,9 +535,8 @@ class _TemplateRendererScreenState extends State<TemplateRendererScreen> {
         SizedBox(height: 8.h),
         Text(
           label,
-          style: GoogleFonts.inter(
-            color: Colors.black87,
-            fontSize: 14.sp,
+          style: AppTypography.bodyMedium(
+            color: AppColors.textPrimary,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -510,9 +547,9 @@ class _TemplateRendererScreenState extends State<TemplateRendererScreen> {
             width: double.infinity,
             height: 180.h,
             decoration: BoxDecoration(
-              color: Colors.grey.shade100,
+              color: AppColors.inputBackground,
               borderRadius: BorderRadius.circular(14.r),
-              border: Border.all(color: Colors.grey.shade300),
+              border: Border.all(color: AppColors.inputBorder),
             ),
             child: _buildImagePickerContent(slot.id),
           ),
@@ -562,13 +599,12 @@ class _TemplateRendererScreenState extends State<TemplateRendererScreen> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(Icons.cloud_upload_outlined, size: 40.sp, color: _primary),
+        Icon(Icons.cloud_upload_outlined, size: 40.sp, color: AppColors.primary),
         SizedBox(height: 8.h),
         Text(
           'Upload Image',
-          style: GoogleFonts.inter(
-            color: Colors.black54,
-            fontSize: 14.sp,
+          style: AppTypography.bodyMedium(
+            color: AppColors.textSecondary,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -589,19 +625,19 @@ class _TemplateRendererScreenState extends State<TemplateRendererScreen> {
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
             decoration: BoxDecoration(
-              color: _primary.withValues(alpha: 0.85),
+              color: AppColors.secondary.withValues(alpha: 0.85),
               borderRadius: BorderRadius.circular(20.r),
+              border: Border.all(color: AppColors.inputBorder),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.edit, size: 13.sp, color: Colors.white),
+                Icon(Icons.edit, size: 13.sp, color: AppColors.primary),
                 SizedBox(width: 4.w),
                 Text(
                   'Change',
-                  style: GoogleFonts.inter(
-                    color: Colors.white,
-                    fontSize: 11.sp,
+                  style: AppTypography.caption(
+                    color: AppColors.primary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -881,15 +917,16 @@ class _TemplateRendererScreenState extends State<TemplateRendererScreen> {
     return Container(
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.secondary,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+        border: const Border(top: BorderSide(color: AppColors.inputBorder)),
       ),
       child: Row(
         children: [
-          Expanded(child: _primaryButton('Edit', _goToForm)),
+          Expanded(child: _secondaryButton('Edit', _goToForm)),
           SizedBox(width: 12.w),
           Expanded(
-            child: _primaryButton('Save', _saveTemplate, color: Colors.green),
+            child: _primaryButton('Save', _saveTemplate),
           ),
         ],
       ),
@@ -900,20 +937,37 @@ class _TemplateRendererScreenState extends State<TemplateRendererScreen> {
 
   Widget _header({required String title, required VoidCallback onBack}) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(8.w, 8.h, 8.w, 0),
+      padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 0),
       child: Row(
         children: [
-          IconButton(
-            onPressed: onBack,
-            icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+          GestureDetector(
+            onTap: onBack,
+            behavior: HitTestBehavior.opaque,
+            child: Container(
+              width: 40.w,
+              height: 40.w,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.white.withValues(alpha: 0.08),
+                border: Border.all(
+                  color: AppColors.white.withValues(alpha: 0.12),
+                  width: 1,
+                ),
+              ),
+              child: Icon(
+                Icons.arrow_back_ios_new_rounded,
+                color: AppColors.primary,
+                size: 18.sp,
+              ),
+            ),
           ),
+          SizedBox(width: 12.w),
           Expanded(
             child: Text(
               title,
               textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
-                color: _primary,
-                fontSize: 18.sp,
+              style: AppTypography.headline(
+                color: AppColors.white,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -924,22 +978,46 @@ class _TemplateRendererScreenState extends State<TemplateRendererScreen> {
     );
   }
 
-  Widget _primaryButton(String label, VoidCallback onTap, {Color? color}) {
+  Widget _primaryButton(String label, VoidCallback onTap, {Color? color, Color? textColor}) {
     return SizedBox(
       height: 52.h,
       child: ElevatedButton(
         onPressed: onTap,
         style: ElevatedButton.styleFrom(
-          backgroundColor: color ?? _primary,
+          backgroundColor: color ?? AppColors.primary,
+          elevation: 2,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14.r),
           ),
         ),
         child: Text(
           label,
-          style: GoogleFonts.inter(
-            color: Colors.white,
-            fontSize: 15.sp,
+          style: AppTypography.button(
+            color: textColor ?? AppColors.onPrimary,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _secondaryButton(String label, VoidCallback onTap) {
+    return SizedBox(
+      height: 52.h,
+      child: ElevatedButton(
+        onPressed: onTap,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.inputBackground,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14.r),
+            side: const BorderSide(color: AppColors.inputBorder),
+          ),
+        ),
+        child: Text(
+          label,
+          style: AppTypography.button(
+            color: AppColors.white,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -962,8 +1040,10 @@ class _TemplateRendererScreenState extends State<TemplateRendererScreen> {
       case 'poppins':
         return GoogleFonts.poppins(textStyle: base);
       case 'notosansmalayalam':
-      default:
         return GoogleFonts.notoSansMalayalam(textStyle: base);
+      case 'marcellus':
+      default:
+        return GoogleFonts.marcellus(textStyle: base);
     }
   }
 
@@ -1087,8 +1167,6 @@ class _TemplateNameDialog extends StatefulWidget {
 }
 
 class _TemplateNameDialogState extends State<_TemplateNameDialog> {
-  static const Color _primary = Color(0xFF032544);
-
   late final TextEditingController _controller;
   final _formKey = GlobalKey<FormState>();
 
@@ -1120,11 +1198,12 @@ class _TemplateNameDialogState extends State<_TemplateNameDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.secondary,
       elevation: 0,
       insetPadding: EdgeInsets.symmetric(horizontal: 28.w),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(24.r),
+        side: const BorderSide(color: AppColors.inputBorder),
       ),
       child: Padding(
         padding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, 20.h),
@@ -1136,29 +1215,29 @@ class _TemplateNameDialogState extends State<_TemplateNameDialog> {
               width: 48.w,
               height: 48.w,
               decoration: BoxDecoration(
-                color: _primary.withValues(alpha: 0.08),
+                color: AppColors.primary.withValues(alpha: 0.12),
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.bookmark_added_outlined,
-                  color: _primary, size: 24.sp),
+              child: Icon(
+                Icons.bookmark_added_outlined,
+                color: AppColors.primary,
+                size: 24.sp,
+              ),
             ),
             SizedBox(height: 16.h),
             Text(
               'Save template',
-              style: GoogleFonts.inter(
-                fontSize: 18.sp,
+              style: AppTypography.title(
                 fontWeight: FontWeight.w700,
-                color: _primary,
+                color: AppColors.white,
               ),
             ),
             SizedBox(height: 4.h),
             Text(
               'Give this template a name so you can find it later.',
-              style: GoogleFonts.inter(
-                fontSize: 13.sp,
-                color: Colors.black54,
-                height: 1.4,
-              ),
+              style: AppTypography.bodySmall(
+                color: AppColors.textSecondary,
+              ).copyWith(height: 1.4),
             ),
             SizedBox(height: 18.h),
             Form(
@@ -1168,38 +1247,37 @@ class _TemplateNameDialogState extends State<_TemplateNameDialog> {
                 autofocus: true,
                 textCapitalization: TextCapitalization.sentences,
                 textInputAction: TextInputAction.done,
-                style: GoogleFonts.inter(color: Colors.black, fontSize: 14.sp),
+                style: AppTypography.bodyMedium(color: AppColors.white),
                 validator: (value) => (value ?? '').trim().isEmpty
                     ? 'Please enter a name'
                     : null,
                 onFieldSubmitted: (_) => _submit(),
                 decoration: InputDecoration(
                   hintText: 'Template name',
-                  hintStyle: GoogleFonts.inter(
-                    color: Colors.grey.shade500,
-                    fontSize: 13.sp,
+                  hintStyle: AppTypography.bodyMedium(
+                    color: AppColors.textTertiary,
                   ),
                   filled: true,
-                  fillColor: Colors.grey.shade100,
+                  fillColor: AppColors.inputBackground,
                   contentPadding: EdgeInsets.symmetric(
                     horizontal: 16.w,
                     vertical: 14.h,
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14.r),
-                    borderSide: BorderSide.none,
+                    borderSide: const BorderSide(color: AppColors.inputBorder),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14.r),
-                    borderSide: BorderSide(color: _primary, width: 1.4),
+                    borderSide: const BorderSide(color: AppColors.primary, width: 1.4),
                   ),
                   errorBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14.r),
-                    borderSide: const BorderSide(color: Colors.red),
+                    borderSide: const BorderSide(color: AppColors.error),
                   ),
                   focusedErrorBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14.r),
-                    borderSide: const BorderSide(color: Colors.red, width: 1.4),
+                    borderSide: const BorderSide(color: AppColors.error, width: 1.4),
                   ),
                 ),
               ),
@@ -1229,17 +1307,20 @@ class _TemplateNameDialogState extends State<_TemplateNameDialog> {
         onPressed: onTap,
         style: ElevatedButton.styleFrom(
           elevation: 0,
-          backgroundColor: filled ? _primary : Colors.grey.shade100,
-          foregroundColor: filled ? Colors.white : _primary,
+          backgroundColor: filled ? AppColors.primary : AppColors.inputBackground,
+          foregroundColor: filled ? AppColors.onPrimary : AppColors.textSecondary,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14.r),
+            side: BorderSide(
+              color: filled ? Colors.transparent : AppColors.inputBorder,
+            ),
           ),
         ),
         child: Text(
           label,
-          style: GoogleFonts.inter(
-            fontSize: 14.sp,
+          style: AppTypography.button(
             fontWeight: FontWeight.w600,
+            color: filled ? AppColors.onPrimary : AppColors.textSecondary,
           ),
         ),
       ),

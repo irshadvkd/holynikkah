@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:holynikkah/core/theme/app_typography.dart';
 import 'package:holynikkah/modules/category/widgets/animated_pattern_background.dart';
 import 'package:holynikkah/modules/category/widgets/normal_category_card.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:holynikkah/core/widgets/common_snackbar.dart';
 import 'package:holynikkah/modules/category/controller/category_provider.dart';
 import 'package:holynikkah/modules/login/screens/login_screen.dart';
@@ -62,6 +62,9 @@ class _NormalCategoryScreenState extends State<NormalCategoryScreen> {
         children: [
           AnimatedPatternBackground(
             backgroundImage: 'assets/images/moroccan_pattern.jpg',
+            fit: BoxFit.none,
+            repeat: ImageRepeat.repeat,
+            scale: 1.5,
             veilColor: NormalCategoryColors.ink.withValues(alpha: 0.5),
           ),
           SafeArea(
@@ -125,7 +128,7 @@ class _NormalCategoryScreenState extends State<NormalCategoryScreen> {
 
   Widget _buildHeader() {
     return Padding(
-      padding: EdgeInsets.fromLTRB(24.w, 20.h, 24.w, 16.h),
+      padding: EdgeInsets.fromLTRB(24.w, 6.h, 24.w, 22.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -133,12 +136,41 @@ class _NormalCategoryScreenState extends State<NormalCategoryScreen> {
             children: [
               Text(
                 'CHOOSE CATEGORY',
-                style: GoogleFonts.cormorantGaramond(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 4.0,
+                style: AppTypography.marcellus(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 3.0,
+                  color: const Color(0xFFF3D68A).withValues(alpha: 0.9),
+                ),
+              ),
+              SizedBox(width: 10.w),
+              Expanded(
+                child: Container(
+                  height: 1,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        const Color(0xFFC9973F).withValues(alpha: 0.4),
+                        Colors.transparent,
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 8.h),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                'Register',
+                style: AppTypography.marcellus(
+                  fontSize: 34.sp,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.3,
                   color: Colors.white,
-                  // color: NormalCategoryColors.gold1,
                   shadows: [
                     Shadow(
                       color: Colors.black.withValues(alpha: 0.75),
@@ -148,69 +180,8 @@ class _NormalCategoryScreenState extends State<NormalCategoryScreen> {
                   ],
                 ),
               ),
-              SizedBox(width: 14.w),
-              Expanded(
-                child: Container(
-                  height: 1,
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [NormalCategoryColors.gold2, Colors.transparent],
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 10.h),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Stack(
-                children: [
-                  // Drop shadow layer for the title text
-                  Text(
-                    'Register',
-                    style: GoogleFonts.italiana(
-                      fontSize: 44.sp,
-                      fontWeight: FontWeight.w400,
-                      height: 0.95,
-                      color: Colors.transparent,
-                      shadows: [
-                        Shadow(
-                          color: Colors.black.withValues(alpha: 0.75),
-                          offset: const Offset(0, 4),
-                          blurRadius: 18,
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Gradient-filled title text
-                  ShaderMask(
-                    shaderCallback: (bounds) => const LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Color(0xFFFFFFFF),
-                        NormalCategoryColors.cream,
-                        Color(0xFFF0DFB8),
-                      ],
-                      stops: [0.0, 0.55, 1.0],
-                    ).createShader(bounds),
-                    child: Text(
-                      'Register',
-                      style: GoogleFonts.italiana(
-                        fontSize: 44.sp,
-                        fontWeight: FontWeight.w400,
-                        height: 0.95,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 22.w, vertical: 10.h),
+                padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 6.h),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(999.r),
                   gradient: const LinearGradient(
@@ -226,17 +197,17 @@ class _NormalCategoryScreenState extends State<NormalCategoryScreen> {
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.45),
-                      blurRadius: 20,
-                      offset: const Offset(0, 6),
+                      blurRadius: 16,
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),
                 child: Text(
                   'FREE',
-                  style: GoogleFonts.cormorantGaramond(
-                    fontSize: 15.sp,
+                  style: AppTypography.marcellus(
+                    fontSize: 12.sp,
                     fontWeight: FontWeight.w700,
-                    letterSpacing: 2.1,
+                    letterSpacing: 1.8,
                     color: NormalCategoryColors.inkDeep,
                   ),
                 ),
@@ -298,7 +269,7 @@ class _NormalCategoryScreenState extends State<NormalCategoryScreen> {
                 children: [
                   Text(
                     title,
-                    style: GoogleFonts.cormorantGaramond(
+                    style: AppTypography.marcellus(
                       fontSize: 19.sp,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 1.14,

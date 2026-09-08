@@ -6,7 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:holynikkah/core/theme/app_typography.dart';
 import 'package:holynikkah/core/utils/routes.dart';
 import 'package:holynikkah/core/services/navigation_guard.dart';
 import 'package:holynikkah/core/services/user_journey_tracker.dart';
@@ -180,7 +180,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           SizedBox(width: 4.w),
           Text(
             'Verified',
-            style: GoogleFonts.inter(
+            style: AppTypography.marcellus(
               fontSize: 13.sp,
               fontWeight: FontWeight.w600,
               color: const Color(0xFF2E7D32),
@@ -294,7 +294,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 Center(
                   child: Text(
                     'Upload profile photo',
-                    style: GoogleFonts.inter(
+                    style: AppTypography.marcellus(
                       color: Colors.grey,
                       fontSize: 14.sp,
                     ),
@@ -332,7 +332,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           },
                           title: Text(
                             "Male",
-                            style: GoogleFonts.inter(
+                            style: AppTypography.marcellus(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w600,
                               color: AppColors.inputText,
@@ -357,7 +357,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           },
                           title: Text(
                             "Female",
-                            style: GoogleFonts.inter(
+                            style: AppTypography.marcellus(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w600,
                               color: AppColors.inputText,

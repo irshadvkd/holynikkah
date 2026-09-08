@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:holynikkah/core/theme/app_typography.dart';
 import 'package:holynikkah/core/theme/context_extension.dart';
 import 'package:holynikkah/modules/myprofile/providers/profile_provider.dart';
 import 'package:holynikkah/modules/myprofile/screens/vip_profile_update_screen.dart';
@@ -52,7 +52,7 @@ class _MyProfileDetailScreenState extends State<MyProfileDetailScreen> {
                       ),
                       child: Text(
                         "VIP Profile",
-                        style: GoogleFonts.inter(
+                        style: AppTypography.marcellus(
                           color: isVipSelected ? AppColors.pureWhite : AppColors.inputText,
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w600,
@@ -78,7 +78,7 @@ class _MyProfileDetailScreenState extends State<MyProfileDetailScreen> {
                       ),
                       child: Text(
                         "Profile",
-                        style: GoogleFonts.inter(
+                        style: AppTypography.marcellus(
                           color: !isVipSelected ? AppColors.pureWhite : AppColors.inputText,
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w600,
@@ -115,7 +115,7 @@ class _MyProfileDetailScreenState extends State<MyProfileDetailScreen> {
                           children: [
                             Text(
                               isVipSelected ? 'VIP Profile Information' : 'Profile Information',
-                              style: GoogleFonts.inter(
+                              style: AppTypography.marcellus(
                                 fontSize: 18.sp,
                                 fontWeight: FontWeight.w700,
                                 color: Color(0xFF032544),
@@ -163,7 +163,7 @@ class _MyProfileDetailScreenState extends State<MyProfileDetailScreen> {
                           ),
                           child: Text(
                             isVipSelected ? 'Update VIP Profile' : 'Update Profile',
-                            style: GoogleFonts.inter(
+                            style: AppTypography.marcellus(
                               color: AppColors.pureWhite,
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w600,
@@ -192,7 +192,7 @@ class _MyProfileDetailScreenState extends State<MyProfileDetailScreen> {
             width: 80.w,
             child: Text(
               label,
-              style: GoogleFonts.inter(
+              style: AppTypography.marcellus(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w600,
                 color: AppColors.inputText,
@@ -202,7 +202,7 @@ class _MyProfileDetailScreenState extends State<MyProfileDetailScreen> {
           Expanded(
             child: Text(
               value,
-              style: GoogleFonts.inter(
+              style: AppTypography.marcellus(
                 fontSize: 14.sp,
                 color: AppColors.inputHint,
               ),

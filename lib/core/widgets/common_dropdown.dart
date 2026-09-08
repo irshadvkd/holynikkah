@@ -1,7 +1,7 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:holynikkah/core/theme/app_typography.dart';
 import 'package:holynikkah/core/theme/context_extension.dart';
 
 class CommonDropdown<T> extends StatefulWidget {
@@ -87,7 +87,7 @@ class _CommonDropdownState<T> extends State<CommonDropdown<T>> {
                         widget.itemLabel(item),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.inter(
+                        style: AppTypography.marcellus(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w400,
                           color: AppColors.inputText,
@@ -108,7 +108,7 @@ class _CommonDropdownState<T> extends State<CommonDropdown<T>> {
                         widget.itemLabel(item),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.inter(
+                        style: AppTypography.marcellus(
                           fontSize: 15.sp,
                           color: AppColors.inputText,
                         ),
@@ -207,7 +207,7 @@ class _CommonDropdownState<T> extends State<CommonDropdown<T>> {
         widget.hintText,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: GoogleFonts.inter(
+        style: AppTypography.marcellus(
           fontSize: 16.sp,
           color: AppColors.inputHint,
         ),
@@ -222,14 +222,14 @@ class _CommonDropdownState<T> extends State<CommonDropdown<T>> {
       child: TextField(
         controller: _searchController,
         autofocus: true,
-        style: GoogleFonts.inter(
+        style: AppTypography.marcellus(
           fontSize: 15.sp,
           color: AppColors.inputText,
         ),
         decoration: InputDecoration(
           isDense: true,
           hintText: widget.searchHintText,
-          hintStyle: GoogleFonts.inter(
+          hintStyle: AppTypography.marcellus(
             fontSize: 14.sp,
             color: AppColors.inputHint,
           ),
@@ -288,7 +288,7 @@ class _CommonDropdownState<T> extends State<CommonDropdown<T>> {
           Text(
             widget.noResultsText,
             textAlign: TextAlign.center,
-            style: GoogleFonts.inter(
+            style: AppTypography.marcellus(
               fontSize: 14.sp,
               color: AppColors.inputHint,
             ),
