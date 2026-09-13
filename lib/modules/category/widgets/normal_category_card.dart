@@ -4,8 +4,8 @@ import 'package:holynikkah/core/theme/app_typography.dart';
 import 'package:holynikkah/modules/category/models/category_model.dart';
 
 /// A card widget representing a normal category with custom gradient styling,
-/// icon, and selection state.
-class NormalCategoryCard extends StatelessWidget {
+/// icon, selection state, and staggered fade-in entrance animation.
+class NormalCategoryCard extends StatefulWidget {
   final Categories category;
   final bool isSelected;
   final int index;
@@ -20,6 +20,36 @@ class NormalCategoryCard extends StatelessWidget {
     required this.onTap,
     required this.isSelectionRequired,
   });
+
+  @override
+  State<NormalCategoryCard> createState() => _NormalCategoryCardState();
+}
+
+class _NormalCategoryCardState extends State<NormalCategoryCard>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _entryController;
+
+  @override
+  void initState() {
+    super.initState();
+    _entryController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+
+    Future<void>.delayed(
+      Duration(milliseconds: 50 + widget.index * 80),
+      () {
+        if (mounted) _entryController.forward();
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _entryController.dispose();
+    super.dispose();
+  }
 
   String _toTitleCase(String text) {
     if (text.isEmpty) return text;
@@ -66,100 +96,114 @@ class NormalCategoryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final gradientColors = [
-      _parseColor(category.bgColor, const Color(0xFFA68A72)),
-      _parseColor(category.gradientEndColor, const Color(0xFF7A6350)),
+      _parseColor(widget.category.bgColor, const Color(0xFFA68A72)),
+      _parseColor(widget.category.gradientEndColor, const Color(0xFF7A6350)),
     ];
-    final icon = _getIconData(category.icon, Icons.star_outline_rounded);
-    final textColor = _parseColor(category.textColor, Colors.white);
+    final icon = _getIconData(widget.category.icon, Icons.star_outline_rounded);
+    final textColor = _parseColor(widget.category.textColor, Colors.white);
 
-    final number = '0${index + 1}';
-    final name = _toTitleCase(category.name ?? '');
+    final number = '0${widget.index + 1}';
+    final name = _toTitleCase(widget.category.name ?? '');
 
-    return GestureDetector(
-      onTap: isSelectionRequired ? onTap : null,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeInOut,
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: gradientColors,
+    return AnimatedBuilder(
+      animation: _entryController,
+      builder: (context, child) {
+        return Transform.translate(
+          offset: Offset(0, 14.h * (1 - _entryController.value)),
+          child: Opacity(
+            opacity: _entryController.value,
+            child: child,
           ),
-          borderRadius: BorderRadius.circular(20.r),
-          border: Border.all(
-            color: isSelected
-                ? const Color(0xFFF3D68A) // NormalCategoryColors.gold1
-                : const Color(0x38FFFAF0), // glass line border
-            width: isSelected ? 2.0 : 1.0,
-          ),
-          boxShadow: [
-            if (isSelected)
-              BoxShadow(
-                color: const Color(0xFFF3D68A).withValues(alpha: 0.4),
-                blurRadius: 16,
-                spreadRadius: 2,
-              )
-            else
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.15),
-                blurRadius: 8,
-                offset: const Offset(0, 4),
-              ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  padding: EdgeInsets.all(8.r),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10.r),
-                    color: Colors.white.withValues(alpha: 0.15),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.25),
-                      width: 1,
-                    ),
-                  ),
-                  child: Icon(icon, color: textColor, size: 20.sp),
+        );
+      },
+      child: GestureDetector(
+        onTap: widget.isSelectionRequired ? widget.onTap : null,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeInOut,
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: gradientColors,
+            ),
+            borderRadius: BorderRadius.circular(20.r),
+            border: Border.all(
+              color: widget.isSelected
+                  ? const Color(0xFFF3D68A) // NormalCategoryColors.gold1
+                  : const Color(0x38FFFAF0), // glass line border
+              width: widget.isSelected ? 2.0 : 1.0,
+            ),
+            boxShadow: [
+              if (widget.isSelected)
+                BoxShadow(
+                  color: const Color(0xFFF3D68A).withValues(alpha: 0.4),
+                  blurRadius: 16,
+                  spreadRadius: 2,
+                )
+              else
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.15),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
                 ),
-                if (isSelectionRequired)
-                  Icon(
-                    isSelected ? Icons.check_circle_rounded : Icons.add_rounded,
-                    color: isSelected
-                        ? const Color(0xFFF3D68A)
-                        : Colors.white.withValues(alpha: 0.6),
-                    size: 22.sp,
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(8.r),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10.r),
+                      color: Colors.white.withValues(alpha: 0.15),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.25),
+                        width: 1,
+                      ),
+                    ),
+                    child: Icon(icon, color: textColor, size: 20.sp),
                   ),
-              ],
-            ),
-            const Spacer(),
-            Text(
-              number,
-              style: AppTypography.marcellus(
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 2.88,
-                color: textColor.withValues(alpha: 0.7),
+                  if (widget.isSelectionRequired)
+                    Icon(
+                      widget.isSelected
+                          ? Icons.check_circle_rounded
+                          : Icons.add_rounded,
+                      color: widget.isSelected
+                          ? const Color(0xFFF3D68A)
+                          : Colors.white.withValues(alpha: 0.6),
+                      size: 22.sp,
+                    ),
+                ],
               ),
-            ),
-            SizedBox(height: 2.h),
-            Text(
-              name,
-              style: AppTypography.marcellus(
-                fontSize: 20.sp,
-                fontWeight: FontWeight.w700,
-                color: textColor,
-                height: 1.08,
+              const Spacer(),
+              Text(
+                number,
+                style: AppTypography.cormorantGaramond(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 2.88,
+                  color: textColor.withValues(alpha: 0.7),
+                ),
               ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
+              SizedBox(height: 2.h),
+              Text(
+                name,
+                style: AppTypography.cormorantGaramond(
+                  fontSize: 22.sp,
+                  fontWeight: FontWeight.w700,
+                  color: textColor,
+                  height: 1.08,
+                ),
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
         ),
       ),
     );

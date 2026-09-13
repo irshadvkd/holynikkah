@@ -16,6 +16,7 @@ import 'package:holynikkah/core/theme/app_typography.dart';
 import 'package:holynikkah/core/utils/constants.dart';
 
 import 'package:holynikkah/modules/login/providers/auth_provider.dart';
+import 'package:holynikkah/modules/login/screens/login_screen.dart';
 import 'package:holynikkah/modules/category/screens/vip_category_screen.dart';
 import 'package:holynikkah/modules/partner/widgets/partner_full_screen_view.dart';
 import 'package:holynikkah/modules/reels/screens/reels_screen.dart';
@@ -62,7 +63,7 @@ class _HomeScreenState extends State<HomeScreen> {
     required bool isTemplateSelected,
   }) {
     if (!isLoggedIn) {
-      return const VipCategoryScreen(isSelectionRequired: false);
+      return const LoginScreen(type: 'vip', showBackButton: false);
     }
 
     if (!isCategorySelected) {
@@ -88,7 +89,7 @@ class _HomeScreenState extends State<HomeScreen> {
     required bool isTemplateSelected,
   }) {
     if (!isLoggedIn) {
-      return const NormalCategoryScreen(isSelectionRequired: false);
+      return const LoginScreen(type: 'normal', showBackButton: false);
     }
 
     if (!isCategorySelected) {

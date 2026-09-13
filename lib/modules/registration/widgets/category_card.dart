@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:holynikkah/core/theme/app_typography.dart';
-import 'package:holynikkah/core/utils/constants.dart';
 import 'package:holynikkah/core/utils/utils.dart';
 import 'package:holynikkah/modules/category/models/category_model.dart';
 

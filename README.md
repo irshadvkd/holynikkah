@@ -1,4 +1,4 @@
-# HolyNikkah - Flutter Application
+# HolyNikah - Flutter Application
 
 A Flutter application for matrimonial services with VIP and normal registration options.
 

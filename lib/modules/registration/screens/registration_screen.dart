@@ -1,17 +1,16 @@
 import 'dart:io';
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:holynikkah/core/theme/app_colors.dart';
 import 'package:holynikkah/core/theme/app_typography.dart';
 import 'package:holynikkah/core/utils/routes.dart';
-import 'package:holynikkah/core/services/navigation_guard.dart';
 import 'package:holynikkah/core/services/user_journey_tracker.dart';
-import 'package:holynikkah/core/theme/context_extension.dart';
-import 'package:holynikkah/core/utils/constants.dart';
 import 'package:holynikkah/core/utils/validation_utils.dart';
 import 'package:holynikkah/core/widgets/common_app_bar.dart';
 import 'package:holynikkah/core/widgets/widgets.dart';
@@ -24,16 +23,30 @@ import 'package:holynikkah/modules/registration/providers/registration_provider.
 import 'package:holynikkah/modules/registration/services/locations_service.dart';
 import 'package:holynikkah/modules/registration/services/normal_registration_service.dart';
 import 'package:holynikkah/modules/registration/services/vip_registration_service.dart';
+import 'package:dio/dio.dart';
+import 'package:holynikkah/core/utils/app_logger.dart';
+import 'package:holynikkah/core/utils/constants.dart';
 import 'package:holynikkah/modules/registration/widgets/phone_visibility_selector.dart';
 import 'package:holynikkah/modules/template/screens/common_image_picker.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
 class RegistrationScreen extends StatefulWidget {
   final bool isVip;
   final String? phoneNumber;
+  final String? prefilledName;
+  final Map<String, dynamic>? prefillData;
+  final String? email;
 
-  const RegistrationScreen({super.key, required this.isVip, this.phoneNumber});
+  const RegistrationScreen({
+    super.key,
+    required this.isVip,
+    this.phoneNumber,
+    this.prefilledName,
+    this.prefillData,
+    this.email,
+  });
 
   @override
   State<RegistrationScreen> createState() => _RegistrationScreenState();
@@ -47,6 +60,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   final _profileIdController = TextEditingController();
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
+  final _emailController = TextEditingController();
   final _cityController = TextEditingController();
   final _informationController = TextEditingController();
   String gender = "";
@@ -73,6 +87,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
   /// Selected profile image
   File? _profileImage;
+  String? _profileImageUrl;
 
   @override
   void initState() {
@@ -90,12 +105,17 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
     _profileIdController.text = generateProfileId();
 
+    if (widget.email != null && widget.email!.isNotEmpty) {
+      _emailController.text = widget.email!;
+    }
     if (widget.phoneNumber != null) {
       _phoneController.text = widget.phoneNumber!;
-    } else {
-      _loadPhoneNumber();
+    }
+    if (widget.prefilledName != null && widget.prefilledName!.isNotEmpty) {
+      _nameController.text = widget.prefilledName!;
     }
 
+    _loadUserData();
     _loadStates();
   }
 
@@ -113,6 +133,34 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
     if (states.isEmpty) {
       CommonSnackBar.showError(context, 'Failed to load states');
+      return;
+    }
+
+    // Prefill state and district if available from other registration tier
+    if (widget.prefillData != null) {
+      final stateId = widget.prefillData!['state_id'];
+      if (stateId != null) {
+        LocationState? matchedState;
+        for (final s in states) {
+          if (s.id == stateId || s.id.toString() == stateId.toString()) {
+            matchedState = s;
+            break;
+          }
+        }
+        if (matchedState != null) {
+          stateNotifier.value = matchedState;
+          await _loadDistricts(matchedState.id);
+          final districtId = widget.prefillData!['district_id'];
+          if (districtId != null && _districts.isNotEmpty) {
+            for (final d in _districts) {
+              if (d.id == districtId || d.id.toString() == districtId.toString()) {
+                districtNotifier.value = d;
+                break;
+              }
+            }
+          }
+        }
+      }
     }
   }
 
@@ -155,18 +203,123 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     return "HN$number";
   }
 
-  /// Load phone number from secure storage
-  Future<void> _loadPhoneNumber() async {
-    final phoneNumber = await _storage.read(key: 'phone_number');
-    if (phoneNumber != null && mounted) {
-      setState(() {
-        _phoneController.text = phoneNumber;
-      });
-      context.read<RegistrationProvider>().updatePhoneNumber(phoneNumber);
+  String _resolveImageUrl(String path) {
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return path;
+    }
+    final base = AppConstants.urls.imageBaseUrl;
+    final cleanBase = base.endsWith('/') ? base : '$base/';
+    final cleanPath = path.startsWith('/') ? path.substring(1) : path;
+    return '$cleanBase$cleanPath';
+  }
+
+  Future<void> _downloadImageToTemp(String url) async {
+    try {
+      final resolvedUrl = _resolveImageUrl(url);
+      final response = await Dio().get<List<int>>(
+        resolvedUrl,
+        options: Options(responseType: ResponseType.bytes),
+      );
+      if (response.statusCode == 200 && response.data != null && mounted) {
+        final tempDir = await getTemporaryDirectory();
+        final file = File(
+          '${tempDir.path}/prefilled_avatar_${DateTime.now().millisecondsSinceEpoch}.jpg',
+        );
+        await file.writeAsBytes(response.data!);
+        if (mounted && _profileImage == null) {
+          setState(() {
+            _profileImage = file;
+          });
+        }
+      }
+    } catch (e) {
+      AppLogger.warning('Failed to cache prefilled image: $e', tag: 'RegistrationScreen');
     }
   }
 
-  Widget _verifiedPhoneSuffix() {
+  /// Load phone number and Google user details from secure storage and prefillData
+  Future<void> _loadUserData() async {
+    final phoneNumber = await _storage.read(key: 'phone_number');
+    final googleName = await _storage.read(key: 'google_name');
+    final googleEmail = await _storage.read(key: 'google_email');
+    final googlePhoto = await _storage.read(key: 'google_photo');
+
+    String? imageUrlToDownload;
+
+    if (!mounted) return;
+    setState(() {
+      if (phoneNumber != null && phoneNumber.isNotEmpty && _phoneController.text.isEmpty) {
+        _phoneController.text = phoneNumber;
+      }
+      if (googleName != null && googleName.isNotEmpty && _nameController.text.isEmpty) {
+        _nameController.text = googleName;
+      }
+      if (googleEmail != null && googleEmail.isNotEmpty && _emailController.text.isEmpty) {
+        _emailController.text = googleEmail;
+      }
+      if (googlePhoto != null && googlePhoto.isNotEmpty && _profileImageUrl == null && _profileImage == null) {
+        _profileImageUrl = googlePhoto;
+        imageUrlToDownload = googlePhoto;
+      }
+
+      // Prefill from prefillData (e.g. from existing VIP or Normal registration)
+      if (widget.prefillData != null) {
+        final p = widget.prefillData!;
+        if (p['email'] != null && p['email'].toString().isNotEmpty && _emailController.text.isEmpty) {
+          _emailController.text = p['email'].toString();
+        }
+        if (p['name'] != null && p['name'].toString().isNotEmpty && _nameController.text.isEmpty) {
+          _nameController.text = p['name'].toString();
+        }
+        if (p['phone'] != null && p['phone'].toString().isNotEmpty && _phoneController.text.isEmpty) {
+          _phoneController.text = p['phone'].toString();
+        }
+        if (p['city'] != null && p['city'].toString().isNotEmpty) {
+          _cityController.text = p['city'].toString();
+        }
+
+        // Info / Information prefill
+        final infoVal = p['info'] ?? p['information'];
+        if (infoVal != null && infoVal.toString().isNotEmpty && _informationController.text.isEmpty) {
+          _informationController.text = infoVal.toString();
+        }
+
+        // Gender prefill (UI uses "Male" and "Female")
+        if (p['gender'] != null && p['gender'].toString().isNotEmpty) {
+          final g = p['gender'].toString().trim().toLowerCase();
+          if (g == 'male') {
+            gender = "Male";
+          } else if (g == 'female') {
+            gender = "Female";
+          }
+        }
+
+        // Phone visibility (mob_visibility) prefill
+        if (p['mob_visibility'] != null) {
+          final mv = p['mob_visibility'];
+          final bool isVisible = mv == true || mv.toString() == 'true' || mv == 1 || mv.toString() == '1';
+          _phoneVisibility = PhoneVisibility.fromMobVisibility(isVisible);
+        }
+
+        // Profile image prefill
+        final imgVal = p['image_url'] ?? p['image_path'] ?? p['profile_pic'] ?? p['image'];
+        if (imgVal != null && imgVal.toString().isNotEmpty && imgVal.toString() != 'null') {
+          _profileImageUrl = imgVal.toString();
+          imageUrlToDownload = imgVal.toString();
+        }
+      }
+    });
+
+    if (imageUrlToDownload != null && imageUrlToDownload!.isNotEmpty) {
+      _downloadImageToTemp(imageUrlToDownload!);
+    }
+
+    if (_phoneController.text.isNotEmpty) {
+      context.read<RegistrationProvider>().updatePhoneNumber(_phoneController.text);
+    }
+  }
+
+  Widget _verifiedEmailSuffix() {
     return Padding(
       padding: EdgeInsets.only(right: 12.w),
       child: Row(
@@ -210,6 +363,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
     setState(() {
       _profileImage = croppedImage;
+      _profileImageUrl = null;
     });
   }
 
@@ -218,6 +372,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     _profileIdController.dispose();
     _nameController.dispose();
     _phoneController.dispose();
+    _emailController.dispose();
     _cityController.dispose();
     _informationController.dispose();
     stateNotifier.dispose();
@@ -227,8 +382,17 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return CommonAppBar(
+    return PopScope(
+      canPop: !_isLoading,
+      child: Stack(
+        children: [
+          CommonAppBar(
       title: "${widget.isVip ? 'VIP ' : ''}REGISTRATION",
+      gradient: AppColors.darkGreenGradient,
+      backgroundColor: AppColors.secondary,
+      titleColor: Colors.white,
+      leadingIconColor: AppColors.goldLight,
+      systemOverlayStyle: SystemUiOverlayStyle.light,
       child: SingleChildScrollView(
         child: Form(
           key: _formKey,
@@ -248,15 +412,24 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           width: 116.sp,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            border: Border.all(color: Colors.black26),
+                            border: Border.all(
+                              color: AppColors.primary.withValues(alpha: 0.4),
+                              width: 1.5,
+                            ),
                             image: _profileImage != null
                                 ? DecorationImage(
                                     image: FileImage(_profileImage!),
                                     fit: BoxFit.cover,
                                   )
-                                : null,
+                                : (_profileImageUrl != null && _profileImageUrl!.isNotEmpty)
+                                    ? DecorationImage(
+                                        image: NetworkImage(_resolveImageUrl(_profileImageUrl!)),
+                                        fit: BoxFit.cover,
+                                      )
+                                    : null,
                           ),
-                          child: _profileImage == null
+                          child: (_profileImage == null &&
+                                  (_profileImageUrl == null || _profileImageUrl!.isEmpty))
                               ? Padding(
                                   padding: EdgeInsets.all(0.sp),
                                   child: SvgPicture.asset(
@@ -272,9 +445,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           bottom: 0,
                           right: 0,
                           child: Container(
-                            padding: EdgeInsets.all(6),
+                            padding: const EdgeInsets.all(6),
                             decoration: const BoxDecoration(
-                              color: Color(0xFF032544),
+                              color: AppColors.goldMain,
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(
@@ -295,7 +468,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   child: Text(
                     'Upload profile photo',
                     style: AppTypography.marcellus(
-                      color: Colors.grey,
+                      color: AppColors.textMuted,
                       fontSize: 14.sp,
                     ),
                   ),
@@ -309,8 +482,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     borderRadius: BorderRadius.circular(50.r),
                     boxShadow: [
                       BoxShadow(
-                        color: Color(0xFF303036).withOpacity(.7),
-                        offset: Offset(0, 4),
+                        color: const Color(0xFF303036).withValues(alpha: 0.7),
+                        offset: const Offset(0, 4),
                         blurRadius: 8,
                       ),
                     ],
@@ -324,7 +497,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           child: RadioListTile<String>(
                           value: "Male",
                           groupValue: gender,
-                          activeColor: Color(0xFF032544),
+                          activeColor: AppColors.secondary,
                           onChanged: (value) {
                             setState(() {
                               gender = "Male";
@@ -335,21 +508,21 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                             style: AppTypography.marcellus(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w600,
-                              color: AppColors.inputText,
+                              color: AppColors.black,
                             ),
                           ),
                         ),
                       ),
                       Container(
                         width: 1,
-                        color: AppColors.inputText,
+                        color: AppColors.black.withValues(alpha: 0.2),
                         height: 30,
                       ),
                       Expanded(
                         child: RadioListTile<String>(
                           value: "Female",
                           groupValue: gender,
-                          activeColor: Color(0xFF032544),
+                          activeColor: AppColors.secondary,
                           onChanged: (value) {
                             setState(() {
                               gender = "Female";
@@ -360,7 +533,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                             style: AppTypography.marcellus(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w600,
-                              color: AppColors.inputText,
+                              color: AppColors.black,
                             ),
                           ),
                         ),
@@ -372,13 +545,25 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
                 SizedBox(height: 16.h),
 
-                /// VERIFIED PHONE
-                CustomTextField(
+                /// VERIFIED EMAIL
+                ValidatedTextField(
+                  controller: _emailController,
+                  hintText: 'Email',
+                  type: TextFieldType.email,
+                  fieldName: 'Email',
+                  readOnly: true,
+                  suffixIcon: _verifiedEmailSuffix(),
+                ),
+
+                SizedBox(height: 16.h),
+
+                /// PHONE NUMBER
+                ValidatedTextField(
                   controller: _phoneController,
                   hintText: 'Phone Number',
+                  type: TextFieldType.phone,
+                  fieldName: 'Phone Number',
                   keyboardType: TextInputType.phone,
-                  readOnly: true,
-                  suffixIcon: _verifiedPhoneSuffix(),
                 ),
 
                 SizedBox(height: 16.h),
@@ -386,6 +571,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 /// PHONE VISIBILITY (sample UI)
                 PhoneVisibilitySelector(
                   value: _phoneVisibility,
+                  titleColor: Colors.white,
+                  descriptionColor: AppColors.textMuted,
                   onChanged: (value) {
                     setState(() => _phoneVisibility = value);
                   },
@@ -481,30 +668,190 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   ),
                 ),
 
-                SizedBox(height: 30.h),
-                Center(
-                  child: CommonButton(
-                    title: "Continue",
-                    isLoading: _isLoading,
-                    onTap: _continue,
-                  ),
+                SizedBox(height: 32.h),
+
+                // Continue Button
+                CommonButton(
+                  title: 'Continue',
+                  isLoading: _isLoading,
+                  margin: EdgeInsets.symmetric(horizontal: 16),
+                  onTap: _continue,
                 ),
-                SizedBox(height: 30.h),
+
+                SizedBox(height: 36.h),
               ],
             ),
           ),
         ),
       ),
-    );
+    ),
+    if (_isLoading)
+      Positioned.fill(
+        child: AbsorbPointer(
+          absorbing: true,
+          child: Material(
+            color: Colors.transparent,
+            child: Stack(
+              children: [
+                // Blurred glass backdrop using theme background/overlay
+                Positioned.fill(
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                    child: Container(
+                      color: AppColors.background.withValues(alpha: 0.82),
+                    ),
+                  ),
+                ),
+
+                // Theme-matching modal card using AppColors tokens
+                Center(
+                  child: Container(
+                    margin: EdgeInsets.symmetric(horizontal: 36.w),
+                    padding: EdgeInsets.symmetric(horizontal: 28.w, vertical: 28.h),
+                    decoration: BoxDecoration(
+                      gradient: AppColors.darkGreenGradient,
+                      borderRadius: BorderRadius.circular(24.r),
+                      border: Border.all(
+                        color: AppColors.inputBorder,
+                        width: 1.2,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.shadow,
+                          blurRadius: 24,
+                          offset: const Offset(0, 8),
+                        ),
+                        BoxShadow(
+                          color: AppColors.primary.withValues(alpha: 0.12),
+                          blurRadius: 20,
+                          spreadRadius: 1,
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            SizedBox(
+                              width: 58.sp,
+                              height: 58.sp,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 3.0,
+                                valueColor: const AlwaysStoppedAnimation<Color>(
+                                  AppColors.primary,
+                                ),
+                                backgroundColor:
+                                    AppColors.primary.withValues(alpha: 0.15),
+                              ),
+                            ),
+                            Icon(
+                              Icons.workspace_premium_rounded,
+                              size: 26.sp,
+                              color: AppColors.goldLight,
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 20.h),
+                        Text(
+                          "Creating Your Profile",
+                          textAlign: TextAlign.center,
+                          style: AppTypography.marcellus(
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                            letterSpacing: 0.4,
+                          ),
+                        ),
+                        SizedBox(height: 8.h),
+                        Text(
+                          "${widget.isVip ? 'VIP ' : ''}Registration in progress...",
+                          textAlign: TextAlign.center,
+                          style: AppTypography.marcellus(
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.w400,
+                            color: AppColors.textMuted,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+  ],
+),
+);
   }
 
   /// Continue button action
   void _continue() async {
     if (_isLoading) return;
 
+    // Validate fields before activating overlay loader
+    if (gender.isEmpty) {
+      CommonSnackBar.showError(context, 'Please select gender');
+      return;
+    }
+
+    if (_nameController.text.trim().isEmpty) {
+      CommonSnackBar.showError(context, 'Please enter your name');
+      return;
+    }
+
+    if (stateNotifier.value == null) {
+      CommonSnackBar.showError(context, 'Please select state');
+      return;
+    }
+
+    if (districtNotifier.value == null) {
+      CommonSnackBar.showError(context, 'Please select district');
+      return;
+    }
+
+    if (_cityController.text.trim().isEmpty) {
+      CommonSnackBar.showError(context, 'Please enter city');
+      return;
+    }
+
+    if (_informationController.text.isEmpty) {
+      CommonSnackBar.showError(context, 'Please enter about yourself');
+      return;
+    }
+
+    if (_informationController.text.trim().length < 25) {
+      CommonSnackBar.showError(
+        context,
+        'Information should be minimum 25 characters',
+      );
+      return;
+    }
+
+    if (_informationController.text.trim().length > 500) {
+      CommonSnackBar.showError(
+        context,
+        'Information must not exceed 500 characters',
+      );
+      return;
+    }
+
+    if (!_formKey.currentState!.validate()) {
+      CommonSnackBar.showError(
+        context,
+        'Please check and complete all required fields correctly',
+      );
+      return;
+    }
+
     setState(() {
       _isLoading = true;
     });
+
+    bool isSuccess = false;
 
     try {
       // Track registration step
@@ -521,78 +868,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         },
       );
 
-      if (gender.isEmpty) {
-        setState(() {
-          _isLoading = false;
-        });
-        CommonSnackBar.showError(context, 'Please select gender');
-        return;
-      }
-
-      if (_nameController.text.trim().isEmpty) {
-        setState(() {
-          _isLoading = false;
-        });
-        CommonSnackBar.showError(context, 'Please enter your name');
-        return;
-      }
-
-      if (stateNotifier.value == null) {
-        setState(() {
-          _isLoading = false;
-        });
-        CommonSnackBar.showError(context, 'Please select state');
-        return;
-      }
-
-      if (districtNotifier.value == null) {
-        setState(() {
-          _isLoading = false;
-        });
-        CommonSnackBar.showError(context, 'Please select district');
-        return;
-      }
-
-      if (_cityController.text.trim().isEmpty) {
-        setState(() {
-          _isLoading = false;
-        });
-        CommonSnackBar.showError(context, 'Please enter city');
-        return;
-      }
-
-      if (_informationController.text.isEmpty) {
-        setState(() {
-          _isLoading = false;
-        });
-        CommonSnackBar.showError(context, 'Please enter about yourself');
-        return;
-      }
-
-      if (_informationController.text.trim().length < 25) {
-        setState(() {
-          _isLoading = false;
-        });
-        CommonSnackBar.showError(
-          context,
-          'Information should be minimum 25 characters',
-        );
-        return;
-      }
-
-      if (_informationController.text.trim().length > 500) {
-        setState(() {
-          _isLoading = false;
-        });
-        CommonSnackBar.showError(
-          context,
-          'Information must not exceed 500 characters',
-        );
-        return;
-      }
-
       // If all validations pass
-      if (_formKey.currentState!.validate()) {
+      if (true) {
         final provider = context.read<RegistrationProvider>();
 
         // Update provider data
@@ -627,6 +904,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               information: _informationController.text.trim(),
               mobVisibility: _phoneVisibility.mobVisibility,
               profilePicPath: _profileImage?.path,
+              email: _emailController.text.trim().isNotEmpty
+                  ? _emailController.text.trim()
+                  : null,
             ),
           );
 
@@ -661,6 +941,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               information: _informationController.text.trim(),
               mobVisibility: _phoneVisibility.mobVisibility,
               profilePicPath: _profileImage?.path,
+              email: _emailController.text.trim().isNotEmpty
+                  ? _emailController.text.trim()
+                  : null,
             ),
           );
 
@@ -685,6 +968,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           );
         }
 
+        isSuccess = true;
+
         // Single navigation with delay and proper guard
         Future.delayed(const Duration(milliseconds: 800), () async {
           if (!mounted) return;
@@ -704,7 +989,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         );
       }
     } finally {
-      if (mounted) {
+      if (mounted && !isSuccess) {
         setState(() {
           _isLoading = false;
         });

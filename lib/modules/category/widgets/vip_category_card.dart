@@ -168,7 +168,7 @@ class _VipCategoryCardState extends State<VipCategoryCard>
                           children: [
                             Text(
                               tierLabel,
-                              style: AppTypography.marcellus(
+                              style: AppTypography.cormorantGaramond(
                                 fontSize: 10.5.sp,
                                 fontWeight: FontWeight.w700,
                                 letterSpacing: 2,
@@ -178,7 +178,7 @@ class _VipCategoryCardState extends State<VipCategoryCard>
                             SizedBox(height: 9.h),
                             Text(
                               widget.category.name ?? '',
-                              style: AppTypography.marcellus(
+                              style: AppTypography.cormorantGaramond(
                                 fontSize: 18.sp,
                                 fontWeight: FontWeight.w700,
                                 height: 1.15,
@@ -206,7 +206,7 @@ class _VipCategoryCardState extends State<VipCategoryCard>
                           children: [
                             Text(
                               'NET WORTH',
-                              style: AppTypography.marcellus(
+                              style: AppTypography.cormorantGaramond(
                                 fontSize: 10.sp,
                                 fontWeight: FontWeight.w600,
                                 letterSpacing: 1.6,
@@ -217,7 +217,7 @@ class _VipCategoryCardState extends State<VipCategoryCard>
                             Text(
                               netWorth,
                               textAlign: TextAlign.right,
-                              style: AppTypography.marcellus(
+                              style: AppTypography.cormorantGaramond(
                                 fontSize: 16.5.sp,
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: 0.2,

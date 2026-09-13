@@ -323,24 +323,16 @@ class _MyTemplateScreenState extends State<MyTemplateScreen> {
     final auth = context.watch<AuthProvider>();
     final showTabs = !widget.isGate && auth.isVipLoggedIn && auth.isNormalLoggedIn;
 
-    return Scaffold(
-      backgroundColor: AppColors.secondary,
-      body: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: SystemUiOverlayStyle.light,
-        child: Container(
-          width: double.infinity,
-          height: double.infinity,
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                AppColors.secondaryLight,
-                AppColors.secondary,
-                AppColors.background,
-              ],
-            ),
-          ),
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      decoration: const BoxDecoration(
+        gradient: AppColors.darkGreenGradient,
+      ),
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: AnnotatedRegion<SystemUiOverlayStyle>(
+          value: SystemUiOverlayStyle.light,
           child: SafeArea(
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
@@ -362,8 +354,7 @@ class _MyTemplateScreenState extends State<MyTemplateScreen> {
             ),
           ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
+        floatingActionButton: FloatingActionButton.extended(
         onPressed: _addTemplate,
         backgroundColor: AppColors.primary,
         elevation: 4,
@@ -376,8 +367,9 @@ class _MyTemplateScreenState extends State<MyTemplateScreen> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _header() {
     return Row(

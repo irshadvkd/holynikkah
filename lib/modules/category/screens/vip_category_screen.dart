@@ -4,6 +4,7 @@ import 'package:holynikkah/core/theme/app_typography.dart';
 import 'package:holynikkah/modules/category/widgets/animated_pattern_background.dart';
 import 'package:holynikkah/core/widgets/common_snackbar.dart';
 import 'package:holynikkah/modules/category/controller/category_provider.dart';
+import 'package:holynikkah/modules/category/models/category_model.dart';
 import 'package:holynikkah/modules/category/models/vip_tier_style.dart';
 import 'package:holynikkah/modules/category/widgets/vip_category_card.dart';
 import 'package:holynikkah/modules/login/providers/auth_provider.dart';
@@ -39,6 +40,30 @@ class _VipCategoryScreenState extends State<VipCategoryScreen> {
     });
   }
 
+  int _getTierIndex(Categories category, int fallbackIndex) {
+    final name = (category.name ?? '').toLowerCase();
+    if (name.contains('middle') && !name.contains('upper')) {
+      return 0; // Tier 1: Middle Class
+    } else if (name.contains('upper')) {
+      return 1; // Tier 2: Upper Middle Class
+    } else if (name.contains('hni') ||
+        (name.contains('rich') &&
+            !name.contains('super') &&
+            !name.contains('ultra'))) {
+      return 2; // Tier 3: HNI (Rich)
+    } else if (name.contains('super')) {
+      return 3; // Tier 4: Super Rich
+    } else if (name.contains('ultra')) {
+      return 4; // Tier 5: Ultra Rich
+    } else if (name.contains('billion')) {
+      return 5; // Tier 6: Billionaire
+    }
+    if (category.sortOrder != null && category.sortOrder! > 0) {
+      return category.sortOrder! - 1;
+    }
+    return fallbackIndex;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -50,59 +75,65 @@ class _VipCategoryScreenState extends State<VipCategoryScreen> {
             backgroundImage: 'assets/images/vip_category_bg.jpeg',
             fit: BoxFit.cover,
             repeat: ImageRepeat.noRepeat,
+            scale: 1.5,
             veilColor: VipRegisterColors.ink.withValues(alpha: 0.35),
+            animationDuration: const Duration(seconds: 15),
           ),
           SafeArea(
-            bottom: false,
             child: Consumer<RegistrationProvider>(
-                builder: (context, provider, child) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      _buildHeader(),
-                      if (provider.categoriesLoading)
-                        Expanded(
-                          child: Center(
-                            child: CircularProgressIndicator(
-                              color: VipRegisterColors.goldDark,
-                            ),
-                          ),
-                        )
-                      else
-                        Expanded(
-                          child: ListView.separated(
-                            padding: EdgeInsets.fromLTRB(20.w, 6.h, 20.w, 8.h),
-                            itemCount: provider.categories.length,
-                            separatorBuilder: (_, __) => SizedBox(height: 16.h),
-                            itemBuilder: (context, index) {
-                              final category = provider.categories[index];
-                              final tierIndex = int.tryParse(
-                                    category.catId ?? '${index + 1}',
-                                  ) ??
-                                  (index + 1);
-                              return VipCategoryCard(
-                                category: category,
-                                tierIndex: tierIndex - 1,
-                                animationIndex: index,
-                                isSelectionRequired:
-                                    widget.isSelectionRequired,
-                                isSelected: widget.isSelectionRequired &&
-                                    provider.selectedCategoryId ==
-                                        category.catId,
-                                onTap: () =>
-                                    _selectCategory(category.catId ?? ''),
-                              );
-                            },
+              builder: (context, provider, child) {
+                final sortedCategories =
+                    List<Categories>.from(provider.categories)
+                      ..sort((a, b) {
+                        final tierA = _getTierIndex(a, 0);
+                        final tierB = _getTierIndex(b, 0);
+                        return tierA.compareTo(tierB);
+                      });
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _buildHeader(),
+                    if (provider.categoriesLoading)
+                      Expanded(
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            color: VipRegisterColors.goldDark,
                           ),
                         ),
-                      Padding(
-                        padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 20.h),
-                        child: _buildActionButton(),
+                      )
+                    else
+                      Expanded(
+                        child: ListView.separated(
+                          padding: EdgeInsets.fromLTRB(20.w, 4.h, 20.w, 16.h),
+                          itemCount: sortedCategories.length,
+                          separatorBuilder: (_, __) => SizedBox(height: 16.h),
+                          itemBuilder: (context, index) {
+                            final category = sortedCategories[index];
+                            final tierIndex = _getTierIndex(category, index);
+                            return VipCategoryCard(
+                              category: category,
+                              tierIndex: tierIndex,
+                              animationIndex: index,
+                              isSelectionRequired:
+                                  widget.isSelectionRequired,
+                              isSelected: widget.isSelectionRequired &&
+                                  provider.selectedCategoryId ==
+                                      category.catId,
+                              onTap: () =>
+                                  _selectCategory(category.catId ?? ''),
+                            );
+                          },
+                        ),
                       ),
-                    ],
-                  );
-                },
-              ),
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 20.h),
+                      child: _buildActionButton(),
+                    ),
+                  ],
+                );
+              },
+            ),
           ),
         ],
       ),
@@ -111,7 +142,7 @@ class _VipCategoryScreenState extends State<VipCategoryScreen> {
 
   Widget _buildHeader() {
     return Padding(
-      padding: EdgeInsets.fromLTRB(24.w, 6.h, 24.w, 22.h),
+      padding: EdgeInsets.fromLTRB(24.w, 6.h, 24.w, 10.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -119,10 +150,11 @@ class _VipCategoryScreenState extends State<VipCategoryScreen> {
             children: [
               Text(
                 'MEMBERSHIP DIRECTORY',
-                style: AppTypography.marcellus(
-                  fontSize: 13.sp,
+                style: AppTypography.cormorantGaramond(
+                  fontSize: 15.sp,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 3.0,
+                  height: 1.0,
                   color: const Color(0xFFF3D68A).withValues(alpha: 0.9),
                 ),
               ),
@@ -142,13 +174,14 @@ class _VipCategoryScreenState extends State<VipCategoryScreen> {
               ),
             ],
           ),
-          SizedBox(height: 8.h),
+          SizedBox(height: 12.h),
           RichText(
             text: TextSpan(
-              style: AppTypography.marcellus(
+              style: AppTypography.italiana(
                 fontSize: 34.sp,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.3,
+                height: 1.1,
                 color: Colors.white,
                 shadows: [
                   Shadow(
@@ -161,11 +194,11 @@ class _VipCategoryScreenState extends State<VipCategoryScreen> {
               children: [
                 TextSpan(
                   text: 'VIP ',
-                  style: AppTypography.marcellus(color: const Color(0xFFF3D68A)),
+                  style: AppTypography.italiana(color: const Color(0xFFF3D68A)),
                 ),
                 TextSpan(
                   text: 'Register',
-                  style: AppTypography.marcellus(color: Colors.white),
+                  style: AppTypography.italiana(color: Colors.white),
                 ),
               ],
             ),

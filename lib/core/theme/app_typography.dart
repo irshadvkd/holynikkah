@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// 🔹 Centralized Typography configuration for Holy Nikkah.
+/// 🔹 Centralized Typography configuration for HolyNikah.
 /// Uses 'Marcellus' (serif) as the primary font family with ScreenUtil responsive sizes.
 class AppTypography {
   AppTypography._();
@@ -26,6 +26,68 @@ class AppTypography {
     List<Shadow>? shadows,
   }) {
     return GoogleFonts.marcellus(
+      fontSize: fontSize,
+      fontWeight: fontWeight,
+      color: color,
+      letterSpacing: letterSpacing,
+      height: height,
+      decoration: decoration,
+      fontStyle: fontStyle,
+      decorationColor: decorationColor,
+      textBaseline: textBaseline,
+      foreground: foreground,
+      background: background,
+      shadows: shadows,
+    );
+  }
+
+  /// Generates a [TextStyle] using Italiana font.
+  static TextStyle italiana({
+    double? fontSize,
+    FontWeight? fontWeight,
+    Color? color,
+    double? letterSpacing,
+    double? height,
+    TextDecoration? decoration,
+    FontStyle? fontStyle,
+    Color? decorationColor,
+    TextBaseline? textBaseline,
+    Paint? foreground,
+    Paint? background,
+    List<Shadow>? shadows,
+  }) {
+    return GoogleFonts.italiana(
+      fontSize: fontSize,
+      fontWeight: fontWeight,
+      color: color,
+      letterSpacing: letterSpacing,
+      height: height,
+      decoration: decoration,
+      fontStyle: fontStyle,
+      decorationColor: decorationColor,
+      textBaseline: textBaseline,
+      foreground: foreground,
+      background: background,
+      shadows: shadows,
+    );
+  }
+
+  /// Generates a [TextStyle] using Cormorant Garamond font.
+  static TextStyle cormorantGaramond({
+    double? fontSize,
+    FontWeight? fontWeight,
+    Color? color,
+    double? letterSpacing,
+    double? height,
+    TextDecoration? decoration,
+    FontStyle? fontStyle,
+    Color? decorationColor,
+    TextBaseline? textBaseline,
+    Paint? foreground,
+    Paint? background,
+    List<Shadow>? shadows,
+  }) {
+    return GoogleFonts.cormorantGaramond(
       fontSize: fontSize,
       fontWeight: fontWeight,
       color: color,

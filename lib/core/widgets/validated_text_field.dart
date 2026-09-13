@@ -33,6 +33,7 @@ class ValidatedTextField extends StatefulWidget {
   final int maxLines;
   final int? maxLength;
   final bool enabled;
+  final bool readOnly;
   final String? confirmPasswordValue; // For confirm password validation
   final VoidCallback? onTap;
   final Function(String)? onChanged;
@@ -54,6 +55,7 @@ class ValidatedTextField extends StatefulWidget {
     this.maxLines = 1,
     this.maxLength,
     this.enabled = true,
+    this.readOnly = false,
     this.confirmPasswordValue,
     this.onTap,
     this.onChanged,
@@ -97,6 +99,7 @@ class _ValidatedTextFieldState extends State<ValidatedTextField> {
         maxLines: widget.maxLines,
         maxLength: widget.maxLength,
         enabled: widget.enabled,
+        readOnly: widget.readOnly,
         onTap: widget.onTap,
         onChanged: widget.onChanged,
         style: AppTypography.marcellus(
@@ -195,8 +198,6 @@ class _ValidatedTextFieldState extends State<ValidatedTextField> {
               value,
               fieldName: widget.fieldName,
             );
-      default:
-        return null;
     }
   }
 

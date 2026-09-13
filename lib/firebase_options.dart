@@ -62,6 +62,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '269423378271',
     projectId: 'holynikah-a299e',
     storageBucket: 'holynikah-a299e.firebasestorage.app',
+    androidClientId: '269423378271-mpe8ch708ffou8vbuvh6gsi6fsrgf1f3.apps.googleusercontent.com',
+    iosClientId: '269423378271-a5a4014s1ntjf5h9f8grtkbp91i4op1v.apps.googleusercontent.com',
     iosBundleId: 'com.holynikah.holynikah',
   );
 }

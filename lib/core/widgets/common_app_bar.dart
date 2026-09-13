@@ -12,6 +12,7 @@ class CommonAppBar extends StatelessWidget {
   final Color? titleColor;
   final SystemUiOverlayStyle? systemOverlayStyle;
   final List<Widget>? actions;
+  final Gradient? gradient;
 
   const CommonAppBar({
     super.key,
@@ -23,34 +24,46 @@ class CommonAppBar extends StatelessWidget {
     this.titleColor,
     this.systemOverlayStyle,
     this.actions,
+    this.gradient,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: backgroundColor ?? Colors.white,
+    final isDark = gradient != null ||
+        (backgroundColor != null && backgroundColor!.computeLuminance() < 0.5);
+
+    final scaffold = Scaffold(
+      backgroundColor: gradient != null
+          ? Colors.transparent
+          : (backgroundColor ?? Colors.white),
       appBar: AppBar(
-        backgroundColor: appBarBackgroundColor ?? (backgroundColor ?? Colors.white),
+        backgroundColor: gradient != null
+            ? (appBarBackgroundColor ?? Colors.transparent)
+            : (appBarBackgroundColor ?? (backgroundColor ?? Colors.white)),
         elevation: 0,
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
+        shadowColor: Colors.transparent,
         leading: GestureDetector(
           onTap: () {
             Navigator.of(context).pop();
           },
           child: Icon(
             Icons.arrow_back_ios_new_rounded,
-            color: leadingIconColor ?? const Color(0xFF000000),
+            color: leadingIconColor ??
+                (isDark ? Colors.white : const Color(0xFF000000)),
           ),
         ),
         actions: actions,
         systemOverlayStyle: systemOverlayStyle ??
-            ((backgroundColor != null && backgroundColor!.computeLuminance() < 0.5)
+            (isDark
                 ? SystemUiOverlayStyle.light
                 : SystemUiOverlayStyle.dark),
         centerTitle: true,
         title: Text(
           title,
           style: AppTypography.marcellus(
-            color: titleColor ?? Colors.black,
+            color: titleColor ?? (isDark ? Colors.white : Colors.black),
             fontSize: 18.sp,
             fontWeight: FontWeight.w600,
           ),
@@ -58,5 +71,16 @@ class CommonAppBar extends StatelessWidget {
       ),
       body: child,
     );
+
+    if (gradient != null) {
+      return Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(gradient: gradient),
+        child: scaffold,
+      );
+    }
+
+    return scaffold;
   }
 }

@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:holynikkah/core/api/api_client.dart';
 import 'package:holynikkah/core/utils/app_logger.dart';
@@ -94,12 +97,13 @@ class ProfileProvider extends ChangeNotifier {
 
   bool get isProfileImageNetwork {
     final path = profileImagePath;
-    if (path == null || path.isEmpty) return false;
+    if (path == null || path.isEmpty || path == '0' || path == 'null') return false;
     return path.startsWith('http') || (!path.startsWith('/') && !path.startsWith('assets/'));
   }
 
   String get profileImageNetworkUrl {
     final path = profileImagePath ?? '';
+    if (path.isEmpty || path == '0' || path == 'null') return '';
     if (path.startsWith('http')) return path;
     final base = AppConstants.urls.imageBaseUrl;
     final cleanBase = base.endsWith('/') ? base : '$base/';
@@ -148,6 +152,22 @@ class ProfileProvider extends ChangeNotifier {
     return val ?? _profileImagePath;
   }
 
+  bool isProfileImageNetworkTier(bool isVip) {
+    final path = getProfileImagePath(isVip);
+    if (path == null || path.isEmpty || path == '0' || path == 'null') return false;
+    return path.startsWith('http') || (!path.startsWith('/') && !path.startsWith('assets/'));
+  }
+
+  String getProfileImageNetworkUrlTier(bool isVip) {
+    final path = getProfileImagePath(isVip) ?? '';
+    if (path.isEmpty || path == '0' || path == 'null') return '';
+    if (path.startsWith('http')) return path;
+    final base = AppConstants.urls.imageBaseUrl;
+    final cleanBase = base.endsWith('/') ? base : '$base/';
+    final cleanPath = path.startsWith('/') ? path.substring(1) : path;
+    return '$cleanBase$cleanPath';
+  }
+
   // Setters (backward compatibility / local updates)
   void setVipProfile(bool isVip) {
     _isVipProfile = isVip;
@@ -186,111 +206,119 @@ class ProfileProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void updateProfileImage(String? imagePath) {
+  void updateProfileImage(String? imagePath, {bool? isVip}) {
     _profileImagePath = imagePath;
+    final targetVip = isVip ?? _isVipProfile;
+    if (targetVip) {
+      _vipProfileImagePath = imagePath;
+    } else {
+      _normalProfileImagePath = imagePath;
+    }
+    PaintingBinding.instance.imageCache.clear();
+    PaintingBinding.instance.imageCache.clearLiveImages();
+    final netUrl = getProfileImageNetworkUrlTier(targetVip);
+    if (netUrl.isNotEmpty) {
+      CachedNetworkImage.evictFromCache(netUrl);
+    }
     notifyListeners();
   }
 
-  /// Fetch VIP and/or Normal profiles from backend
-  Future<void> fetchProfiles({required AuthProvider authProvider}) async {
-    if (_isFetching) return;
-    _isFetching = true;
-    notifyListeners();
+  /// Apply user dictionary directly to the state (from login, storage, or API)
+  void applyUserData(Map<String, dynamic> data, {required bool isVip}) {
+    final id = data['hn_id']?.toString() ?? data['id']?.toString() ?? '';
+    final name = data['name']?.toString() ?? '';
+    final phone =
+        data['phone']?.toString() ?? data['phone_number']?.toString() ?? '';
+    final gender = data['gender']?.toString() ?? '';
+    final info =
+        data['info']?.toString() ?? data['information']?.toString() ?? '';
 
-    // 1. Fetch VIP profile if logged in
-    if (authProvider.isVipLoggedIn) {
-      try {
-        await authProvider.ensureApiTokenFor(isVip: true);
-        final response = await ApiClient.instance.get<dynamic>(
-          '/vip-users/me',
-          parser: (json) => json,
-        );
-        if (response.success && response.data != null) {
-          final data = response.data['data'];
-          if (data is Map) {
-            _vipProfileId = data['hn_id']?.toString() ?? '';
-            _vipName = data['name']?.toString() ?? '';
-            _vipPhoneNumber = data['phone']?.toString() ?? '';
-            _vipGender = data['gender']?.toString() ?? '';
-            _vipInformation = data['information']?.toString() ?? '';
-
-            if (data['state'] is Map) {
-              _vipState = data['state']['name']?.toString();
-            } else {
-              _vipState = data['state_name']?.toString() ?? data['state']?.toString();
-            }
-
-            if (data['district'] is Map) {
-              _vipDistrict = data['district']['name']?.toString();
-            } else {
-              _vipDistrict = data['district_name']?.toString() ?? data['district']?.toString();
-            }
-
-            _vipCity = data['city']?.toString();
-            _vipProfileImagePath = data['profile_pic']?.toString();
-          }
-        }
-      } catch (e) {
-        AppLogger.warning('Failed to fetch VIP profile: $e', tag: 'ProfileProvider');
-      }
+    String? state;
+    if (data['state'] is Map) {
+      state = data['state']['name']?.toString();
     } else {
-      _vipProfileId = '';
-      _vipName = '';
-      _vipPhoneNumber = '';
-      _vipGender = '';
-      _vipInformation = '';
-      _vipState = null;
-      _vipDistrict = null;
-      _vipCity = null;
-      _vipProfileImagePath = null;
+      state = data['state_name']?.toString() ?? data['state']?.toString();
     }
 
-    // 2. Fetch Normal profile if logged in
-    if (authProvider.isNormalLoggedIn) {
-      try {
-        await authProvider.ensureApiTokenFor(isVip: false);
-        final response = await ApiClient.instance.get<dynamic>(
-          '/normal-users/me',
-          parser: (json) => json,
-        );
-        if (response.success && response.data != null) {
-          final data = response.data['data'];
-          if (data is Map) {
-            _normalProfileId = data['hn_id']?.toString() ?? '';
-            _normalName = data['name']?.toString() ?? '';
-            _normalPhoneNumber = data['phone']?.toString() ?? '';
-            _normalGender = data['gender']?.toString() ?? '';
-            _normalInformation = data['information']?.toString() ?? '';
+    String? district;
+    if (data['district'] is Map) {
+      district = data['district']['name']?.toString();
+    } else {
+      district =
+          data['district_name']?.toString() ?? data['district']?.toString();
+    }
 
-            if (data['state'] is Map) {
-              _normalState = data['state']['name']?.toString();
-            } else {
-              _normalState = data['state_name']?.toString() ?? data['state']?.toString();
-            }
+    final city = data['city']?.toString();
+    String? imagePath;
+    final rawImg = data['image_url']?.toString() ??
+        data['image_path']?.toString() ??
+        data['profile_pic']?.toString();
+    if (rawImg != null &&
+        rawImg.isNotEmpty &&
+        rawImg != '0' &&
+        rawImg != 'null') {
+      final updatedAt = data['updated_at']?.toString();
+      final t = (updatedAt != null && updatedAt.isNotEmpty)
+          ? updatedAt
+          : DateTime.now().millisecondsSinceEpoch.toString();
+      String cleanUrl = rawImg;
+      if (cleanUrl.contains('?t=')) {
+        cleanUrl = cleanUrl.split('?t=').first;
+      } else if (cleanUrl.contains('&t=')) {
+        cleanUrl = cleanUrl.split('&t=').first;
+      }
+      final sep = cleanUrl.contains('?') ? '&' : '?';
+      imagePath = '$cleanUrl${sep}t=${Uri.encodeComponent(t)}';
+    }
 
-            if (data['district'] is Map) {
-              _normalDistrict = data['district']['name']?.toString();
-            } else {
-              _normalDistrict = data['district_name']?.toString() ?? data['district']?.toString();
-            }
-
-            _normalCity = data['city']?.toString();
-            _normalProfileImagePath = data['profile_pic']?.toString();
-          }
+    if (isVip) {
+      if (id.isNotEmpty) _vipProfileId = id;
+      if (name.isNotEmpty) _vipName = name;
+      if (phone.isNotEmpty) _vipPhoneNumber = phone;
+      if (gender.isNotEmpty) _vipGender = gender;
+      if (info.isNotEmpty) _vipInformation = info;
+      if (state != null && state.isNotEmpty) _vipState = state;
+      if (district != null && district.isNotEmpty) _vipDistrict = district;
+      if (city != null && city.isNotEmpty) _vipCity = city;
+      if (imagePath != null && imagePath.isNotEmpty) {
+        final current = _vipProfileImagePath;
+        final isCurrentLocal = current != null && current.startsWith('/') && File(current).existsSync();
+        if (!isCurrentLocal) {
+          _vipProfileImagePath = imagePath;
         }
-      } catch (e) {
-        AppLogger.warning('Failed to fetch Normal profile: $e', tag: 'ProfileProvider');
       }
     } else {
-      _normalProfileId = '';
-      _normalName = '';
-      _normalPhoneNumber = '';
-      _normalGender = '';
-      _normalInformation = '';
-      _normalState = null;
-      _normalDistrict = null;
-      _normalCity = null;
-      _normalProfileImagePath = null;
+      if (id.isNotEmpty) _normalProfileId = id;
+      if (name.isNotEmpty) _normalName = name;
+      if (phone.isNotEmpty) _normalPhoneNumber = phone;
+      if (gender.isNotEmpty) _normalGender = gender;
+      if (info.isNotEmpty) _normalInformation = info;
+      if (state != null && state.isNotEmpty) _normalState = state;
+      if (district != null && district.isNotEmpty) _normalDistrict = district;
+      if (city != null && city.isNotEmpty) _normalCity = city;
+      if (imagePath != null && imagePath.isNotEmpty) {
+        final current = _normalProfileImagePath;
+        final isCurrentLocal = current != null && current.startsWith('/') && File(current).existsSync();
+        if (!isCurrentLocal) {
+          _normalProfileImagePath = imagePath;
+        }
+      }
+    }
+  }
+
+  /// Load user data from local SecureStorage via AuthProvider immediately
+  Future<void> loadFromStorage(AuthProvider authProvider) async {
+    if (authProvider.isVipLoggedIn) {
+      final vipUser = await authProvider.getStoredUser(isVip: true);
+      if (vipUser != null) {
+        applyUserData(vipUser, isVip: true);
+      }
+    }
+    if (authProvider.isNormalLoggedIn) {
+      final normalUser = await authProvider.getStoredUser(isVip: false);
+      if (normalUser != null) {
+        applyUserData(normalUser, isVip: false);
+      }
     }
 
     if (authProvider.isVipLoggedIn && !authProvider.isNormalLoggedIn) {
@@ -298,9 +326,71 @@ class ProfileProvider extends ChangeNotifier {
     } else if (!authProvider.isVipLoggedIn && authProvider.isNormalLoggedIn) {
       _isVipProfile = false;
     }
-
-    _isFetching = false;
     notifyListeners();
+  }
+
+  /// Fetch VIP and/or Normal profiles from backend
+  Future<void> fetchProfiles({required AuthProvider authProvider}) async {
+    // 1. Immediately populate from local storage for instant zero-lag display
+    await loadFromStorage(authProvider);
+
+    if (_isFetching) return;
+    _isFetching = true;
+
+    try {
+      // 1. Fetch VIP profile if logged in
+      if (authProvider.isVipLoggedIn) {
+        try {
+          await authProvider.ensureApiTokenFor(isVip: true);
+          final response = await ApiClient.instance.get<dynamic>(
+            '/vip-users/me',
+            parser: (json) => json,
+          );
+          if (response.success && response.data != null) {
+            final data = response.data['data'];
+            if (data is Map) {
+              final map = Map<String, dynamic>.from(data);
+              applyUserData(map, isVip: true);
+              await authProvider.updateStoredVipUser(map);
+            }
+          }
+        } catch (e) {
+          AppLogger.warning(
+              'Failed to fetch VIP profile: $e', tag: 'ProfileProvider');
+        }
+      }
+
+      // 2. Fetch Normal profile if logged in
+      if (authProvider.isNormalLoggedIn) {
+        try {
+          await authProvider.ensureApiTokenFor(isVip: false);
+          final response = await ApiClient.instance.get<dynamic>(
+            '/normal-users/me',
+            parser: (json) => json,
+          );
+          if (response.success && response.data != null) {
+            final data = response.data['data'];
+            if (data is Map) {
+              final map = Map<String, dynamic>.from(data);
+              applyUserData(map, isVip: false);
+              await authProvider.updateStoredNormalUser(map);
+            }
+          }
+        } catch (e) {
+          AppLogger.warning(
+              'Failed to fetch Normal profile: $e', tag: 'ProfileProvider');
+        }
+      }
+
+      if (authProvider.isVipLoggedIn && !authProvider.isNormalLoggedIn) {
+        _isVipProfile = true;
+      } else if (!authProvider.isVipLoggedIn && authProvider.isNormalLoggedIn) {
+        _isVipProfile = false;
+      }
+    } finally {
+      _isFetching = false;
+      notifyListeners();
+    }
   }
 
   void clearProfile() {

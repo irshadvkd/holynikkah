@@ -1,10 +1,13 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:holynikkah/core/widgets/logo_widget.dart';
-import 'package:holynikkah/core/utils/routes.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:holynikkah/core/theme/app_colors.dart';
+import 'package:holynikkah/core/utils/constants.dart';
 import 'package:holynikkah/modules/category/controller/category_provider.dart';
 import 'package:holynikkah/modules/login/providers/auth_provider.dart';
 import 'package:holynikkah/core/utils/app_logger.dart';
+import 'package:holynikkah/modules/home/screens/home_screen.dart';
 import 'package:provider/provider.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -15,6 +18,8 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  static const Color _creamDim = Color(0xFFDCD4C0);
+
   @override
   void initState() {
     super.initState();
@@ -23,8 +28,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> _init() async {
     AppLogger.info("Splash screens initializing...", tag: "SplashScreen");
-    final delay = kDebugMode ? Duration.zero : const Duration(seconds: 2);
-    await Future.delayed(delay);
+    await Future.delayed(const Duration(seconds: 2));
     if (!mounted) return;
 
     AppLogger.info("Checking login status...", tag: "SplashScreen");
@@ -41,11 +45,68 @@ class _SplashScreenState extends State<SplashScreen> {
     AppLogger.info("Navigating to HomeRoute...", tag: "SplashScreen");
     // await context.read<AuthProvider>().clearAuthData();
 
-    Navigator.of(context).pushReplacementNamed(Routes.home);
+    Navigator.of(context).pushReplacement(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            const HomeScreen(),
+        transitionDuration: const Duration(milliseconds: 600),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          final curved = CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOutCubic,
+          );
+          return FadeTransition(
+            opacity: curved,
+            child: ScaleTransition(
+              scale: Tween<double>(begin: 0.88, end: 1.0).animate(curved),
+              alignment: Alignment.center,
+              child: child,
+            ),
+          );
+        },
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: Center(child: const LogoWidget(size: 300)));
+    return Scaffold(
+      backgroundColor: AppColors.secondary,
+      body: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.light,
+        child: Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: const BoxDecoration(
+            gradient: AppColors.darkGreenGradient,
+          ),
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.asset(
+                  AppConstants.icons.logoVertical,
+                  width: 220.w,
+                  height: 220.h,
+                  fit: BoxFit.contain,
+                ),
+                SizedBox(height: 18.h),
+                Text(
+                  'Great people find sacred souls',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.cormorantGaramond(
+                    color: _creamDim,
+                    fontSize: 18.sp,
+                    fontStyle: FontStyle.italic,
+                    fontWeight: FontWeight.w400,
+                    letterSpacing: 0.4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

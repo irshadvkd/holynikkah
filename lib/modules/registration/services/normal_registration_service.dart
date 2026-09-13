@@ -16,14 +16,19 @@ class NormalRegistrationService {
     );
 
     final fields = <String, dynamic>{
+      'phone': request.phoneNumber,
       'phone_number': request.phoneNumber,
+      'name': request.fullName,
       'full_name': request.fullName,
       'gender': request.normalizedGender,
       'state_id': request.stateId,
       'district_id': request.districtId,
       'city': request.city,
+      'info': request.information,
       'information': request.information,
-      'mob_visibility': request.mobVisibility,
+      'mob_visibility': request.mobVisibility ? 'true' : 'false',
+      if (request.email != null && request.email!.isNotEmpty)
+        'email': request.email,
     };
 
     if (request.profilePicPath != null && request.profilePicPath!.isNotEmpty) {

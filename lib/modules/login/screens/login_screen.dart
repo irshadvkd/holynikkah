@@ -1,305 +1,446 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:holynikkah/core/theme/app_colors.dart';
 import 'package:holynikkah/core/theme/app_typography.dart';
 import 'package:holynikkah/core/utils/constants.dart';
 import 'package:holynikkah/core/utils/routes.dart';
-import 'package:holynikkah/core/utils/validation_utils.dart';
+import 'package:holynikkah/core/widgets/common_button.dart';
 import 'package:holynikkah/core/widgets/common_snackbar.dart';
-import 'package:holynikkah/core/widgets/custom_text_field.dart';
+import 'package:holynikkah/core/widgets/legal_screens.dart';
+import 'package:holynikkah/modules/category/controller/category_provider.dart';
 import 'package:holynikkah/modules/login/providers/auth_provider.dart';
+import 'package:holynikkah/modules/login/widgets/google_logo_icon.dart';
+import 'package:holynikkah/modules/myprofile/providers/profile_provider.dart';
+import 'package:holynikkah/modules/template/providers/template_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 /// 🧭 Login Screen
 class LoginScreen extends StatefulWidget {
   final String type;
-  const LoginScreen({super.key, required this.type});
+  final bool? showBackButton;
+
+  const LoginScreen({
+    super.key,
+    required this.type,
+    this.showBackButton,
+  });
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
-  final _phoneController = TextEditingController();
-  final _storage = const FlutterSecureStorage();
+class _LoginScreenState extends State<LoginScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _logoAnimController;
+  late Animation<double> _logoFadeAnimation;
+  late Animation<Offset> _logoSlideAnimation;
 
-  static const Color _bgPrimary = Color(0xFF0E1F16);
-  static const Color _bgGradientTop = Color(0xFF142B1F);
-  static const Color _bgGradientBottom = Color(0xFF060D09);
-  static const Color _goldLight = Color(0xFFF3D68A);
-  static const Color _goldMain = Color(0xFFC9973F);
-  static const Color _goldDark = Color(0xFF9E7428);
-  static const Color _inputFill = Color(0xFF162E21);
-  static const Color _inputBorder = Color(0xFF28523C);
-  static const Color _textMuted = Color(0xFF8FAEA0);
+  @override
+  void initState() {
+    super.initState();
+
+    // 🌟 Smooth Logo Top-to-Bottom Slide + Fade-In Animation
+    _logoAnimController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2000),
+    );
+    _logoFadeAnimation = CurvedAnimation(
+      parent: _logoAnimController,
+      curve: Curves.easeOutCubic,
+    );
+    _logoSlideAnimation = Tween<Offset>(
+      begin: const Offset(0.0, -0.35),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(
+        parent: _logoAnimController,
+        curve: Curves.easeOutCubic,
+      ),
+    );
+    _logoAnimController.forward();
+  }
 
   @override
   void dispose() {
-    _phoneController.dispose();
+    _logoAnimController.dispose();
     super.dispose();
   }
+
+  // Premium Theme Palette matching HTML design
+  static const Color _gold = Color(0xFFC9A35C);
+  static const Color _cream = Color(0xFFF3EAD9);
+  static const Color _creamDim = Color(0xFFCDBFA4);
 
   @override
   Widget build(BuildContext context) {
     final isVip = widget.type.toLowerCase() == 'vip';
+    final canPop = Navigator.of(context).canPop();
+    final shouldShowBack = widget.showBackButton ?? canPop;
 
     return Scaffold(
-      backgroundColor: _bgPrimary,
+      backgroundColor: AppColors.secondary,
       body: AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle.light,
         child: Container(
           width: double.infinity,
           height: double.infinity,
           decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                _bgGradientTop,
-                _bgPrimary,
-                _bgGradientBottom,
-              ],
-            ),
+            gradient: AppColors.darkGreenGradient,
           ),
           child: SafeArea(
             child: Consumer<AuthProvider>(
               builder: (context, authProvider, child) {
-                return SingleChildScrollView(
-                  physics: const ClampingScrollPhysics(),
-                  padding: EdgeInsets.symmetric(horizontal: 24.w),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      SizedBox(height: 8.h),
-                      // Top Back Navigation
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: GestureDetector(
-                          onTap: () => Navigator.of(context).pop(),
-                          behavior: HitTestBehavior.opaque,
-                          child: Container(
-                            width: 40.w,
-                            height: 40.w,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.white.withValues(alpha: 0.08),
-                              border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.12),
-                                width: 1,
-                              ),
-                            ),
-                            child: Icon(
-                              Icons.arrow_back_ios_new_rounded,
-                              color: _goldLight,
-                              size: 18.sp,
-                            ),
-                          ),
+                return LayoutBuilder(
+                  builder: (context, constraints) {
+                    return SingleChildScrollView(
+                      physics: const ClampingScrollPhysics(),
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minHeight: constraints.maxHeight,
                         ),
-                      ),
+                        child: IntrinsicHeight(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 34.w),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                // Top Back Navigation (if applicable)
+                                SizedBox(height: 8.h),
+                                if (shouldShowBack)
+                                  Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: GestureDetector(
+                                      onTap: () => Navigator.of(context).pop(),
+                                      behavior: HitTestBehavior.opaque,
+                                      child: Container(
+                                        width: 40.w,
+                                        height: 40.w,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: Colors.white
+                                              .withValues(alpha: 0.08),
+                                          border: Border.all(
+                                            color: Colors.white
+                                                .withValues(alpha: 0.12),
+                                            width: 1,
+                                          ),
+                                        ),
+                                        child: Icon(
+                                          Icons.arrow_back_ios_new_rounded,
+                                          color: _gold,
+                                          size: 18.sp,
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                else
+                                  SizedBox(height: 12.h),
 
-                      SizedBox(height: 24.h),
+                                const Spacer(flex: 2),
 
-                      // Logo & Ambient Branding Container
-                      Image.asset(
-                        AppConstants.icons.logoHorizontal,
-                        width: 300.w,
-                        fit: BoxFit.contain,
-                      ),
-
-                      if (isVip) ...[
-                        SizedBox(height: 8.h),
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 14.w,
-                            vertical: 5.h,
-                          ),
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [_goldLight, _goldMain],
-                            ),
-                            borderRadius: BorderRadius.circular(20.r),
-                            boxShadow: [
-                              BoxShadow(
-                                color: _goldMain.withValues(alpha: 0.3),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.workspace_premium_rounded,
-                                size: 14.sp,
-                                color: _bgPrimary,
-                              ),
-                              SizedBox(width: 4.w),
-                              Text(
-                                'VIP ACCESS',
-                                style: AppTypography.marcellus(
-                                  fontSize: 11.sp,
-                                  fontWeight: FontWeight.w800,
-                                  color: _bgPrimary,
-                                  letterSpacing: 1.2,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-
-                      SizedBox(height: 48.h),
-
-                      // Form Content Box
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Ready to Join',
-                              style: AppTypography.marcellus(
-                                color: Colors.white,
-                                fontSize: 28.sp,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: -0.3,
-                              ),
-                            ),
-                            SizedBox(height: 8.h),
-                            Text(
-                              'Enter your mobile number to receive an OTP verification code.',
-                              style: AppTypography.marcellus(
-                                color: _textMuted,
-                                fontSize: 14.sp,
-                                height: 1.4,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      SizedBox(height: 32.h),
-
-                      // Custom Phone Number Text Field
-                      CustomTextField(
-                        controller: _phoneController,
-                        hintText: 'Enter 10-digit phone number',
-                        keyboardType: TextInputType.phone,
-                        inputFormatters: InputFormatters.phoneFormatter(),
-                        maxLength: 10,
-                        maxLines: 1,
-                        backgroundColor: _inputFill,
-                        borderColor: _inputBorder,
-                        textColor: Colors.white,
-                        hintColor: _textMuted,
-                        cursorColor: _goldLight,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.35),
-                            offset: const Offset(0, 4),
-                            blurRadius: 10,
-                          ),
-                        ],
-                        prefixIcon: Padding(
-                          padding: EdgeInsets.only(left: 20.w, right: 12.w),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                '+91',
-                                style: AppTypography.marcellus(
-                                  color: _goldLight,
-                                  fontSize: 16.sp,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              SizedBox(width: 12.w),
-                              Container(
-                                width: 1,
-                                height: 20.h,
-                                color: _inputBorder,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-
-                      SizedBox(height: 36.h),
-
-                      // Send OTP Action Button
-                      GestureDetector(
-                        onTap: authProvider.isLoading ? null : _login,
-                        child: Container(
-                          width: double.infinity,
-                          height: 52.h,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(50.r),
-                            gradient: const LinearGradient(
-                              colors: [
-                                _goldLight,
-                                _goldMain,
-                                _goldDark,
-                              ],
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: _goldMain.withValues(alpha: 0.4),
-                                offset: const Offset(0, 6),
-                                blurRadius: 16,
-                              ),
-                            ],
-                          ),
-                          child: authProvider.isLoading
-                              ? SizedBox(
-                                  height: 22.h,
-                                  width: 22.w,
-                                  child: const CircularProgressIndicator(
-                                    strokeWidth: 2.5,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      _bgPrimary,
+                                // 🌟 Animated Logo Container (Slide down from Top + Fade-In)
+                                SlideTransition(
+                                  position: _logoSlideAnimation,
+                                  child: FadeTransition(
+                                    opacity: _logoFadeAnimation,
+                                    child: Image.asset(
+                                      AppConstants.icons.logoVertical,
+                                      width: 200.w,
+                                      height: 200.h,
+                                      fit: BoxFit.contain,
                                     ),
                                   ),
-                                )
-                              : Text(
-                                  'Send OTP',
-                                  style: AppTypography.marcellus(
-                                    color: _bgPrimary,
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 18.sp,
+                                ),
+
+                                // if (isVip) ...[
+                                //   SizedBox(height: 14.h),
+                                //   Container(
+                                //     padding: EdgeInsets.symmetric(
+                                //       horizontal: 14.w,
+                                //       vertical: 5.h,
+                                //     ),
+                                //     decoration: BoxDecoration(
+                                //       gradient: AppColors.goldGradient,
+                                //       borderRadius:
+                                //           BorderRadius.circular(20.r),
+                                //       boxShadow: [
+                                //         BoxShadow(
+                                //           color: AppColors.goldMain
+                                //               .withValues(alpha: 0.3),
+                                //           blurRadius: 8,
+                                //           offset: const Offset(0, 2),
+                                //         ),
+                                //       ],
+                                //     ),
+                                //     child: Row(
+                                //       mainAxisSize: MainAxisSize.min,
+                                //       children: [
+                                //         Icon(
+                                //           Icons.workspace_premium_rounded,
+                                //           size: 14.sp,
+                                //           color: AppColors.onPrimary,
+                                //         ),
+                                //         SizedBox(width: 4.w),
+                                //         Text(
+                                //           'VIP ACCESS',
+                                //           style: AppTypography.marcellus(
+                                //             fontSize: 11.sp,
+                                //             fontWeight: FontWeight.w800,
+                                //             color: AppColors.onPrimary,
+                                //             letterSpacing: 1.2,
+                                //           ),
+                                //         ),
+                                //       ],
+                                //     ),
+                                //   ),
+                                // ],
+
+                                SizedBox(height: 52.h),
+
+                                // 🌟 Headline: Welcome to HolyNikah
+                                Text(
+                                  'Welcome to HolyNikah',
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.cormorantGaramond(
+                                    color: _cream,
+                                    fontSize: 32.sp,
+                                    fontWeight: FontWeight.w600,
+                                    height: 1.25,
                                     letterSpacing: 0.3,
                                   ),
                                 ),
-                        ),
-                      ),
 
-                      SizedBox(height: 36.h),
+                                SizedBox(height: 14.h),
 
-                      // Bottom Trust/Security Info
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.lock_outline_rounded,
-                            color: _textMuted.withValues(alpha: 0.7),
-                            size: 14.sp,
-                          ),
-                          SizedBox(width: 6.w),
-                          Text(
-                            'Secured with HolyNikah Verification',
-                            style: AppTypography.marcellus(
-                              color: _textMuted.withValues(alpha: 0.7),
-                              fontSize: 12.sp,
-                              fontWeight: FontWeight.w400,
+                                // 🌟 Subtitle: Great people find sacred souls
+                                Text(
+                                  'Great people find sacred souls',
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.cormorantGaramond(
+                                    color: _creamDim,
+                                    fontSize: 18.sp,
+                                    fontStyle: FontStyle.italic,
+                                    fontWeight: FontWeight.w400,
+                                    letterSpacing: 0.4,
+                                  ),
+                                ),
+
+                                SizedBox(height: 26.h),
+
+                                // 🌟 Divider (34px x 1px gold hairline)
+                                Container(
+                                  width: 34.w,
+                                  height: 1.h,
+                                  color: _gold.withValues(alpha: 0.55),
+                                ),
+
+                                SizedBox(height: 56.h),
+
+                                // 🔥 Continue with Google Button (CommonButton)
+                                CommonButton(
+                                  title: 'Continue with Google',
+                                  isLoading: authProvider.isLoading,
+                                  onTap: _handleGoogleSignIn,
+                                  height: 54.h,
+                                  borderRadius: BorderRadius.circular(30.r),
+                                  backgroundColor: _gold,
+                                  hasShadow: false,
+                                  loaderColor: const Color(0xFF0E2019),
+                                  prefixIcon: const GoogleLogoIcon(size: 20),
+                                  textStyle: GoogleFonts.cormorantGaramond(
+                                    color: const Color(0xFF0E2019),
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 18.sp,
+                                    letterSpacing: 0.6,
+                                  ),
+                                ),
+
+                                /*
+                                // Previous custom button implementation (commented out)
+                                GestureDetector(
+                                  onTap: authProvider.isLoading
+                                      ? null
+                                      : _handleGoogleSignIn,
+                                  behavior: HitTestBehavior.opaque,
+                                  child: Container(
+                                    width: double.infinity,
+                                    padding: EdgeInsets.symmetric(
+                                      vertical: 17.h,
+                                    ),
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(
+                                      borderRadius:
+                                          BorderRadius.circular(30.r),
+                                      gradient: const LinearGradient(
+                                        begin: Alignment.topCenter,
+                                        end: Alignment.bottomCenter,
+                                        colors: [
+                                          _goldLight,
+                                          _gold,
+                                        ],
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: _gold.withValues(alpha: 0.28),
+                                          blurRadius: 28,
+                                          offset: const Offset(0, 10),
+                                        ),
+                                      ],
+                                    ),
+                                    child: authProvider.isLoading
+                                        ? SizedBox(
+                                            height: 22.h,
+                                            width: 22.w,
+                                            child:
+                                                const CircularProgressIndicator(
+                                              strokeWidth: 2.5,
+                                              valueColor:
+                                                  AlwaysStoppedAnimation<Color>(
+                                                Color(0xFF0E2019),
+                                              ),
+                                            ),
+                                          )
+                                        : Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              GoogleLogoIcon(size: 20.w),
+                                              SizedBox(width: 12.w),
+                                              Text(
+                                                'Continue with Google',
+                                                style: GoogleFonts
+                                                    .cormorantGaramond(
+                                                  color:
+                                                      const Color(0xFF0E2019),
+                                                  fontWeight: FontWeight.w600,
+                                                  fontSize: 18.sp,
+                                                  letterSpacing: 0.6,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                  ),
+                                ),
+                                */
+
+                                SizedBox(height: 26.h),
+
+                                // 📜 Legal Footer
+                                Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      'By continuing, you agree to our',
+                                      textAlign: TextAlign.center,
+                                      style: GoogleFonts.cormorantGaramond(
+                                        color:
+                                            _creamDim.withValues(alpha: 0.75),
+                                        fontSize: 13.5.sp,
+                                        letterSpacing: 0.3,
+                                        height: 1.7,
+                                      ),
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        GestureDetector(
+                                          onTap: () {
+                                            Navigator.of(context).push(
+                                              MaterialPageRoute(
+                                                builder: (_) =>
+                                                    const TermsScreen(),
+                                              ),
+                                            );
+                                          },
+                                          behavior: HitTestBehavior.opaque,
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              border: Border(
+                                                bottom: BorderSide(
+                                                  color: _gold.withValues(
+                                                      alpha: 0.4),
+                                                  width: 1,
+                                                ),
+                                              ),
+                                            ),
+                                            padding:
+                                                EdgeInsets.only(bottom: 1.h),
+                                            child: Text(
+                                              'Terms of Service',
+                                              style: GoogleFonts
+                                                  .cormorantGaramond(
+                                                color: _gold,
+                                                fontSize: 13.5.sp,
+                                                letterSpacing: 0.3,
+                                                height: 1.7,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal: 8.w,
+                                          ),
+                                          child: Text(
+                                            '·',
+                                            style: GoogleFonts
+                                                .cormorantGaramond(
+                                              color: _creamDim
+                                                  .withValues(alpha: 0.6),
+                                              fontSize: 13.5.sp,
+                                            ),
+                                          ),
+                                        ),
+                                        GestureDetector(
+                                          onTap: () {
+                                            Navigator.of(context).push(
+                                              MaterialPageRoute(
+                                                builder: (_) =>
+                                                    const PrivacyScreen(),
+                                              ),
+                                            );
+                                          },
+                                          behavior: HitTestBehavior.opaque,
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              border: Border(
+                                                bottom: BorderSide(
+                                                  color: _gold.withValues(
+                                                      alpha: 0.4),
+                                                  width: 1,
+                                                ),
+                                              ),
+                                            ),
+                                            padding:
+                                                EdgeInsets.only(bottom: 1.h),
+                                            child: Text(
+                                              'Privacy Policy',
+                                              style: GoogleFonts
+                                                  .cormorantGaramond(
+                                                color: _gold,
+                                                fontSize: 13.5.sp,
+                                                letterSpacing: 0.3,
+                                                height: 1.7,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+
+                                const Spacer(flex: 3),
+                              ],
                             ),
                           ),
-                        ],
+                        ),
                       ),
-                      SizedBox(height: 16.h),
-                    ],
-                  ),
+                    );
+                  },
                 );
               },
             ),
@@ -309,35 +450,68 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  void _login() async {
-    final phone = _phoneController.text.trim();
+  void _handleGoogleSignIn() async {
+    final auth = context.read<AuthProvider>();
+    if (auth.isLoading) return;
 
-    if (phone.isEmpty) {
-      CommonSnackBar.showError(context, 'Please enter phone number');
-      return;
-    } else if (phone.length != 10) {
-      CommonSnackBar.showError(context, 'Please enter 10 digit phone number');
+    final isVip = widget.type.toLowerCase() == 'vip';
+    final result = await auth.signInWithGoogle(type: widget.type);
+
+    if (!mounted) return;
+
+    if (result.cancelled) {
       return;
     }
 
-    await _storage.write(key: 'phone_number', value: phone);
-    // Store the registration type for verification screens
-    await _storage.write(key: 'registration_type', value: widget.type);
-
-    if (!mounted) return;
-
-    final auth = context.read<AuthProvider>();
-
-    // Prevent double tap by checking loading state
-    if (auth.isLoading) return;
-
-    final result = await auth.sendOtp(phone, type: widget.type);
-
-    if (!mounted) return;
-
     if (result.success) {
-      CommonSnackBar.showSuccess(context, result.message);
-      Navigator.of(context).pushNamed(Routes.verification);
+      if (result.isAlreadyRegistered) {
+        // User already has an account -> Sync categories/templates & navigate to Home
+        if (result.backendUserData != null) {
+          if (isVip) {
+            await context
+                .read<CategoryProvider>()
+                .applyVipCategoryFromUser(result.backendUserData);
+            if (!mounted) return;
+            await context
+                .read<TemplateProvider>()
+                .applyVipTemplateFromUser(result.backendUserData);
+          } else {
+            await context
+                .read<CategoryProvider>()
+                .applyNormalCategoryFromUser(result.backendUserData);
+            if (!mounted) return;
+            await context
+                .read<TemplateProvider>()
+                .applyNormalTemplateFromUser(result.backendUserData);
+          }
+          context.read<ProfileProvider>().applyUserData(
+                result.backendUserData!,
+                isVip: isVip,
+              );
+        }
+        if (!mounted) return;
+        CommonSnackBar.showSuccess(context, 'Login successful');
+        Navigator.of(context).pushReplacementNamed(Routes.home);
+      } else {
+        // User not registered -> Navigate to Register with prefill data from other tier if available
+        final prefill = result.prefillData;
+        final prefillName =
+            prefill?['name']?.toString() ?? result.user?.displayName;
+        final prefillPhone = prefill?['phone']?.toString();
+
+        CommonSnackBar.showSuccess(
+            context, 'Google verified. Complete your profile.');
+        Navigator.of(context).pushNamed(
+          Routes.registration,
+          arguments: {
+            'isVip': isVip,
+            'email': result.user?.email,
+            'phoneNumber': prefillPhone,
+            'name': prefillName,
+            'prefillData': prefill,
+          },
+        );
+      }
     } else {
       CommonSnackBar.showError(context, result.message);
     }

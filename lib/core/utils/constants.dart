@@ -54,6 +54,7 @@ final class _Urls {
   // Auth
   final String login = "/login/login";
   final String register = "/login/register";
+  final String verifyEmail = "/verify-email";
 
   // Content
   final String reels = "/reels";
@@ -183,6 +184,7 @@ final class _IconPaths {
   final String appIcon = "assets/logo/app_icon.png";
   final String logoIcon = "assets/logo/logo_icon.png";
   final String logoHorizontal = "assets/logo/logo_horizontal.png";
+  final String logoVertical = "assets/logo/logo_vertical.png";
   final String appLogo = "assets/logo/logo_icon.png";
   final String appLogoLight = "assets/logo/logo_horizontal.png";
   final String appLogoDark = "assets/logo/logo_horizontal.png";
@@ -216,7 +218,7 @@ final class _Misc {
   const _Misc();
 
   // General constants (you can extend later)
-  final String appName = "Holy Nikah";
+  final String appName = "HolyNikah";
   final String defaultLanguage = "en";
   final Duration apiTimeout = const Duration(seconds: 30);
 }

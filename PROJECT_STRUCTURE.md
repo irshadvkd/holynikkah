@@ -1,4 +1,4 @@
-# Holy Nikkah - Project Structure
+# HolyNikah - Project Structure
 
 ## 📁 Project Architecture
 

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:holynikkah/core/theme/app_colors.dart';
 import 'package:holynikkah/core/theme/app_typography.dart';
+import 'package:holynikkah/core/widgets/common_button.dart';
 import 'package:holynikkah/core/widgets/common_snackbar.dart';
 
 class TemplateDetailScreen extends StatelessWidget {
@@ -25,23 +26,15 @@ class TemplateDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light,
-      child: Scaffold(
-        backgroundColor: AppColors.secondary,
-        body: Container(
-          width: double.infinity,
-          height: double.infinity,
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                AppColors.secondaryLight,
-                AppColors.secondary,
-                AppColors.background,
-              ],
-            ),
-          ),
-          child: SafeArea(
+      child: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: AppColors.darkGreenGradient,
+        ),
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: SafeArea(
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
               child: Column(
@@ -176,55 +169,28 @@ class TemplateDetailScreen extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
+                        child: CommonButton(
+                          title: 'Preview Template',
+                          onTap: () {
                             CommonSnackBar.showInfo(
                               context,
                               'Template preview feature coming soon',
                             );
                           },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            padding: EdgeInsets.symmetric(vertical: 16.h),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12.r),
-                            ),
-                            elevation: 2,
-                          ),
-                          child: Text(
-                            'Preview Template',
-                            style: AppTypography.button(
-                              color: AppColors.onPrimary,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
                         ),
                       ),
                       SizedBox(width: 12.w),
                       Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
+                        child: CommonButton(
+                          title: 'Share Template',
+                          backgroundColor: AppColors.inputBackground,
+                          textColor: AppColors.white,
+                          onTap: () {
                             CommonSnackBar.showInfo(
                               context,
                               'Template sharing feature coming soon',
                             );
                           },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.inputBackground,
-                            padding: EdgeInsets.symmetric(vertical: 16.h),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12.r),
-                              side: const BorderSide(color: AppColors.inputBorder),
-                            ),
-                            elevation: 0,
-                          ),
-                          child: Text(
-                            'Share Template',
-                            style: AppTypography.button(
-                              color: AppColors.white,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
                         ),
                       ),
                     ],

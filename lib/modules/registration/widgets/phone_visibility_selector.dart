@@ -9,10 +9,14 @@ class PhoneVisibilitySelector extends StatelessWidget {
     super.key,
     required this.value,
     required this.onChanged,
+    this.titleColor,
+    this.descriptionColor,
   });
 
   final PhoneVisibility value;
   final ValueChanged<PhoneVisibility> onChanged;
+  final Color? titleColor;
+  final Color? descriptionColor;
 
   String _description(PhoneVisibility option) {
     return switch (option) {
@@ -37,7 +41,7 @@ class PhoneVisibilitySelector extends StatelessWidget {
                 style: AppTypography.marcellus(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.inputText,
+                  color: titleColor ?? AppColors.inputText,
                 ),
               ),
               SizedBox(width: 6.w),
@@ -48,7 +52,9 @@ class PhoneVisibilitySelector extends StatelessWidget {
                 child: Icon(
                   Icons.info_outline_rounded,
                   size: 16.sp,
-                  color: AppColors.inputHint,
+                  color: titleColor != null
+                      ? titleColor!.withValues(alpha: 0.7)
+                      : AppColors.inputHint,
                 ),
               ),
             ],
@@ -104,7 +110,7 @@ class PhoneVisibilitySelector extends StatelessWidget {
               style: AppTypography.marcellus(
                 fontSize: 12.sp,
                 height: 1.35,
-                color: AppColors.inputHint,
+                color: descriptionColor ?? AppColors.inputHint,
               ),
             ),
           ),
@@ -131,7 +137,7 @@ class _SegmentButton extends StatelessWidget {
   final bool isLast;
   final VoidCallback onTap;
 
-  static const Color _primary = Color(0xFF032544);
+  static const Color _primary = Color(0xFF0E1F16);
 
   @override
   Widget build(BuildContext context) {

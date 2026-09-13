@@ -1,7 +1,7 @@
 # Template Engine — Admin Panel & API Specification
 
 > **Purpose:** This document is a build spec for the **Admin Panel + Backend API** that powers
-> dynamically configurable "templates" in the HolyNikkah Flutter app. Hand this file to the
+> dynamically configurable "templates" in the HolyNikah Flutter app. Hand this file to the
 > admin-panel/backend team (or paste it into Cursor) to implement the system.
 >
 > **Goal:** Admins must be able to create and manage templates entirely from the admin panel —

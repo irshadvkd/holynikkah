@@ -62,7 +62,13 @@ class _ApplicationState extends State<Application> {
                 },
                 Routes.registration: (context) {
                   final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-                  return RegistrationScreen(isVip: args?['isVip'] ?? true);
+                  return RegistrationScreen(
+                    isVip: args?['isVip'] ?? true,
+                    phoneNumber: args?['phoneNumber'] ?? args?['phone'],
+                    prefilledName: args?['name'] ?? args?['prefilledName'],
+                    prefillData: args?['prefillData'] ?? args?['prefill_data'],
+                    email: args?['email'],
+                  );
                 },
                 Routes.verification: (context) => const VerificationScreen(),
                 Routes.categorySelection: (context) => const NormalCategoryScreen(isSelectionRequired: true),

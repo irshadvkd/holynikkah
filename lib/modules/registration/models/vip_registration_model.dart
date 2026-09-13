@@ -39,6 +39,7 @@ class RegistrationRequest {
     required this.information,
     required this.mobVisibility,
     this.profilePicPath,
+    this.email,
   });
 
   final String phoneNumber;
@@ -50,6 +51,7 @@ class RegistrationRequest {
   final String information;
   final bool mobVisibility;
   final String? profilePicPath;
+  final String? email;
 
   /// API expects lowercase gender, e.g. `male` / `female`.
   String get normalizedGender => gender.trim().toLowerCase();

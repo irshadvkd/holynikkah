@@ -65,7 +65,8 @@ class _NormalCategoryScreenState extends State<NormalCategoryScreen> {
             fit: BoxFit.none,
             repeat: ImageRepeat.repeat,
             scale: 1.5,
-            veilColor: NormalCategoryColors.ink.withValues(alpha: 0.5),
+            veilColor: NormalCategoryColors.ink.withValues(alpha: 0.35),
+            animationDuration: const Duration(seconds: 15),
           ),
           SafeArea(
             child: Consumer<RegistrationProvider>(
@@ -87,7 +88,7 @@ class _NormalCategoryScreenState extends State<NormalCategoryScreen> {
                         child: Padding(
                           padding: EdgeInsets.symmetric(horizontal: 20.w),
                           child: GridView.builder(
-                            padding: EdgeInsets.only(top: 8.h, bottom: 16.h),
+                            padding: EdgeInsets.only(top: 4.h, bottom: 16.h),
                             itemCount: provider.categories.length,
                             gridDelegate:
                                 SliverGridDelegateWithFixedCrossAxisCount(
@@ -128,7 +129,7 @@ class _NormalCategoryScreenState extends State<NormalCategoryScreen> {
 
   Widget _buildHeader() {
     return Padding(
-      padding: EdgeInsets.fromLTRB(24.w, 6.h, 24.w, 22.h),
+      padding: EdgeInsets.fromLTRB(24.w, 6.h, 24.w, 10.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -136,10 +137,11 @@ class _NormalCategoryScreenState extends State<NormalCategoryScreen> {
             children: [
               Text(
                 'CHOOSE CATEGORY',
-                style: AppTypography.marcellus(
-                  fontSize: 13.sp,
+                style: AppTypography.cormorantGaramond(
+                  fontSize: 15.sp,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 3.0,
+                  height: 1.0,
                   color: const Color(0xFFF3D68A).withValues(alpha: 0.9),
                 ),
               ),
@@ -159,17 +161,18 @@ class _NormalCategoryScreenState extends State<NormalCategoryScreen> {
               ),
             ],
           ),
-          SizedBox(height: 8.h),
+          SizedBox(height: 12.h),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
                 'Register',
-                style: AppTypography.marcellus(
+                style: AppTypography.italiana(
                   fontSize: 34.sp,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.3,
+                  height: 1.1,
                   color: Colors.white,
                   shadows: [
                     Shadow(

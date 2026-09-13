@@ -8,13 +8,14 @@ class CommonImageCropper {
     required String imagePath,
     double ratioX = 3,
     double ratioY = 4,
+    int compressQuality = 85,
   }) async {
     final croppedFile = await ImageCropper().cropImage(
       sourcePath: imagePath,
 
       aspectRatio: CropAspectRatio(ratioX: ratioX, ratioY: ratioY),
 
-      compressQuality: 100,
+      compressQuality: compressQuality,
 
       uiSettings: [
         AndroidUiSettings(

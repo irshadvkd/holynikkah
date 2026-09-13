@@ -79,13 +79,19 @@ class CustomTextField extends StatelessWidget {
         readOnly: readOnly,
         cursorColor: cursorColor,
         style: AppTypography.marcellus(
-          color: textColor ?? AppColors.textPrimary,
+          color: textColor ??
+              (backgroundColor == null || backgroundColor == Colors.white
+                  ? Colors.black87
+                  : AppColors.textPrimary),
           fontSize: 16.sp,
         ),
         decoration: InputDecoration(
           hintText: hintText,
           hintStyle: AppTypography.marcellus(
-            color: hintColor ?? AppColors.textSecondary,
+            color: hintColor ??
+                (backgroundColor == null || backgroundColor == Colors.white
+                    ? Colors.grey[600]
+                    : AppColors.textSecondary),
             fontSize: 16.sp,
           ),
           filled: false,

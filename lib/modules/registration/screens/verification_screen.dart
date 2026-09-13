@@ -14,6 +14,7 @@ import 'package:holynikkah/modules/login/providers/auth_provider.dart';
 import 'package:holynikkah/modules/registration/models/vip_otp_model.dart';
 import 'package:holynikkah/modules/registration/services/normal_otp_service.dart';
 import 'package:holynikkah/modules/registration/services/vip_otp_service.dart';
+import 'package:holynikkah/modules/myprofile/providers/profile_provider.dart';
 import 'package:holynikkah/modules/template/providers/template_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -165,6 +166,9 @@ class _VerificationScreenState extends State<VerificationScreen> {
         );
       }
       if (!mounted) return;
+      if (data.user != null) {
+        context.read<ProfileProvider>().applyUserData(data.user!, isVip: isVip);
+      }
       CommonSnackBar.showSuccess(
         context,
         'OTP verified and login successful',

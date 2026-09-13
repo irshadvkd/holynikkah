@@ -10,6 +10,7 @@ import 'package:holynikkah/core/theme/app_colors.dart';
 import 'package:holynikkah/core/theme/app_typography.dart';
 import 'package:holynikkah/core/utils/app_logger.dart';
 import 'package:holynikkah/core/utils/utils.dart';
+import 'package:holynikkah/core/widgets/common_button.dart';
 import 'package:holynikkah/core/widgets/common_snackbar.dart';
 import 'package:holynikkah/modules/login/providers/auth_provider.dart';
 import 'package:holynikkah/modules/template/models/template_definition.dart';
@@ -326,23 +327,15 @@ class _TemplateRendererScreenState extends State<TemplateRendererScreen> {
   Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light,
-      child: Scaffold(
-        backgroundColor: AppColors.secondary,
-        body: Container(
-          width: double.infinity,
-          height: double.infinity,
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                AppColors.secondaryLight,
-                AppColors.secondary,
-                AppColors.background,
-              ],
-            ),
-          ),
-          child: PageView(
+      child: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: AppColors.darkGreenGradient,
+        ),
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: PageView(
             controller: _pageController,
             physics: const NeverScrollableScrollPhysics(),
             children: [
@@ -979,49 +972,20 @@ class _TemplateRendererScreenState extends State<TemplateRendererScreen> {
   }
 
   Widget _primaryButton(String label, VoidCallback onTap, {Color? color, Color? textColor}) {
-    return SizedBox(
-      height: 52.h,
-      child: ElevatedButton(
-        onPressed: onTap,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: color ?? AppColors.primary,
-          elevation: 2,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14.r),
-          ),
-        ),
-        child: Text(
-          label,
-          style: AppTypography.button(
-            color: textColor ?? AppColors.onPrimary,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-      ),
+    return CommonButton(
+      title: label,
+      onTap: onTap,
+      backgroundColor: color,
+      textColor: textColor,
     );
   }
 
   Widget _secondaryButton(String label, VoidCallback onTap) {
-    return SizedBox(
-      height: 52.h,
-      child: ElevatedButton(
-        onPressed: onTap,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.inputBackground,
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14.r),
-            side: const BorderSide(color: AppColors.inputBorder),
-          ),
-        ),
-        child: Text(
-          label,
-          style: AppTypography.button(
-            color: AppColors.white,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
+    return CommonButton(
+      title: label,
+      onTap: onTap,
+      backgroundColor: AppColors.inputBackground,
+      textColor: AppColors.white,
     );
   }
 

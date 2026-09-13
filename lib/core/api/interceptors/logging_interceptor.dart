@@ -51,8 +51,9 @@ class LoggingInterceptor extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
+    final detail = err.message ?? err.error?.toString() ?? 'Unknown error';
     AppLogger.error(
-      '✗ ${err.requestOptions.method} ${err.requestOptions.uri} — ${err.message}',
+      '✗ ${err.requestOptions.method} ${err.requestOptions.uri} — $detail',
       tag: 'API',
       error: err,
       stackTrace: err.stackTrace,

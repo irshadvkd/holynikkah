@@ -1,29 +1,22 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:holynikkah/core/theme/app_colors.dart';
 import 'package:holynikkah/core/theme/app_typography.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'package:holynikkah/core/theme/context_extension.dart';
 import 'package:holynikkah/core/widgets/widgets.dart';
 import 'package:holynikkah/modules/login/providers/auth_provider.dart';
 import 'package:holynikkah/modules/partner/models/phone_request_model.dart';
 import 'package:holynikkah/modules/partner/services/phone_requests_service.dart';
 
-/// Brand navy used across profile/menu screens.
-const Color _navy = Color(0xFF032544);
-const Color _approveGreen = Color(0xFF1B8A4B);
-const Color _rejectRed = Color(0xFFD64545);
-const Color _pendingAmber = Color(0xFFC98A00);
+const Color _approveGreen = AppColors.success;
+const Color _rejectRed = AppColors.error;
+const Color _pendingAmber = AppColors.primary;
 
-/// Phone-visibility requests hub, opened from the profile menu.
-///
-/// VIP and Normal flows live in one screen but stay clearly separated via a
-/// tier segmented toggle (only tiers the user is signed into appear). A second
-/// toggle switches Received (requests for my phone — approve/reject here) vs
-/// Sent (requests I made — approved ones reveal the target's phone). Styled to
-/// match the app's light navy theme.
+/// Phone-visibility requests hub (Request), opened from the profile menu.
 class PhoneRequestsScreen extends StatefulWidget {
   const PhoneRequestsScreen({super.key});
 
@@ -45,70 +38,80 @@ class _PhoneRequestsScreenState extends State<PhoneRequestsScreen> {
     if (_isVip && !hasVip && hasNormal) _isVip = false;
     if (!_isVip && !hasNormal && hasVip) _isVip = true;
 
-    return Scaffold(
-      backgroundColor: AppColors.pureWhite,
-      appBar: AppBar(
-        backgroundColor: AppColors.pureWhite,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: AppColors.inputText, size: 20.sp),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          'Phone Requests',
-          style: AppTypography.marcellus(
-            color: _navy,
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        centerTitle: true,
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      decoration: const BoxDecoration(
+        gradient: AppColors.darkGreenGradient,
       ),
-      body: (!hasVip && !hasNormal)
-          ? const _EmptyMessage(
-              icon: Icons.lock_person_outlined,
-              message: 'Sign in to view phone requests',
-            )
-          : SafeArea(
-              top: false,
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 0),
-                child: Column(
-                  children: [
-                    if (hasVip && hasNormal) ...[
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          surfaceTintColor: Colors.transparent,
+          systemOverlayStyle: SystemUiOverlayStyle.light,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.goldLight, size: 20.sp),
+            onPressed: () => Navigator.pop(context),
+          ),
+          title: Text(
+            'Phone Requests',
+            style: AppTypography.marcellus(
+              color: AppColors.white,
+              fontSize: 18.sp,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          centerTitle: true,
+        ),
+        body: (!hasVip && !hasNormal)
+            ? const _EmptyMessage(
+                icon: Icons.lock_person_outlined,
+                message: 'Sign in to view requests',
+              )
+            : SafeArea(
+                top: false,
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 0),
+                  child: Column(
+                    children: [
+                      if (hasVip && hasNormal) ...[
+                        _Segmented(
+                          leftLabel: 'VIP',
+                          rightLabel: 'Normal',
+                          leftSelected: _isVip,
+                          onLeft: () => setState(() => _isVip = true),
+                          onRight: () => setState(() => _isVip = false),
+                        ),
+                        SizedBox(height: 12.h),
+                      ],
                       _Segmented(
-                        leftLabel: 'VIP',
-                        rightLabel: 'Normal',
-                        leftSelected: _isVip,
-                        onLeft: () => setState(() => _isVip = true),
-                        onRight: () => setState(() => _isVip = false),
+                        leftLabel: 'Received',
+                        rightLabel: 'Sent',
+                        leftSelected: _isIncoming,
+                        onLeft: () => setState(() => _isIncoming = true),
+                        onRight: () => setState(() => _isIncoming = false),
                       ),
-                      SizedBox(height: 12.h),
+                      SizedBox(height: 16.h),
+                      Expanded(
+                        child: _PhoneRequestList(
+                          key: ValueKey('$_isVip-$_isIncoming'),
+                          isVip: _isVip,
+                          isIncoming: _isIncoming,
+                        ),
+                      ),
                     ],
-                    _Segmented(
-                      leftLabel: 'Received',
-                      rightLabel: 'Sent',
-                      leftSelected: _isIncoming,
-                      onLeft: () => setState(() => _isIncoming = true),
-                      onRight: () => setState(() => _isIncoming = false),
-                    ),
-                    SizedBox(height: 16.h),
-                    Expanded(
-                      child: _PhoneRequestList(
-                        key: ValueKey('$_isVip-$_isIncoming'),
-                        isVip: _isVip,
-                        isIncoming: _isIncoming,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
-            ),
+      ),
     );
   }
 }
 
-/// Two-option navy segmented toggle, mirroring the profile-detail screen.
+/// Two-option segmented toggle with primary gold selection.
 class _Segmented extends StatelessWidget {
   const _Segmented({
     required this.leftLabel,
@@ -126,35 +129,54 @@ class _Segmented extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(child: _segment(leftLabel, leftSelected, onLeft)),
-        SizedBox(width: 12.w),
-        Expanded(child: _segment(rightLabel, !leftSelected, onRight)),
-      ],
+    return Container(
+      padding: EdgeInsets.all(4.w),
+      decoration: BoxDecoration(
+        color: AppColors.secondary,
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: AppColors.inputBorder),
+      ),
+      child: Row(
+        children: [
+          Expanded(child: _segment(leftLabel, leftSelected, onLeft)),
+          SizedBox(width: 8.w),
+          Expanded(child: _segment(rightLabel, !leftSelected, onRight)),
+        ],
+      ),
     );
   }
 
   Widget _segment(String label, bool selected, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
+      behavior: HitTestBehavior.opaque,
       child: Container(
-        padding: EdgeInsets.symmetric(vertical: 11.h, horizontal: 12.w),
+        padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 12.w),
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: selected ? _navy : AppColors.inputFill,
+          color: selected ? AppColors.primary : Colors.transparent,
+          gradient: selected
+              ? const LinearGradient(
+                  colors: [AppColors.primary, AppColors.primaryDark],
+                )
+              : null,
           borderRadius: BorderRadius.circular(8.r),
-          border: Border.all(
-            color: selected ? _navy : AppColors.inputBorder,
-            width: 2,
-          ),
+          boxShadow: selected
+              ? [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
         ),
         child: Text(
           label,
           style: AppTypography.marcellus(
-            color: selected ? AppColors.pureWhite : AppColors.inputText,
-            fontSize: 15.sp,
-            fontWeight: FontWeight.w600,
+            color: selected ? AppColors.onPrimary : AppColors.textSecondary,
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w700,
           ),
         ),
       ),
@@ -376,16 +398,30 @@ class _PhoneRequestListState extends State<_PhoneRequestList> {
               alignment: Alignment.center,
               padding: EdgeInsets.symmetric(horizontal: 16.w),
               decoration: BoxDecoration(
-                color: selected ? _navy : AppColors.inputFill,
+                color: selected ? AppColors.primary : AppColors.inputBackground,
+                gradient: selected
+                    ? const LinearGradient(
+                        colors: [AppColors.primary, AppColors.primaryDark],
+                      )
+                    : null,
                 borderRadius: BorderRadius.circular(20.r),
                 border: Border.all(
-                  color: selected ? _navy : AppColors.inputBorder,
+                  color: selected ? Colors.transparent : AppColors.inputBorder,
                 ),
+                boxShadow: selected
+                    ? [
+                        BoxShadow(
+                          color: AppColors.primary.withValues(alpha: 0.3),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ]
+                    : null,
               ),
               child: Text(
                 filter.label,
                 style: AppTypography.marcellus(
-                  color: selected ? AppColors.pureWhite : AppColors.inputText,
+                  color: selected ? AppColors.onPrimary : AppColors.textSecondary,
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w600,
                 ),
@@ -399,7 +435,7 @@ class _PhoneRequestListState extends State<_PhoneRequestList> {
 
   Widget _buildBody() {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator(color: _navy));
+      return const Center(child: CircularProgressIndicator(color: AppColors.primary));
     }
 
     if (_errorMessage != null) {
@@ -425,7 +461,8 @@ class _PhoneRequestListState extends State<_PhoneRequestList> {
     }
 
     return RefreshIndicator(
-      color: _navy,
+      color: AppColors.primary,
+      backgroundColor: AppColors.secondary,
       onRefresh: _load,
       child: ListView.separated(
         controller: _scrollController,
@@ -438,7 +475,7 @@ class _PhoneRequestListState extends State<_PhoneRequestList> {
             return Padding(
               padding: EdgeInsets.symmetric(vertical: 16.h),
               child: const Center(
-                child: CircularProgressIndicator(color: _navy),
+                child: CircularProgressIndicator(color: AppColors.primary),
               ),
             );
           }
@@ -481,14 +518,14 @@ class _RequestCard extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.inputFill,
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: AppColors.inputBorder),
+        color: AppColors.secondary,
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(color: AppColors.border),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            offset: const Offset(0, 2),
-            blurRadius: 8,
+            color: Colors.black.withValues(alpha: 0.35),
+            offset: const Offset(0, 4),
+            blurRadius: 10,
           ),
         ],
       ),
@@ -509,7 +546,7 @@ class _RequestCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: AppTypography.marcellus(
-                        color: _navy,
+                        color: AppColors.white,
                         fontSize: 15.sp,
                         fontWeight: FontWeight.w700,
                       ),
@@ -521,7 +558,7 @@ class _RequestCard extends StatelessWidget {
                           Icon(
                             Icons.location_on,
                             size: 13.sp,
-                            color: AppColors.inputHint,
+                            color: AppColors.primary,
                           ),
                           SizedBox(width: 3.w),
                           Expanded(
@@ -530,7 +567,7 @@ class _RequestCard extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: AppTypography.marcellus(
-                                color: AppColors.inputHint,
+                                color: AppColors.textSecondary,
                                 fontSize: 12.sp,
                               ),
                             ),
@@ -569,7 +606,7 @@ class _RequestCard extends StatelessWidget {
               onPressed: busy ? null : onReject,
               style: OutlinedButton.styleFrom(
                 foregroundColor: _rejectRed,
-                side: const BorderSide(color: _rejectRed),
+                side: BorderSide(color: _rejectRed.withValues(alpha: 0.6)),
                 padding: EdgeInsets.symmetric(vertical: 11.h),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8.r),
@@ -590,8 +627,8 @@ class _RequestCard extends StatelessWidget {
             child: ElevatedButton(
               onPressed: busy ? null : onApprove,
               style: ElevatedButton.styleFrom(
-                backgroundColor: _approveGreen,
-                disabledBackgroundColor: AppColors.inputBorder,
+                backgroundColor: AppColors.primary,
+                disabledBackgroundColor: AppColors.primary.withValues(alpha: 0.4),
                 elevation: 0,
                 padding: EdgeInsets.symmetric(vertical: 11.h),
                 shape: RoundedRectangleBorder(
@@ -604,7 +641,7 @@ class _RequestCard extends StatelessWidget {
                       height: 16.w,
                       child: const CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: AppColors.pureWhite,
+                        color: AppColors.onPrimary,
                       ),
                     )
                   : Text(
@@ -612,7 +649,7 @@ class _RequestCard extends StatelessWidget {
                       style: AppTypography.marcellus(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.pureWhite,
+                        color: AppColors.onPrimary,
                       ),
                     ),
             ),
@@ -629,20 +666,20 @@ class _RequestCard extends StatelessWidget {
         child: ElevatedButton.icon(
           onPressed: () => onCall(phone),
           style: ElevatedButton.styleFrom(
-            backgroundColor: _approveGreen,
+            backgroundColor: AppColors.primary,
             elevation: 0,
             padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 9.h),
             minimumSize: Size(0, 36.h),
             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             shape: const StadiumBorder(),
           ),
-          icon: Icon(Icons.call, size: 15.sp, color: AppColors.pureWhite),
+          icon: Icon(Icons.call, size: 15.sp, color: AppColors.onPrimary),
           label: Text(
             'Call',
             style: AppTypography.marcellus(
               fontSize: 13.sp,
               fontWeight: FontWeight.w700,
-              color: AppColors.pureWhite,
+              color: AppColors.onPrimary,
             ),
           ),
         ),
@@ -675,18 +712,18 @@ class _Avatar extends StatelessWidget {
         height: 50.w,
         child: imageUrl.isEmpty
             ? Container(
-                color: AppColors.inputBorder,
-                child: Icon(Icons.person, color: AppColors.inputHint, size: 24.sp),
+                color: AppColors.inputBackground,
+                child: Icon(Icons.person, color: AppColors.textTertiary, size: 24.sp),
               )
             : CachedNetworkImage(
                 imageUrl: imageUrl,
                 fit: BoxFit.cover,
-                placeholder: (_, __) => Container(color: AppColors.inputBorder),
+                placeholder: (_, __) => Container(color: AppColors.inputBackground),
                 errorWidget: (_, __, ___) => Container(
-                  color: AppColors.inputBorder,
+                  color: AppColors.inputBackground,
                   child: Icon(
                     Icons.person,
-                    color: AppColors.inputHint,
+                    color: AppColors.textTertiary,
                     size: 24.sp,
                   ),
                 ),
@@ -722,9 +759,9 @@ class _StatusBadge extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(color: color.withOpacity(0.4)),
+        border: Border.all(color: color.withValues(alpha: 0.4)),
       ),
       child: Text(
         label,
@@ -752,7 +789,7 @@ class _ResultLine extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = neutral
-        ? AppColors.inputHint
+        ? AppColors.textTertiary
         : approved
             ? _approveGreen
             : _rejectRed;
@@ -802,13 +839,13 @@ class _EmptyMessage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: AppColors.inputHint, size: 46.sp),
+            Icon(icon, color: AppColors.textSecondary.withValues(alpha: 0.4), size: 46.sp),
             SizedBox(height: 14.h),
             Text(
               message,
               textAlign: TextAlign.center,
               style: AppTypography.marcellus(
-                color: AppColors.inputText,
+                color: AppColors.textSecondary,
                 fontSize: 14.sp,
               ),
             ),
@@ -817,7 +854,7 @@ class _EmptyMessage extends StatelessWidget {
               ElevatedButton(
                 onPressed: onAction,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _navy,
+                  backgroundColor: AppColors.primary,
                   elevation: 0,
                   padding: EdgeInsets.symmetric(horizontal: 28.w, vertical: 12.h),
                   shape: RoundedRectangleBorder(
@@ -827,7 +864,7 @@ class _EmptyMessage extends StatelessWidget {
                 child: Text(
                   actionLabel!,
                   style: AppTypography.marcellus(
-                    color: AppColors.pureWhite,
+                    color: AppColors.onPrimary,
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
                   ),

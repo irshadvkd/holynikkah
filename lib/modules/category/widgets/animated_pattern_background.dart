@@ -12,6 +12,7 @@ class AnimatedPatternBackground extends StatefulWidget {
   final List<Color>? shimmerColors;
   final List<double> shimmerStops;
   final Duration animationDuration;
+  final Duration? shimmerDuration;
 
   const AnimatedPatternBackground({
     super.key,
@@ -23,6 +24,7 @@ class AnimatedPatternBackground extends StatefulWidget {
     this.shimmerColors,
     this.shimmerStops = const [0.4, 0.48, 0.50, 0.52, 0.60],
     this.animationDuration = const Duration(seconds: 40),
+    this.shimmerDuration,
   });
 
   @override
@@ -31,8 +33,9 @@ class AnimatedPatternBackground extends StatefulWidget {
 }
 
 class _AnimatedPatternBackgroundState extends State<AnimatedPatternBackground>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late final AnimationController _backgroundController;
+  late final AnimationController _shimmerController;
 
   @override
   void initState() {
@@ -41,11 +44,38 @@ class _AnimatedPatternBackgroundState extends State<AnimatedPatternBackground>
       vsync: this,
       duration: widget.animationDuration,
     )..repeat();
+
+    _shimmerController = AnimationController(
+      vsync: this,
+      duration: widget.shimmerDuration ?? const Duration(seconds: 24),
+    )..repeat();
+  }
+
+  @override
+  void didUpdateWidget(covariant AnimatedPatternBackground oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.animationDuration != widget.animationDuration) {
+      _backgroundController.duration = widget.animationDuration;
+      if (!_backgroundController.isAnimating) {
+        _backgroundController.repeat();
+      }
+    }
+    final effectiveShimmerDuration =
+        widget.shimmerDuration ?? const Duration(seconds: 24);
+    final oldEffectiveShimmerDuration =
+        oldWidget.shimmerDuration ?? const Duration(seconds: 24);
+    if (oldEffectiveShimmerDuration != effectiveShimmerDuration) {
+      _shimmerController.duration = effectiveShimmerDuration;
+      if (!_shimmerController.isAnimating) {
+        _shimmerController.repeat();
+      }
+    }
   }
 
   @override
   void dispose() {
     _backgroundController.dispose();
+    _shimmerController.dispose();
     super.dispose();
   }
 
@@ -66,17 +96,25 @@ class _AnimatedPatternBackgroundState extends State<AnimatedPatternBackground>
       animation: _backgroundController,
       builder: (context, child) {
         final double t = _backgroundController.value * 2 * math.pi;
+        final double dx = math.sin(t) * 20.0;
+        final double dy = -math.cos(t) * 20.0;
+
         return Positioned.fill(
           child: Opacity(
             opacity: 1,
             child: Transform.scale(
-              scale: 1.05,
-              child: Image.asset(
-                widget.backgroundImage,
-                repeat: widget.repeat,
-                alignment: Alignment(math.sin(t) * 0.05, -math.sin(t) * 0.05),
-                scale: widget.scale,
-                fit: widget.fit,
+              scale: 1.15,
+              child: Transform.translate(
+                offset: Offset(dx, dy),
+                child: Image.asset(
+                  widget.backgroundImage,
+                  repeat: widget.repeat,
+                  alignment: widget.repeat == ImageRepeat.repeat
+                      ? Alignment(math.sin(t) * 0.08, -math.sin(t) * 0.08)
+                      : Alignment.center,
+                  scale: widget.scale,
+                  fit: widget.fit,
+                ),
               ),
             ),
           ),
@@ -103,13 +141,16 @@ class _AnimatedPatternBackgroundState extends State<AnimatedPatternBackground>
       Colors.white.withValues(alpha: 0.10),
       Colors.transparent,
     ];
+    final Duration effectiveShimmerDuration =
+        widget.shimmerDuration ?? const Duration(seconds: 24);
 
     return AnimatedBuilder(
-      animation: _backgroundController,
+      animation: _shimmerController,
       builder: (context, child) {
-        final double t = _backgroundController.value * 2 * math.pi;
-        final double totalSecs = widget.animationDuration.inMilliseconds.toDouble() / 1000.0;
-        final double time = _backgroundController.value * totalSecs;
+        final double t = _shimmerController.value * 2 * math.pi;
+        final double totalSecs =
+            effectiveShimmerDuration.inMilliseconds.toDouble() / 1000.0;
+        final double time = _shimmerController.value * totalSecs;
 
         // Determine background diagonal direction from cosine derivative of sine alignment
         final bool movingLeftToRight = math.cos(t) >= 0;

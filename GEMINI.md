@@ -10,7 +10,7 @@ The user onboarding and onboarding recovery flow is identical for both **Normal*
 
 ```mermaid
 graph TD
-    A[Start App / Category Preview] -->|No Selection Allowed| B[Login Screen - Enter Mobile]
+    A[Register / Vip Register Tab - Unauthenticated] --> B[Login Screen - Enter Mobile]
     B --> C[OTP Verification Screen]
     C --> D{Is User Registered?}
     D -->|No| E[Registration Screen]
@@ -24,13 +24,9 @@ graph TD
     H -->|Yes| J
 ```
 
-### 1. Pre-Login Preview (Categories Screen)
-- **Behavior**: Show the categories list to the user as a preview.
-- **Constraints**:
-  - **No selection is allowed** at this stage.
-  - The `+` buttons or selection checkmarks/indicators must **not** be visible.
-  - Tapping cards must be disabled (`onTap` set to `null`).
-  - Action button label: **"Next"** (navigates to the Login flow).
+### 1. Direct Login (Unauthenticated State)
+- **Behavior**: When unauthenticated users access the Register or Vip Register tab, directly show the Login screen without any initial dummy category preview.
+- **Back Button**: When embedded in the main tab navigation, the back button is hidden.
 
 ### 2. Login & OTP Verification
 - **Login**: User enters their mobile number.

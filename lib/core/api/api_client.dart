@@ -180,17 +180,18 @@ class ApiClient {
     void Function(int, int)? onSendProgress,
     T Function(dynamic json)? parser,
   }) {
+    final uploadOptions = (options ?? Options()).copyWith(
+      headers: {
+        ...?options?.headers,
+        'Accept': 'application/json',
+      },
+    );
     return _request<T>(
       () => _dio.post<dynamic>(
         path,
         data: formData,
         queryParameters: queryParameters,
-        options: options ??
-            Options(
-              headers: const {
-                'Accept': 'application/json',
-              },
-            ),
+        options: uploadOptions,
         cancelToken: cancelToken,
         onSendProgress: onSendProgress,
       ),
@@ -302,8 +303,16 @@ class ApiClient {
         );
       case DioExceptionType.badCertificate:
       case DioExceptionType.unknown:
+        final original = error.error;
+        if (original is FormatException) {
+          return ApiException(
+            message: 'Server returned an invalid response. Please try again.',
+            type: ApiExceptionType.parseError,
+            originalError: error,
+          );
+        }
         return ApiException(
-          message: error.message ?? 'An unexpected error occurred.',
+          message: error.message ?? error.error?.toString() ?? 'An unexpected error occurred.',
           type: ApiExceptionType.unknown,
           originalError: error,
         );

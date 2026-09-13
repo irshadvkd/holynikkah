@@ -15,7 +15,12 @@ class ThemeProvider extends ChangeNotifier {
     scaffoldBackgroundColor: AppColors.background,
     primaryColor: AppColors.primary,
     cardColor: AppColors.surface,
-    dividerColor: AppColors.border,
+    appBarTheme: const AppBarTheme(
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      surfaceTintColor: Colors.transparent,
+      shadowColor: Colors.transparent,
+    ),
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
       backgroundColor: AppColors.surface,
       selectedItemColor: AppColors.primary,
@@ -40,6 +45,12 @@ class ThemeProvider extends ChangeNotifier {
     primaryColor: AppColors.primary,
     cardColor: AppColors.surface,
     dividerColor: AppColors.border,
+    appBarTheme: const AppBarTheme(
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      surfaceTintColor: Colors.transparent,
+      shadowColor: Colors.transparent,
+    ),
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
       backgroundColor: AppColors.surface,
       selectedItemColor: AppColors.primary,

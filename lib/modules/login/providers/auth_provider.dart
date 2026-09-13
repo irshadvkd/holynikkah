@@ -1,3 +1,5 @@
+library;
+
 /// 🔥 AuthProvider (VIP + NORMAL - FULL CLEAN VERSION)
 
 import 'dart:convert';
@@ -8,6 +10,7 @@ import 'package:holynikkah/core/api/api_client.dart';
 import 'package:holynikkah/core/services/category_session_storage.dart';
 import 'package:holynikkah/core/services/template_session_storage.dart';
 import 'package:holynikkah/core/utils/app_logger.dart';
+import 'package:holynikkah/core/services/google_auth_service.dart';
 import 'package:holynikkah/modules/login/domain/auth_service.dart';
 import 'package:holynikkah/modules/registration/models/vip_user_fields.dart';
 import 'package:holynikkah/modules/registration/services/normal_otp_service.dart';
@@ -60,7 +63,7 @@ class AuthProvider extends ChangeNotifier {
     _isVipLoggedIn = vipValue == 'true';
     _isNormalLoggedIn = normalValue == 'true';
 
-    if (token != null && token.isNotEmpty) {
+    if (_isVipLoggedIn && token != null && token.isNotEmpty) {
       ApiClient.instance.setAuthToken(token);
     } else if (_isNormalLoggedIn) {
       final normalToken = await _storage.read(key: _normalAuthTokenKey);
@@ -139,6 +142,39 @@ class AuthProvider extends ChangeNotifier {
     }
 
     return sendOtp(phone, type: type);
+  }
+
+  /// ============================
+  /// 🔥 GOOGLE AUTH
+  /// ============================
+
+  Future<GoogleAuthResult> signInWithGoogle({required String type}) async {
+    _isLoading = true;
+    notifyListeners();
+
+    AppLogger.info("Initiating Google Sign-In (type: $type)", tag: "AuthProvider");
+
+    final result = await GoogleAuthService.instance.signIn(type: type);
+
+    // If user is already registered in backend, log them in
+    if (result.success && result.isAlreadyRegistered && result.backendUserData != null) {
+      if (type.toLowerCase() == 'vip') {
+        await setVipLoggedIn(
+          token: result.backendUserData!['token'] as String?,
+          user: result.backendUserData,
+        );
+      } else {
+        await setNormalLoggedIn(
+          token: result.backendUserData!['token'] as String?,
+          user: result.backendUserData,
+        );
+      }
+    }
+
+    _isLoading = false;
+    notifyListeners();
+
+    return result;
   }
 
   /// ============================
@@ -317,8 +353,71 @@ class AuthProvider extends ChangeNotifier {
   /// Use the correct bearer token before VIP/normal authenticated API calls.
   Future<void> ensureApiTokenFor({required bool isVip}) async {
     final key = isVip ? _vipAuthTokenKey : _normalAuthTokenKey;
-    final token = await _storage.read(key: key);
+    var token = await _storage.read(key: key);
+
+    // Auto-recovery: If token is missing, attempt to retrieve token via verifyEmail
+    if (token == null || token.isEmpty) {
+      final user = await getStoredUser(isVip: isVip);
+      final email = user?['email']?.toString() ??
+          await _storage.read(key: GoogleAuthService.keyEmail);
+      if (email != null && email.isNotEmpty) {
+        try {
+          final res =
+              await GoogleAuthService.instance.verifyEmail(email: email);
+          final freshUser = isVip ? res?.vipUser : res?.normalUser;
+          final freshToken = freshUser?['token']?.toString();
+          if (freshToken != null && freshToken.isNotEmpty) {
+            token = freshToken;
+            await _storage.write(key: key, value: token);
+            if (freshUser != null) {
+              if (isVip) {
+                await updateStoredVipUser(freshUser);
+              } else {
+                await updateStoredNormalUser(freshUser);
+              }
+            }
+          }
+        } catch (e) {
+          AppLogger.warning('Token auto-recovery failed: $e', tag: 'AuthProvider');
+        }
+      }
+    }
+
     ApiClient.instance.setAuthToken(token);
+  }
+
+  /// 🔹 Get stored user map for VIP or Normal
+  Future<Map<String, dynamic>?> getStoredUser({required bool isVip}) async {
+    final key = isVip ? _vipUserKey : _normalUserKey;
+    final userJson = await _storage.read(key: key);
+    if (userJson == null || userJson.isEmpty) return null;
+    try {
+      final decoded = jsonDecode(userJson);
+      if (decoded is Map<String, dynamic>) return decoded;
+      if (decoded is Map) return Map<String, dynamic>.from(decoded);
+      return null;
+    } catch (e) {
+      AppLogger.warning('Failed to parse stored user ($key): $e', tag: 'AuthProvider');
+      return null;
+    }
+  }
+
+  /// 🔹 Update full stored VIP user data
+  Future<void> updateStoredVipUser(Map<String, dynamic> user) async {
+    try {
+      await _storage.write(key: _vipUserKey, value: jsonEncode(user));
+    } catch (e) {
+      AppLogger.warning('Failed to update stored VIP user: $e', tag: 'AuthProvider');
+    }
+  }
+
+  /// 🔹 Update full stored Normal user data
+  Future<void> updateStoredNormalUser(Map<String, dynamic> user) async {
+    try {
+      await _storage.write(key: _normalUserKey, value: jsonEncode(user));
+    } catch (e) {
+      AppLogger.warning('Failed to update stored normal user: $e', tag: 'AuthProvider');
+    }
   }
 
   /// Persist category selection on the stored VIP user profile.

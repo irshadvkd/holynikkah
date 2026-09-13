@@ -54,6 +54,14 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
     final profileProvider = context.watch<ProfileProvider>();
     final isLoggedIn = authProvider.isAnyUserLoggedIn;
 
+    if (isLoggedIn && profileProvider.name.isEmpty && !profileProvider.isFetching) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          context.read<ProfileProvider>().fetchProfiles(authProvider: authProvider);
+        }
+      });
+    }
+
     return Scaffold(
       body: Stack(
         children: [
@@ -249,7 +257,9 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
           children: [
             // Avatar
             profileProvider.profileImagePath != null &&
-                    profileProvider.profileImagePath!.isNotEmpty
+                    profileProvider.profileImagePath!.isNotEmpty &&
+                    profileProvider.profileImagePath != '0' &&
+                    profileProvider.profileImagePath != 'null'
                 ? ClipOval(
                     child: profileProvider.isProfileImageNetwork
                         ? CustomNetworkImage(
@@ -257,6 +267,31 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
                             width: 64.w,
                             height: 64.h,
                             fit: BoxFit.cover,
+                            errorWidget: Container(
+                              width: 64.w,
+                              height: 64.h,
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                gradient: RadialGradient(
+                                  center: Alignment(-0.3, -0.4),
+                                  colors: [
+                                    Color(0xFFE3C78F),
+                                    Color(0xFFC9A15F),
+                                  ],
+                                  stops: [0.0, 0.75],
+                                ),
+                              ),
+                              child: Center(
+                                child: SvgPicture.string(
+                                  '''<svg viewBox="0 0 24 24" fill="none">
+                                    <circle cx="12" cy="8" r="3.6" fill="#0a1220"/>
+                                    <path d="M4 20c0-4.2 3.6-7 8-7s8 2.8 8 7" fill="#0a1220"/>
+                                  </svg>''',
+                                  width: 28.w,
+                                  height: 28.h,
+                                ),
+                              ),
+                            ),
                           )
                         : Image.file(
                             File(profileProvider.profileImagePath!),
@@ -381,9 +416,9 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
           },
         ),
         _buildRowItem(
-          icon: Icons.remove_red_eye_outlined,
-          title: 'Viewers',
-          desc: "Who's visiting",
+          icon: Icons.phone_in_talk_outlined,
+          title: 'Request',
+          desc: 'Phone requests',
           onTap: () {
             if (isLoggedIn) {
               Navigator.push(
@@ -451,7 +486,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
   //     rows: [
   //       _buildRowItem(
   //         icon: Icons.diamond_outlined,
-  //         title: 'Holynikah Ceremony',
+  //         title: 'HolyNikah Ceremony',
   //         desc: 'Plan your ceremony details',
   //         onTap: () {
   //           _showComingSoonSnackBar(context, 'Ceremony planning dashboard is coming soon!');
@@ -460,7 +495,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
   //       _buildRowItem(
   //         icon: Icons.lightbulb_outline,
   //         title: 'Suggestions',
-  //         desc: 'Help us improve Holynikah',
+  //         desc: 'Help us improve HolyNikah',
   //         onTap: () {
   //           _showComingSoonSnackBar(context, 'Suggestions feature is coming soon.');
   //         },

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// 🔹 Centralized App Color Tokens for Holy Nikkah
+/// 🔹 Centralized App Color Tokens for HolyNikah
 class AppColors {
   AppColors._();
 
@@ -13,6 +13,15 @@ class AppColors {
 
   /// Primary Color Dark: Pressed/hover state of primary (#C9A24B)
   static const Color primaryDark = Color(0xFFC9A24B);
+
+  /// Gold Light: Highlights, back buttons, VIP gradient start (#F3D68A)
+  static const Color goldLight = Color(0xFFF3D68A);
+
+  /// Gold Main: VIP gradient end, badge accents (#C9973F)
+  static const Color goldMain = Color(0xFFC9973F);
+
+  /// Gold Soft: Links, legal text highlights (#E2C98A)
+  static const Color goldSoft = Color(0xFFE2C98A);
 
   /// Secondary Color: Cards, headers, secondary surfaces (#0E1F16)
   static const Color secondary = Color(0xFF0E1F16);
@@ -31,6 +40,9 @@ class AppColors {
 
   /// Secondary Text: Subtext, captions, timestamps (#9A9584)
   static const Color textSecondary = Color(0xFF9A9584);
+
+  /// Muted Text: Body copy, captions on dark background (#9CB8AA)
+  static const Color textMuted = Color(0xFF9CB8AA);
 
   /// Tertiary Text: Placeholder, disabled, hints (#7A8A75)
   static const Color textTertiary = Color(0xFF7A8A75);
@@ -115,6 +127,21 @@ class AppColors {
 
   /// Gradient End: Pairs with Gradient Start (#10241A)
   static const Color gradientEnd = Color(0xFF10241A);
+
+  /// 160deg Dark green gradient panel behind the mark: linear-gradient(160deg, #0e1f16, #10241a)
+  static const LinearGradient darkGreenGradient = LinearGradient(
+    begin: Alignment(-0.342, -0.940),
+    end: Alignment(0.342, 0.940),
+    colors: [
+      Color(0xFF0E1F16),
+      Color(0xFF10241A),
+    ],
+  );
+
+  /// VIP Gold Gradient: [goldLight, goldMain]
+  static const LinearGradient goldGradient = LinearGradient(
+    colors: [goldLight, goldMain],
+  );
 
   // ==========================================
   // Shimmer Tokens

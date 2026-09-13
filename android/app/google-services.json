@@ -12,7 +12,20 @@
           "package_name": "com.holynikah.holynikah"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "269423378271-mpe8ch708ffou8vbuvh6gsi6fsrgf1f3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.holynikah.holynikah",
+            "certificate_hash": "f97730076ff050c1792c41d46d4e35d4ba50ab1c"
+          }
+        },
+        {
+          "client_id": "269423378271-16flepavfkdni191jl7n2akqhheqag1s.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBVkm_ok3gg39BKzNRoKYXQanKtywWXrgQ"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "269423378271-16flepavfkdni191jl7n2akqhheqag1s.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "269423378271-a5a4014s1ntjf5h9f8grtkbp91i4op1v.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.holynikah.holynikah"
+              }
+            }
+          ]
         }
       }
     }
