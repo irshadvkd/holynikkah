@@ -39,7 +39,7 @@ class _AdsScreenState extends State<AdsScreen>
       viewUrlPrefix: '/aura',
     ),
     _OrbitItem(
-      label: 'SHADI\nVIBES',
+      label: 'SHAADI\nVIBES',
       angleDeg: 17.5,
       title: 'Shadi Vibes',
       feedUrl: AppConstants.urls.shadiVibesFeed,
@@ -164,10 +164,10 @@ class _AdsScreenState extends State<AdsScreen>
                 ),
               ),
 
-              // 7. Prayers Text Overlay (Centered exactly on the circle)
+              // 7. Prayers Text Overlay (Centered on the circle)
               Positioned(
                 left: center.dx - mainRadius + (30 * scale),
-                top: center.dy - mainRadius,
+                top: center.dy - mainRadius - (4 * scale),
                 width: mainRadius * 2,
                 height: mainRadius * 2,
                 child: Center(
@@ -187,9 +187,9 @@ class _AdsScreenState extends State<AdsScreen>
                     },
                     child: Text(
                       'Prayers',
-                      style: AppTypography.marcellus(
-                        fontSize: (27 * scale).clamp(18.0, 32.0),
-                        fontWeight: FontWeight.w600,
+                      style: AppTypography.cormorantGaramond(
+                        fontSize: (30 * scale).clamp(18.0, 32.0),
+                        fontWeight: FontWeight.w700,
                         color: AppColors.textPrimary,
                         letterSpacing: 0.5,
                       ),
@@ -283,7 +283,7 @@ class _OrbitGlobe extends StatelessWidget {
     final dy = math.sin(angleRad);
     final double labelDistance = 14 * scale;
     final double labelWidth = 125 * scale;
-    final double fontSize = (10 * scale).clamp(8.0, 12.5);
+    final double fontSize = (16 * scale).clamp(8.0, 12.5);
 
     return Stack(
       children: [
@@ -303,17 +303,17 @@ class _OrbitGlobe extends StatelessWidget {
         ),
         Positioned(
           left: index == 0
-              ? center.dx + (radius + labelDistance) * dx - (55 * scale)
+              ? center.dx + (radius + labelDistance) * dx - (65 * scale)
               : index == 1
-              ? center.dx + (radius + labelDistance) * dx - (62.5 * scale)
+              ? center.dx + (radius + labelDistance) * dx - (95 * scale)
               : index == 2
               ? center.dx + (radius + labelDistance) * dx - (45 * scale)
               : index == 3
-              ? center.dx + (radius + labelDistance) * dx - (40 * scale)
+              ? center.dx + (radius + labelDistance) * dx - (45 * scale)
               : index == 4
-              ? center.dx + (radius + labelDistance) * dx - (85 * scale)
+              ? center.dx + (radius + labelDistance) * dx - (95 * scale)
               : index == 5
-              ? center.dx + (radius + labelDistance) * dx - (55 * scale)
+              ? center.dx + (radius + labelDistance) * dx - (65 * scale)
               : center.dx + (radius + labelDistance) * dx,
           top: index == 0
               ? center.dy + (radius + labelDistance) * dy - (12 * scale)
@@ -339,7 +339,7 @@ class _OrbitGlobe extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: AppTypography.marcellus(
                     fontSize: fontSize,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w600,
                     letterSpacing: 0.5,
                     color: AppColors.textPrimary,
                     height: 1.3,

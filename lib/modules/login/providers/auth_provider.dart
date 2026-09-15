@@ -156,7 +156,28 @@ class AuthProvider extends ChangeNotifier {
 
     final result = await GoogleAuthService.instance.signIn(type: type);
 
-    // If user is already registered in backend, log them in
+    // Persist fresh tokens & user profiles for both tiers returned by verify-email
+    if (result.success && result.emailVerificationData != null) {
+      final verification = result.emailVerificationData!;
+
+      if (verification.isVipRegistered && verification.vipUser != null) {
+        final vipToken = verification.vipUser!['token'] as String?;
+        if (vipToken != null && vipToken.isNotEmpty) {
+          await _storage.write(key: _vipAuthTokenKey, value: vipToken);
+          await _storage.write(key: _vipUserKey, value: jsonEncode(verification.vipUser));
+        }
+      }
+
+      if (verification.isNormalRegistered && verification.normalUser != null) {
+        final normalToken = verification.normalUser!['token'] as String?;
+        if (normalToken != null && normalToken.isNotEmpty) {
+          await _storage.write(key: _normalAuthTokenKey, value: normalToken);
+          await _storage.write(key: _normalUserKey, value: jsonEncode(verification.normalUser));
+        }
+      }
+    }
+
+    // If user is already registered in backend, log them in for the active tier
     if (result.success && result.isAlreadyRegistered && result.backendUserData != null) {
       if (type.toLowerCase() == 'vip') {
         await setVipLoggedIn(
@@ -364,16 +385,21 @@ class AuthProvider extends ChangeNotifier {
         try {
           final res =
               await GoogleAuthService.instance.verifyEmail(email: email);
-          final freshUser = isVip ? res?.vipUser : res?.normalUser;
-          final freshToken = freshUser?['token']?.toString();
-          if (freshToken != null && freshToken.isNotEmpty) {
-            token = freshToken;
-            await _storage.write(key: key, value: token);
-            if (freshUser != null) {
-              if (isVip) {
-                await updateStoredVipUser(freshUser);
-              } else {
-                await updateStoredNormalUser(freshUser);
+          if (res != null) {
+            if (res.isVipRegistered && res.vipUser != null) {
+              final freshVipToken = res.vipUser!['token']?.toString();
+              if (freshVipToken != null && freshVipToken.isNotEmpty) {
+                await _storage.write(key: _vipAuthTokenKey, value: freshVipToken);
+                await updateStoredVipUser(res.vipUser!);
+                if (isVip) token = freshVipToken;
+              }
+            }
+            if (res.isNormalRegistered && res.normalUser != null) {
+              final freshNormalToken = res.normalUser!['token']?.toString();
+              if (freshNormalToken != null && freshNormalToken.isNotEmpty) {
+                await _storage.write(key: _normalAuthTokenKey, value: freshNormalToken);
+                await updateStoredNormalUser(res.normalUser!);
+                if (!isVip) token = freshNormalToken;
               }
             }
           }

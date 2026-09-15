@@ -395,7 +395,8 @@ class _TemplateRendererScreenState extends State<TemplateRendererScreen> {
         children: [
           Text(
             field.label,
-            style: AppTypography.bodyMedium(
+            style: AppTypography.cormorantGaramond(
+              fontSize: 14.sp,
               color: AppColors.textPrimary,
               fontWeight: FontWeight.w600,
             ),
@@ -415,7 +416,8 @@ class _TemplateRendererScreenState extends State<TemplateRendererScreen> {
   InputDecoration _inputDecoration(TemplateField field) {
     return InputDecoration(
       hintText: field.hint ?? 'Enter ${field.label}',
-      hintStyle: AppTypography.bodyMedium(
+      hintStyle: AppTypography.cormorantGaramond(
+        fontSize: 14.sp,
         color: AppColors.textTertiary,
       ),
       filled: true,
@@ -448,7 +450,7 @@ class _TemplateRendererScreenState extends State<TemplateRendererScreen> {
       maxLength: field.maxLength,
       maxLines: multiline ? 4 : 1,
       validator: (value) => _validate(field, value),
-      style: AppTypography.bodyMedium(color: AppColors.white),
+      style: AppTypography.cormorantGaramond(fontSize: 14.sp, color: AppColors.white),
       decoration: _inputDecoration(field).copyWith(counterText: ''),
     );
   }
@@ -461,13 +463,13 @@ class _TemplateRendererScreenState extends State<TemplateRendererScreen> {
       isExpanded: true,
       dropdownColor: AppColors.secondary,
       icon: const Icon(Icons.arrow_drop_down, color: AppColors.primary),
-      style: AppTypography.bodyMedium(color: AppColors.white),
+      style: AppTypography.cormorantGaramond(fontSize: 14.sp, color: AppColors.white),
       items: field.options
           .map((o) => DropdownMenuItem(
                 value: o,
                 child: Text(
                   o,
-                  style: AppTypography.marcellus(
+                  style: AppTypography.cormorantGaramond(
                     fontSize: 14.sp,
                     color: AppColors.white,
                   ),
@@ -486,7 +488,7 @@ class _TemplateRendererScreenState extends State<TemplateRendererScreen> {
       controller: controller,
       readOnly: true,
       validator: (value) => _validate(field, value),
-      style: AppTypography.bodyMedium(color: AppColors.white),
+      style: AppTypography.cormorantGaramond(fontSize: 14.sp, color: AppColors.white),
       decoration: _inputDecoration(field).copyWith(
         suffixIcon: const Icon(Icons.calendar_today, color: AppColors.primary),
       ),
@@ -528,7 +530,8 @@ class _TemplateRendererScreenState extends State<TemplateRendererScreen> {
         SizedBox(height: 8.h),
         Text(
           label,
-          style: AppTypography.bodyMedium(
+          style: AppTypography.cormorantGaramond(
+            fontSize: 14.sp,
             color: AppColors.textPrimary,
             fontWeight: FontWeight.w600,
           ),
@@ -596,7 +599,8 @@ class _TemplateRendererScreenState extends State<TemplateRendererScreen> {
         SizedBox(height: 8.h),
         Text(
           'Upload Image',
-          style: AppTypography.bodyMedium(
+          style: AppTypography.cormorantGaramond(
+            fontSize: 14.sp,
             color: AppColors.textSecondary,
             fontWeight: FontWeight.w500,
           ),
@@ -629,7 +633,8 @@ class _TemplateRendererScreenState extends State<TemplateRendererScreen> {
                 SizedBox(width: 4.w),
                 Text(
                   'Change',
-                  style: AppTypography.caption(
+                  style: AppTypography.cormorantGaramond(
+                    fontSize: 10.sp,
                     color: AppColors.primary,
                     fontWeight: FontWeight.w600,
                   ),
@@ -959,7 +964,8 @@ class _TemplateRendererScreenState extends State<TemplateRendererScreen> {
             child: Text(
               title,
               textAlign: TextAlign.center,
-              style: AppTypography.headline(
+              style: AppTypography.cormorantGaramond(
+                fontSize: 20.sp,
                 color: AppColors.white,
                 fontWeight: FontWeight.w700,
               ),
@@ -977,6 +983,11 @@ class _TemplateRendererScreenState extends State<TemplateRendererScreen> {
       onTap: onTap,
       backgroundColor: color,
       textColor: textColor,
+      textStyle: AppTypography.cormorantGaramond(
+        fontSize: 16.sp,
+        fontWeight: FontWeight.w700,
+        color: textColor ?? AppColors.onPrimary,
+      ),
     );
   }
 
@@ -986,6 +997,11 @@ class _TemplateRendererScreenState extends State<TemplateRendererScreen> {
       onTap: onTap,
       backgroundColor: AppColors.inputBackground,
       textColor: AppColors.white,
+      textStyle: AppTypography.cormorantGaramond(
+        fontSize: 16.sp,
+        fontWeight: FontWeight.w700,
+        color: AppColors.white,
+      ),
     );
   }
 
@@ -1006,8 +1022,10 @@ class _TemplateRendererScreenState extends State<TemplateRendererScreen> {
       case 'notosansmalayalam':
         return GoogleFonts.notoSansMalayalam(textStyle: base);
       case 'marcellus':
-      default:
         return GoogleFonts.marcellus(textStyle: base);
+      case 'cormorantgaramond':
+      default:
+        return GoogleFonts.cormorantGaramond(textStyle: base);
     }
   }
 
@@ -1191,7 +1209,8 @@ class _TemplateNameDialogState extends State<_TemplateNameDialog> {
             SizedBox(height: 16.h),
             Text(
               'Save template',
-              style: AppTypography.title(
+              style: AppTypography.cormorantGaramond(
+                fontSize: 18.sp,
                 fontWeight: FontWeight.w700,
                 color: AppColors.white,
               ),
@@ -1199,9 +1218,11 @@ class _TemplateNameDialogState extends State<_TemplateNameDialog> {
             SizedBox(height: 4.h),
             Text(
               'Give this template a name so you can find it later.',
-              style: AppTypography.bodySmall(
+              style: AppTypography.cormorantGaramond(
+                fontSize: 12.sp,
                 color: AppColors.textSecondary,
-              ).copyWith(height: 1.4),
+                height: 1.4,
+              ),
             ),
             SizedBox(height: 18.h),
             Form(
@@ -1211,14 +1232,15 @@ class _TemplateNameDialogState extends State<_TemplateNameDialog> {
                 autofocus: true,
                 textCapitalization: TextCapitalization.sentences,
                 textInputAction: TextInputAction.done,
-                style: AppTypography.bodyMedium(color: AppColors.white),
+                style: AppTypography.cormorantGaramond(fontSize: 14.sp, color: AppColors.white),
                 validator: (value) => (value ?? '').trim().isEmpty
                     ? 'Please enter a name'
                     : null,
                 onFieldSubmitted: (_) => _submit(),
                 decoration: InputDecoration(
                   hintText: 'Template name',
-                  hintStyle: AppTypography.bodyMedium(
+                  hintStyle: AppTypography.cormorantGaramond(
+                    fontSize: 14.sp,
                     color: AppColors.textTertiary,
                   ),
                   filled: true,
@@ -1282,7 +1304,8 @@ class _TemplateNameDialogState extends State<_TemplateNameDialog> {
         ),
         child: Text(
           label,
-          style: AppTypography.button(
+          style: AppTypography.cormorantGaramond(
+            fontSize: 14.sp,
             fontWeight: FontWeight.w600,
             color: filled ? AppColors.onPrimary : AppColors.textSecondary,
           ),

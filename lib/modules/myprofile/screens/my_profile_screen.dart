@@ -181,7 +181,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
                 child: Center(
                   child: Text(
                     'VIP Profile',
-                    style: AppTypography.marcellus(
+                    style: AppTypography.cormorantGaramond(
                       fontSize: 13.5.sp,
                       fontWeight: FontWeight.w600,
                       color: isVip ? const Color(0xFF0A1220) : const Color(0xFFCBB388).withOpacity(0.8),
@@ -208,7 +208,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
                 child: Center(
                   child: Text(
                     'Normal Profile',
-                    style: AppTypography.marcellus(
+                    style: AppTypography.cormorantGaramond(
                       fontSize: 13.5.sp,
                       fontWeight: FontWeight.w600,
                       color: !isVip ? const Color(0xFFF4ECDD) : const Color(0xFFCBB388).withOpacity(0.8),
@@ -340,7 +340,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
                 children: [
                   Text(
                     'Profile Name',
-                    style: AppTypography.marcellus(
+                    style: AppTypography.cormorantGaramond(
                       fontSize: 12.sp,
                       letterSpacing: 0.12.w,
                       color: const Color(0xFFCBB388).withOpacity(0.62),
@@ -353,7 +353,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
                     isLoggedIn
                         ? (profileProvider.name.isEmpty ? 'Add your name' : profileProvider.name)
                         : 'Guest User',
-                    style: AppTypography.marcellus(
+                    style: AppTypography.cormorantGaramond(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w600,
                       color: const Color(0xFFF4ECDD),
@@ -364,7 +364,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
                   SizedBox(height: 8.h),
                   Text(
                     'Id Number',
-                    style: AppTypography.marcellus(
+                    style: AppTypography.cormorantGaramond(
                       fontSize: 12.sp,
                       letterSpacing: 0.12.w,
                       color: const Color(0xFFCBB388).withOpacity(0.62),
@@ -379,7 +379,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
                             ? 'Add your ID'
                             : profileProvider.profileId)
                         : 'Please Login',
-                    style: AppTypography.marcellus(
+                    style: AppTypography.cormorantGaramond(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w600,
                       color: const Color(0xFFF4ECDD),
@@ -543,7 +543,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
             SizedBox(width: 10.w),
             Text(
               label,
-              style: AppTypography.marcellus(
+              style: AppTypography.cormorantGaramond(
                 fontSize: 12.5.sp,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.28.w,
@@ -611,7 +611,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
                 children: [
                   Text(
                     title,
-                    style: AppTypography.marcellus(
+                    style: AppTypography.cormorantGaramond(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w700,
                       color: const Color(0xFFF4ECDD),
@@ -620,7 +620,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
                   SizedBox(height: 2.h),
                   Text(
                     desc,
-                    style: AppTypography.marcellus(
+                    style: AppTypography.cormorantGaramond(
                       fontSize: 14.sp,
                       color: const Color(0xFFCBB388).withOpacity(0.62),
                     ),
@@ -657,7 +657,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
           onPressed: () => _logout(context),
           child: Text(
             'Logout',
-            style: AppTypography.marcellus(
+            style: AppTypography.cormorantGaramond(
               fontSize: 19.sp,
               fontWeight: FontWeight.w400,
               letterSpacing: 0.06.w,
@@ -679,7 +679,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
         ),
         title: Text(
           'Join HolyNikah',
-          style: AppTypography.marcellus(
+          style: AppTypography.cormorantGaramond(
             color: const Color(0xFFF4ECDD), // var(--cream)
             fontSize: 22.sp,
             fontWeight: FontWeight.bold,
@@ -688,7 +688,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
         ),
         content: Text(
           'To access this feature, please log in to your account.',
-          style: AppTypography.marcellus(
+          style: AppTypography.cormorantGaramond(
             color: const Color(0xFFCBB388), // var(--champagne)
             fontSize: 16.sp,
           ),
@@ -717,7 +717,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
             },
             child: Text(
               'VIP Login',
-              style: AppTypography.marcellus(
+              style: AppTypography.cormorantGaramond(
                 fontSize: 16.sp,
                 fontWeight: FontWeight.bold,
               ),
@@ -744,7 +744,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
             },
             child: Text(
               'Normal Login',
-              style: AppTypography.marcellus(
+              style: AppTypography.cormorantGaramond(
                 fontSize: 16.sp,
                 fontWeight: FontWeight.bold,
               ),
@@ -761,7 +761,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
         backgroundColor: const Color(0xFF101D33),
         content: Text(
           message,
-          style: AppTypography.marcellus(
+          style: AppTypography.cormorantGaramond(
             color: const Color(0xFFF4ECDD),
             fontSize: 16.sp,
             fontWeight: FontWeight.w600,
@@ -788,7 +788,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
         ),
         title: Text(
           'Logout',
-          style: AppTypography.marcellus(
+          style: AppTypography.cormorantGaramond(
             color: const Color(0xFFF4ECDD),
             fontSize: 22.sp,
             fontWeight: FontWeight.bold,
@@ -797,7 +797,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
         ),
         content: Text(
           'Are you sure you want to logout?',
-          style: AppTypography.marcellus(
+          style: AppTypography.cormorantGaramond(
             color: const Color(0xFFCBB388),
             fontSize: 16.sp,
           ),
@@ -808,7 +808,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
             onPressed: () => Navigator.pop(context),
             child: Text(
               'Cancel',
-              style: AppTypography.marcellus(
+              style: AppTypography.cormorantGaramond(
                 color: const Color(0xFFCBB388).withOpacity(0.7),
                 fontSize: 16.sp,
                 fontWeight: FontWeight.bold,
@@ -830,7 +830,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
             },
             child: Text(
               'Logout',
-              style: AppTypography.marcellus(
+              style: AppTypography.cormorantGaramond(
                 color: Colors.redAccent,
                 fontSize: 16.sp,
                 fontWeight: FontWeight.bold,

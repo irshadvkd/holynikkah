@@ -58,7 +58,7 @@ class _PhoneRequestsScreenState extends State<PhoneRequestsScreen> {
           ),
           title: Text(
             'Phone Requests',
-            style: AppTypography.marcellus(
+            style: AppTypography.cormorantGaramond(
               color: AppColors.white,
               fontSize: 18.sp,
               fontWeight: FontWeight.w700,
@@ -173,7 +173,7 @@ class _Segmented extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: AppTypography.marcellus(
+          style: AppTypography.cormorantGaramond(
             color: selected ? AppColors.onPrimary : AppColors.textSecondary,
             fontSize: 14.sp,
             fontWeight: FontWeight.w700,
@@ -420,7 +420,7 @@ class _PhoneRequestListState extends State<_PhoneRequestList> {
               ),
               child: Text(
                 filter.label,
-                style: AppTypography.marcellus(
+                style: AppTypography.cormorantGaramond(
                   color: selected ? AppColors.onPrimary : AppColors.textSecondary,
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w600,
@@ -545,7 +545,7 @@ class _RequestCard extends StatelessWidget {
                       name,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTypography.marcellus(
+                      style: AppTypography.cormorantGaramond(
                         color: AppColors.white,
                         fontSize: 15.sp,
                         fontWeight: FontWeight.w700,
@@ -566,7 +566,7 @@ class _RequestCard extends StatelessWidget {
                               place,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: AppTypography.marcellus(
+                              style: AppTypography.cormorantGaramond(
                                 color: AppColors.textSecondary,
                                 fontSize: 12.sp,
                               ),
@@ -614,7 +614,7 @@ class _RequestCard extends StatelessWidget {
               ),
               child: Text(
                 'Reject',
-                style: AppTypography.marcellus(
+                style: AppTypography.cormorantGaramond(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w700,
                   color: _rejectRed,
@@ -646,7 +646,7 @@ class _RequestCard extends StatelessWidget {
                     )
                   : Text(
                       'Approve',
-                      style: AppTypography.marcellus(
+                      style: AppTypography.cormorantGaramond(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w700,
                         color: AppColors.onPrimary,
@@ -676,7 +676,7 @@ class _RequestCard extends StatelessWidget {
           icon: Icon(Icons.call, size: 15.sp, color: AppColors.onPrimary),
           label: Text(
             'Call',
-            style: AppTypography.marcellus(
+            style: AppTypography.cormorantGaramond(
               fontSize: 13.sp,
               fontWeight: FontWeight.w700,
               color: AppColors.onPrimary,
@@ -765,7 +765,7 @@ class _StatusBadge extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: AppTypography.marcellus(
+        style: AppTypography.cormorantGaramond(
           color: color,
           fontSize: 11.sp,
           fontWeight: FontWeight.w700,
@@ -806,7 +806,7 @@ class _ResultLine extends StatelessWidget {
         Expanded(
           child: Text(
             text,
-            style: AppTypography.marcellus(
+            style: AppTypography.cormorantGaramond(
               color: color,
               fontSize: 12.sp,
               fontWeight: FontWeight.w600,
@@ -844,7 +844,7 @@ class _EmptyMessage extends StatelessWidget {
             Text(
               message,
               textAlign: TextAlign.center,
-              style: AppTypography.marcellus(
+              style: AppTypography.cormorantGaramond(
                 color: AppColors.textSecondary,
                 fontSize: 14.sp,
               ),
@@ -863,7 +863,7 @@ class _EmptyMessage extends StatelessWidget {
                 ),
                 child: Text(
                   actionLabel!,
-                  style: AppTypography.marcellus(
+                  style: AppTypography.cormorantGaramond(
                     color: AppColors.onPrimary,
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,

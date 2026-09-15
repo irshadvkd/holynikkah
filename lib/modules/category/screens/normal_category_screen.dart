@@ -100,13 +100,16 @@ class _NormalCategoryScreenState extends State<NormalCategoryScreen> {
                             itemBuilder: (context, index) {
                               final category = provider.categories[index];
                               final isSelected = widget.isSelectionRequired &&
-                                  provider.selectedCategoryId == category.catId;
+                                  (provider.selectedCategoryIds
+                                          .contains(category.catId) ||
+                                      provider.selectedCategoryId ==
+                                          category.catId);
                               return NormalCategoryCard(
                                 category: category,
                                 isSelected: isSelected,
                                 index: index,
                                 onTap: () =>
-                                    _selectCategory(category.catId ?? ""),
+                                    _toggleCategory(category.catId ?? ""),
                                 isSelectionRequired: widget.isSelectionRequired,
                               );
                             },
@@ -300,22 +303,33 @@ class _NormalCategoryScreenState extends State<NormalCategoryScreen> {
     );
   }
 
-  void _selectCategory(String categoryId) {
+  void _toggleCategory(String categoryId) {
     final provider = context.read<RegistrationProvider>();
-    provider.selectCategory(categoryId);
+    provider.toggleCategory(categoryId);
   }
 
   Future<void> _continueWithCategory() async {
     final provider = context.read<RegistrationProvider>();
-    final selectedCategoryId = provider.selectedCategoryId;
+    final selectedCategoryIds = provider.selectedCategoryIds.isNotEmpty
+        ? provider.selectedCategoryIds
+        : (provider.selectedCategoryId != null
+            ? [provider.selectedCategoryId!]
+            : <String>[]);
 
-    if (selectedCategoryId == null) {
-      CommonSnackBar.showError(context, 'Please select category to continue');
+    if (selectedCategoryIds.isEmpty) {
+      CommonSnackBar.showError(
+        context,
+        'Please select at least one category to continue',
+      );
       return;
     }
 
-    final categoryId = int.tryParse(selectedCategoryId);
-    if (categoryId == null) {
+    final categoryIdInts = selectedCategoryIds
+        .map((id) => int.tryParse(id))
+        .whereType<int>()
+        .toList();
+
+    if (categoryIdInts.isEmpty) {
       CommonSnackBar.showError(context, 'Invalid category selected');
       return;
     }
@@ -326,7 +340,7 @@ class _NormalCategoryScreenState extends State<NormalCategoryScreen> {
       await context.read<AuthProvider>().ensureApiTokenFor(isVip: false);
 
       final result = await NormalCategoryService.instance.selectCategory(
-        categoryId,
+        categoryIds: categoryIdInts,
       );
 
       if (!mounted) return;
@@ -339,6 +353,17 @@ class _NormalCategoryScreenState extends State<NormalCategoryScreen> {
               : 'Failed to select category',
         );
         return;
+      }
+
+      final userData = result.data?['user'] is Map<String, dynamic>
+          ? result.data!['user'] as Map<String, dynamic>
+          : (result.data is Map<String, dynamic> && result.data!.containsKey('hn_id'))
+              ? result.data
+              : null;
+
+      if (userData != null) {
+        await context.read<AuthProvider>().updateStoredNormalUser(userData);
+        if (!mounted) return;
       }
 
       await context.read<AuthProvider>().updateStoredNormalCategorySelected(

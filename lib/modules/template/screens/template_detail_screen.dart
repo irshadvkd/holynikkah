@@ -67,7 +67,8 @@ class TemplateDetailScreen extends StatelessWidget {
                       Expanded(
                         child: Text(
                           isVip ? 'VIP Template Details' : 'Template Details',
-                          style: AppTypography.headline(
+                          style: AppTypography.cormorantGaramond(
+                            fontSize: 20.sp,
                             color: AppColors.white,
                             fontWeight: FontWeight.w700,
                           ),
@@ -116,7 +117,8 @@ class TemplateDetailScreen extends StatelessWidget {
                               ),
                               child: Text(
                                 isVip ? 'VIP' : 'STANDARD',
-                                style: AppTypography.caption(
+                                style: AppTypography.cormorantGaramond(
+                                  fontSize: 10.sp,
                                   color: isVip ? AppColors.onPrimary : AppColors.textSecondary,
                                   fontWeight: FontWeight.w700,
                                 ),
@@ -125,7 +127,8 @@ class TemplateDetailScreen extends StatelessWidget {
                             const Spacer(),
                             Text(
                               templateId,
-                              style: AppTypography.bodySmall(
+                              style: AppTypography.cormorantGaramond(
+                                fontSize: 12.sp,
                                 color: AppColors.textTertiary,
                               ),
                             ),
@@ -134,7 +137,8 @@ class TemplateDetailScreen extends StatelessWidget {
                         SizedBox(height: 16.h),
                         Text(
                           templateName,
-                          style: AppTypography.title(
+                          style: AppTypography.cormorantGaramond(
+                            fontSize: 18.sp,
                             fontWeight: FontWeight.w700,
                             color: AppColors.white,
                           ),
@@ -142,7 +146,8 @@ class TemplateDetailScreen extends StatelessWidget {
                         SizedBox(height: 8.h),
                         Text(
                           'Category: $templateCategory',
-                          style: AppTypography.bodyMedium(
+                          style: AppTypography.cormorantGaramond(
+                            fontSize: 14.sp,
                             fontWeight: FontWeight.w600,
                             color: AppColors.primary,
                           ),
@@ -150,7 +155,8 @@ class TemplateDetailScreen extends StatelessWidget {
                         SizedBox(height: 16.h),
                         Text(
                           'Description',
-                          style: AppTypography.subTitle(
+                          style: AppTypography.cormorantGaramond(
+                            fontSize: 16.sp,
                             fontWeight: FontWeight.w700,
                             color: AppColors.white,
                           ),
@@ -158,9 +164,11 @@ class TemplateDetailScreen extends StatelessWidget {
                         SizedBox(height: 8.h),
                         Text(
                           templateDescription,
-                          style: AppTypography.bodyMedium(
+                          style: AppTypography.cormorantGaramond(
+                            fontSize: 14.sp,
                             color: AppColors.textSecondary,
-                          ).copyWith(height: 1.5),
+                            height: 1.5,
+                          ),
                         ),
                       ],
                     ),
@@ -171,6 +179,11 @@ class TemplateDetailScreen extends StatelessWidget {
                       Expanded(
                         child: CommonButton(
                           title: 'Preview Template',
+                          textStyle: AppTypography.cormorantGaramond(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.onPrimary,
+                          ),
                           onTap: () {
                             CommonSnackBar.showInfo(
                               context,
@@ -183,6 +196,11 @@ class TemplateDetailScreen extends StatelessWidget {
                       Expanded(
                         child: CommonButton(
                           title: 'Share Template',
+                          textStyle: AppTypography.cormorantGaramond(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.white,
+                          ),
                           backgroundColor: AppColors.inputBackground,
                           textColor: AppColors.white,
                           onTap: () {

@@ -84,7 +84,7 @@ class _TermsScreenState extends State<TermsScreen> {
                   iconTheme: const IconThemeData(color: Color(0xFFCBB388)),
                   title: Text(
                     _page?.title ?? 'Terms & Conditions',
-                    style: AppTypography.marcellus(
+                    style: AppTypography.cormorantGaramond(
                       color: const Color(0xFFF4ECDD),
                       fontSize: 20.sp,
                       fontWeight: FontWeight.bold,
@@ -120,7 +120,7 @@ class _TermsScreenState extends State<TermsScreen> {
             children: [
               Text(
                 _error!,
-                style: AppTypography.marcellus(
+                style: AppTypography.cormorantGaramond(
                   color: Colors.redAccent,
                   fontSize: 18.sp,
                   fontWeight: FontWeight.w600,
@@ -139,7 +139,7 @@ class _TermsScreenState extends State<TermsScreen> {
                 onPressed: _fetchContent,
                 child: Text(
                   'Retry',
-                  style: AppTypography.marcellus(
+                  style: AppTypography.cormorantGaramond(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.bold,
                   ),
@@ -156,9 +156,9 @@ class _TermsScreenState extends State<TermsScreen> {
       physics: const BouncingScrollPhysics(),
       child: Text(
         _page?.content ?? '',
-        style: AppTypography.marcellus(
+        style: AppTypography.cormorantGaramond(
           color: const Color(0xFFF4ECDD),
-          fontSize: 14.5.sp,
+          fontSize: 15.sp,
           height: 1.6,
           fontWeight: FontWeight.w400,
         ),
@@ -248,7 +248,7 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
                   iconTheme: const IconThemeData(color: Color(0xFFCBB388)),
                   title: Text(
                     _page?.title ?? 'Privacy Policy',
-                    style: AppTypography.marcellus(
+                    style: AppTypography.cormorantGaramond(
                       color: const Color(0xFFF4ECDD),
                       fontSize: 20.sp,
                       fontWeight: FontWeight.bold,
@@ -284,7 +284,7 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
             children: [
               Text(
                 _error!,
-                style: AppTypography.marcellus(
+                style: AppTypography.cormorantGaramond(
                   color: Colors.redAccent,
                   fontSize: 18.sp,
                   fontWeight: FontWeight.w600,
@@ -303,7 +303,7 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
                 onPressed: _fetchContent,
                 child: Text(
                   'Retry',
-                  style: AppTypography.marcellus(
+                  style: AppTypography.cormorantGaramond(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.bold,
                   ),
@@ -320,9 +320,9 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
       physics: const BouncingScrollPhysics(),
       child: Text(
         _page?.content ?? '',
-        style: AppTypography.marcellus(
+        style: AppTypography.cormorantGaramond(
           color: const Color(0xFFF4ECDD),
-          fontSize: 14.5.sp,
+          fontSize: 15.sp,
           height: 1.6,
           fontWeight: FontWeight.w400,
         ),

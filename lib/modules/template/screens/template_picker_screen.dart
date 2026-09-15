@@ -130,7 +130,8 @@ class _TemplatePickerScreenState extends State<TemplatePickerScreen> {
         Expanded(
           child: Text(
             'Choose a Template',
-            style: AppTypography.headline(
+            style: AppTypography.cormorantGaramond(
+              fontSize: 20.sp,
               color: AppColors.white,
               fontWeight: FontWeight.w700,
             ),
@@ -166,7 +167,10 @@ class _TemplatePickerScreenState extends State<TemplatePickerScreen> {
           Text(
             provider.listError ?? 'Something went wrong',
             textAlign: TextAlign.center,
-            style: AppTypography.bodyMedium(color: AppColors.textSecondary),
+            style: AppTypography.cormorantGaramond(
+              fontSize: 14.sp,
+              color: AppColors.textSecondary,
+            ),
           ),
           SizedBox(height: 16.h),
           ElevatedButton(
@@ -179,7 +183,8 @@ class _TemplatePickerScreenState extends State<TemplatePickerScreen> {
             ),
             child: Text(
               'Retry',
-              style: AppTypography.button(
+              style: AppTypography.cormorantGaramond(
+                fontSize: 14.sp,
                 color: AppColors.onPrimary,
                 fontWeight: FontWeight.w700,
               ),
@@ -194,7 +199,10 @@ class _TemplatePickerScreenState extends State<TemplatePickerScreen> {
     return Center(
       child: Text(
         'No templates available',
-        style: AppTypography.bodyMedium(color: AppColors.textSecondary),
+        style: AppTypography.cormorantGaramond(
+          fontSize: 14.sp,
+          color: AppColors.textSecondary,
+        ),
       ),
     );
   }
@@ -285,7 +293,8 @@ class _TemplatePickerScreenState extends State<TemplatePickerScreen> {
                   ),
                   child: Text(
                     'Use Now',
-                    style: AppTypography.button(
+                    style: AppTypography.cormorantGaramond(
+                      fontSize: 14.sp,
                       fontWeight: FontWeight.w700,
                       color: AppColors.onPrimary,
                     ),

@@ -154,50 +154,53 @@ class _LoginScreenState extends State<LoginScreen>
                                   ),
                                 ),
 
-                                // if (isVip) ...[
-                                //   SizedBox(height: 14.h),
-                                //   Container(
-                                //     padding: EdgeInsets.symmetric(
-                                //       horizontal: 14.w,
-                                //       vertical: 5.h,
-                                //     ),
-                                //     decoration: BoxDecoration(
-                                //       gradient: AppColors.goldGradient,
-                                //       borderRadius:
-                                //           BorderRadius.circular(20.r),
-                                //       boxShadow: [
-                                //         BoxShadow(
-                                //           color: AppColors.goldMain
-                                //               .withValues(alpha: 0.3),
-                                //           blurRadius: 8,
-                                //           offset: const Offset(0, 2),
-                                //         ),
-                                //       ],
-                                //     ),
-                                //     child: Row(
-                                //       mainAxisSize: MainAxisSize.min,
-                                //       children: [
-                                //         Icon(
-                                //           Icons.workspace_premium_rounded,
-                                //           size: 14.sp,
-                                //           color: AppColors.onPrimary,
-                                //         ),
-                                //         SizedBox(width: 4.w),
-                                //         Text(
-                                //           'VIP ACCESS',
-                                //           style: AppTypography.marcellus(
-                                //             fontSize: 11.sp,
-                                //             fontWeight: FontWeight.w800,
-                                //             color: AppColors.onPrimary,
-                                //             letterSpacing: 1.2,
-                                //           ),
-                                //         ),
-                                //       ],
-                                //     ),
-                                //   ),
-                                // ],
-
-                                SizedBox(height: 52.h),
+                                SizedBox(
+                                  height: 52.h,
+                                  child: isVip
+                                      ? Center(
+                                          child: Container(
+                                            padding: EdgeInsets.symmetric(
+                                              horizontal: 14.w,
+                                              vertical: 5.h,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              gradient: AppColors.goldGradient,
+                                              borderRadius:
+                                                  BorderRadius.circular(20.r),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: AppColors.goldMain
+                                                      .withValues(alpha: 0.3),
+                                                  blurRadius: 8,
+                                                  offset: const Offset(0, 2),
+                                                ),
+                                              ],
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Icon(
+                                                  Icons
+                                                      .workspace_premium_rounded,
+                                                  size: 14.sp,
+                                                  color: AppColors.onPrimary,
+                                                ),
+                                                SizedBox(width: 4.w),
+                                                Text(
+                                                  'VIP ACCESS',
+                                                  style: AppTypography.marcellus(
+                                                    fontSize: 11.sp,
+                                                    fontWeight: FontWeight.w800,
+                                                    color: AppColors.onPrimary,
+                                                    letterSpacing: 1.2,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        )
+                                      : null,
+                                ),
 
                                 // 🌟 Headline: Welcome to HolyNikah
                                 Text(
@@ -484,6 +487,7 @@ class _LoginScreenState extends State<LoginScreen>
                 .read<TemplateProvider>()
                 .applyNormalTemplateFromUser(result.backendUserData);
           }
+          if (!mounted) return;
           context.read<ProfileProvider>().applyUserData(
                 result.backendUserData!,
                 isVip: isVip,

@@ -63,8 +63,22 @@ class RegistrationProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void toggleCategory(String categoryId) {
+    if (_selectedCategoryIds.contains(categoryId)) {
+      _selectedCategoryIds.remove(categoryId);
+    } else {
+      _selectedCategoryIds.add(categoryId);
+    }
+    _selectedCategoryId =
+        _selectedCategoryIds.isNotEmpty ? _selectedCategoryIds.first : null;
+    notifyListeners();
+  }
+
   void selectCategory(String categoryId) {
     _selectedCategoryId = categoryId;
+    if (!_selectedCategoryIds.contains(categoryId)) {
+      _selectedCategoryIds = [categoryId];
+    }
     notifyListeners();
   }
 
@@ -116,7 +130,9 @@ class RegistrationProvider extends ChangeNotifier {
       information: _information,
       isVip: _isVip,
       categoryId: _selectedCategoryId,
-      categoryIds: _selectedCategoryId != null ? [_selectedCategoryId!] : null,
+      categoryIds: _selectedCategoryIds.isNotEmpty
+          ? _selectedCategoryIds
+          : (_selectedCategoryId != null ? [_selectedCategoryId!] : null),
     );
 
     final success = await _service.submitRegistration(registration);

@@ -8,15 +8,19 @@ class NormalCategoryService {
 
   static final NormalCategoryService instance = NormalCategoryService._();
 
-  Future<NormalCategorySelectResponse> selectCategory(int categoryId) async {
+  Future<NormalCategorySelectResponse> selectCategory({
+    required List<int> categoryIds,
+  }) async {
     AppLogger.info(
-      'Selecting normal category id=$categoryId',
+      'Selecting normal categories ids=$categoryIds',
       tag: 'NormalCategoryService',
     );
 
     final response = await ApiClient.instance.post<dynamic>(
       AppConstants.urls.normalCategorySelect,
-      data: {'category_id': categoryId},
+      data: {
+        'category_ids': categoryIds,
+      },
       parser: (json) => json,
     );
 
@@ -25,7 +29,7 @@ class NormalCategoryService {
 
     if (parsed.status) {
       AppLogger.success(
-        'Normal category selected: $categoryId',
+        'Normal categories selected: $categoryIds',
         tag: 'NormalCategoryService',
       );
       return parsed;
