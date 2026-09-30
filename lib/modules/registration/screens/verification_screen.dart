@@ -147,9 +147,8 @@ class _VerificationScreenState extends State<VerificationScreen> {
       if (isVip) {
         await auth.setVipLoggedIn(token: data.token, user: data.user);
         if (!mounted) return;
-        await context.read<CategoryProvider>().applyVipCategoryFromUser(
-          data.user,
-        );
+        await context.read<CategoryProvider>().setVipSelected(true);
+        await auth.updateStoredVipCategorySelected(true);
         if (!mounted) return;
         await context.read<TemplateProvider>().applyVipTemplateFromUser(
           data.user,
@@ -157,9 +156,8 @@ class _VerificationScreenState extends State<VerificationScreen> {
       } else {
         await auth.setNormalLoggedIn(token: data.token, user: data.user);
         if (!mounted) return;
-        await context.read<CategoryProvider>().applyNormalCategoryFromUser(
-          data.user,
-        );
+        await context.read<CategoryProvider>().setNormalSelected(true);
+        await auth.updateStoredNormalCategorySelected(true);
         if (!mounted) return;
         await context.read<TemplateProvider>().applyNormalTemplateFromUser(
           data.user,

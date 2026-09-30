@@ -473,7 +473,10 @@ class _LoginScreenState extends State<LoginScreen>
           if (isVip) {
             await context
                 .read<CategoryProvider>()
-                .applyVipCategoryFromUser(result.backendUserData);
+                .setVipSelected(true);
+            await context
+                .read<AuthProvider>()
+                .updateStoredVipCategorySelected(true);
             if (!mounted) return;
             await context
                 .read<TemplateProvider>()
@@ -481,7 +484,10 @@ class _LoginScreenState extends State<LoginScreen>
           } else {
             await context
                 .read<CategoryProvider>()
-                .applyNormalCategoryFromUser(result.backendUserData);
+                .setNormalSelected(true);
+            await context
+                .read<AuthProvider>()
+                .updateStoredNormalCategorySelected(true);
             if (!mounted) return;
             await context
                 .read<TemplateProvider>()

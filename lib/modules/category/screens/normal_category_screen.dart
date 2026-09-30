@@ -93,7 +93,7 @@ class _NormalCategoryScreenState extends State<NormalCategoryScreen> {
                             gridDelegate:
                                 SliverGridDelegateWithFixedCrossAxisCount(
                                   crossAxisCount: 2,
-                                  childAspectRatio: 0.98,
+                                  childAspectRatio: 0.9,
                                   crossAxisSpacing: 14.w,
                                   mainAxisSpacing: 14.h,
                                 ),

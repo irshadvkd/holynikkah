@@ -102,8 +102,14 @@ Do NOT, without explicit approval:
 - Some features use `controller/` instead of `providers/` (e.g. `category`). Follow the existing folder of that feature.
 - `PROJECT_STRUCTURE.md` references auto_route — ignore; routing is manual named routes.
 
-## 12. Response Rules (for the AI)
+## 12. Authentication, Category & Profile Flow Rules
+- **Login Flow (Existing Users)**: Existing users logging in bypass category selection and proceed directly to template checks or Partner Profiles. Never gate on category during login.
+- **Registration Flow (First Time)**: New registrations require sequential category selection (`isSelectionRequired: true`) -> Template selection -> Partner Profiles.
+- **Profile Category Update**: Users can change their category anytime via `ProfileUpdateScreen`. For VIP: single category selection. For Normal: multi/single category selection. Persist via `VipCategoryService` / `NormalCategoryService`.
+
+## 13. Response Rules (for the AI)
 - Be concise, technical, actionable, low-token. Minimal prose unless the user asks for explanation.
 - State which files you changed and why in 1–2 lines. Don't paste large unchanged code blocks.
 - Run `flutter analyze` mentally / check lints after edits; fix lints you introduce.
 - Ask before scope expansion or destructive actions; otherwise pick sensible defaults and proceed.
+

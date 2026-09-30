@@ -1,56 +1,68 @@
 # Application Flow Rules
 
-This document outlines the mandatory authentication, registration, and setup flow. The agent must adhere to and respect these rules when modifying onboarding, login, registration, or screen routing in the app.
+This document outlines the mandatory authentication, registration, setup, and profile edit flow. The agent must adhere to and respect these rules when modifying onboarding, login, registration, or screen routing in the app.
 
 ---
 
-## Authentication & Registration Flow
+## Authentication, Registration & Category Flow
 
-The user onboarding and onboarding recovery flow is identical for both **Normal** and **VIP** registers.
+The user onboarding, login, and category management flow for both **Normal** and **VIP** registers is defined as follows:
 
 ```mermaid
 graph TD
     A[Register / Vip Register Tab - Unauthenticated] --> B[Login Screen - Enter Mobile]
     B --> C[OTP Verification Screen]
     C --> D{Is User Registered?}
-    D -->|No| E[Registration Screen]
-    E --> F{Category Selected?}
-    D -->|Yes| F
-    F -->|No| G[Category Selection Screen - Selection Required]
-    G -->|Select & Save to DB| H{Template Selected?}
-    F -->|Yes| H
-    H -->|No| I[Template Selection Screen]
-    I -->|Select & Save| J[Profiles View]
-    H -->|Yes| J
+    
+    %% First Registration Flow
+    D -->|No - First Registration| E[Registration Screen]
+    E --> F[Category Selection Screen - isSelectionRequired: true]
+    F -->|Select & Save to DB| G{Template Selected?}
+    G -->|No| H[Template Selection Screen]
+    H -->|Select & Save| I[Profiles View]
+    G -->|Yes| I
+
+    %% Login Flow (Existing User)
+    D -->|Yes - Login| J[Bypass Category Selection Gate]
+    J --> K{Template Selected?}
+    K -->|No| L[Template Selection Screen]
+    L -->|Select & Save| I
+    K -->|Yes| I
+
+    %% Profile Category Update
+    M[My Profile Screen] --> N[Profile Update Screen]
+    N --> O[Update Category / Categories]
+    O -->|Save via Category API| P[Persist & Sync Local State]
 ```
 
 ### 1. Direct Login (Unauthenticated State)
 - **Behavior**: When unauthenticated users access the Register or Vip Register tab, directly show the Login screen without any initial dummy category preview.
 - **Back Button**: When embedded in the main tab navigation, the back button is hidden.
 
-### 2. Login & OTP Verification
-- **Login**: User enters their mobile number.
-- **OTP Screen**: Verifies the code.
-- **Registration check**:
-  - If **not registered**: Redirect the user to the Register page.
-  - If **already registered**: Check database state to restore/determine progress.
+### 2. Login Flow (Existing Registered Users)
+- **Login**: User enters their mobile number / Google Sign-In and completes OTP verification.
+- **Category Gate Bypassed**: Existing users logging in are **NOT** asked to select a category. The category gate is bypassed, allowing them to proceed directly to the template check or Partner Profiles screen.
 
-### 3. Onboarding Steps Completion (Mandatory Gatekeeping)
-Once registered, the app must sequentially verify and gate the user through the following setup steps before they can view partner profiles:
-
+### 3. First-Time Registration Flow (Mandatory Gatekeeping)
+When a user completes registration for the first time:
 1. **Category Selection**:
-   - Check if a category is selected in the database.
-   - If **not selected**: Show the Category Selection screen (with `isSelectionRequired: true`). Once selected, save choice via API.
-   - If **selected**: Proceed to template check.
+   - The user must be sequentially gated to select a category (`NormalCategoryScreen` / `VipCategoryScreen` with `isSelectionRequired: true`).
+   - Once selected, save choice via the Category Selection API before proceeding.
 2. **Template Selection**:
    - Check if a profile template is selected.
-   - If **not selected**: Show the Template Selection screen. Once selected, save choice.
-   - If **selected**: Proceed to the main profiles screen.
+   - If not selected: Show the Template Selection screen. Once selected, save choice.
+   - If selected: Proceed to the main profiles screen.
+
+### 4. Category Updation in Profile Edit Screen
+- Users can view and update their category/categories at any time from the **Profile Update Screen** (`ProfileUpdateScreen`).
+- **VIP Profile**: Single category selection corresponding to VIP tiers.
+- **Normal Profile**: Category selection supporting multiple/single categories.
+- Updating category in the Profile Update screen persists the change via the Category Selection API (`VipCategoryService` / `NormalCategoryService`) and updates local state in `ProfileProvider` and `CategoryProvider`.
 
 ---
 
 ## App Initialization / App Restart Verification Rule
 
 Whenever the application initializes, restores session, or recovers from a background/restart state:
-- The app **must verify** that the complete sequence is fully satisfied (Registered -> Category Selected -> Template Selected) before displaying the Partner Profiles view.
-- Until all requirements are met, the corresponding onboarding screen for that step must block the user. This is a mandatory gate.
+- For authenticated existing sessions, verify that the template requirement is satisfied before displaying the Partner Profiles view.
+- Category requirement is strictly enforced only on first-time registration completion and remains editable from the user's Profile screen.

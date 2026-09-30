@@ -18,15 +18,29 @@ const Color _pendingAmber = AppColors.primary;
 
 /// Phone-visibility requests hub (Request), opened from the profile menu.
 class PhoneRequestsScreen extends StatefulWidget {
-  const PhoneRequestsScreen({super.key});
+  final bool? initialIsIncoming;
+  final bool? initialIsVip;
+
+  const PhoneRequestsScreen({
+    super.key,
+    this.initialIsIncoming,
+    this.initialIsVip,
+  });
 
   @override
   State<PhoneRequestsScreen> createState() => _PhoneRequestsScreenState();
 }
 
 class _PhoneRequestsScreenState extends State<PhoneRequestsScreen> {
-  bool _isVip = true;
-  bool _isIncoming = true;
+  late bool _isVip;
+  late bool _isIncoming;
+
+  @override
+  void initState() {
+    super.initState();
+    _isVip = widget.initialIsVip ?? true;
+    _isIncoming = widget.initialIsIncoming ?? true;
+  }
 
   @override
   Widget build(BuildContext context) {

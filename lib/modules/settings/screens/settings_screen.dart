@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:holynikkah/core/theme/app_typography.dart';
 import 'package:holynikkah/core/widgets/legal_screens.dart';
+import 'package:holynikkah/modules/home/screens/home_screen.dart';
+import 'package:holynikkah/modules/login/providers/auth_provider.dart';
+import 'package:holynikkah/modules/myprofile/providers/profile_provider.dart';
+import 'package:holynikkah/modules/myprofile/widgets/delete_account_dialog.dart';
+import 'package:provider/provider.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
-  
-  final _storage = const FlutterSecureStorage();
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +42,13 @@ class SettingsScreen extends StatelessWidget {
               icon: Icons.logout,
               title: 'Logout',
               onTap: () => _logout(context),
+              isDestructive: false,
+            ),
+            _buildMenuItem(
+              context,
+              icon: Icons.delete_forever,
+              title: 'Delete Account',
+              onTap: () => _deleteAccount(context),
               isDestructive: true,
             ),
           ],
@@ -107,6 +116,14 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
+  void _deleteAccount(BuildContext context) {
+    final profileProvider = context.read<ProfileProvider>();
+    DeleteAccountDialog.show(
+      context,
+      initialIsVip: profileProvider.isVipProfile,
+    );
+  }
+
   void _logout(BuildContext context) async {
     showDialog(
       context: context,
@@ -124,9 +141,11 @@ class SettingsScreen extends StatelessWidget {
           ),
           TextButton(
             onPressed: () async {
-              await _storage.deleteAll();
-              Navigator.of(context).pushNamedAndRemoveUntil(
-                '/login',
+              final authProvider = context.read<AuthProvider>();
+              await authProvider.logoutAll();
+              if (!context.mounted) return;
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (context) => const HomeScreen(initialIndex: 2)),
                 (route) => false,
               );
             },

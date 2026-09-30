@@ -2,8 +2,9 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:holynikkah/core/api/curl_printer.dart';
 import 'package:holynikkah/core/utils/app_logger.dart';
+import 'package:holynikkah/core/utils/constants.dart';
 
-/// Prints a reproducible cURL command for every outgoing request (debug only).
+/// Prints a reproducible cURL command for every outgoing request.
 class CurlInterceptor extends Interceptor {
   CurlInterceptor({this.maskSecrets = true});
 
@@ -11,7 +12,7 @@ class CurlInterceptor extends Interceptor {
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    if (kDebugMode) {
+    if (kDebugMode || AppConstants.enableReleaseLogs) {
       final curl = CurlPrinter.fromRequest(
         options,
         maskSecrets: maskSecrets,

@@ -47,16 +47,19 @@ class SavedTemplate {
   factory SavedTemplate.fromJson(Map<String, dynamic> json) {
     return SavedTemplate(
       id: (json['id'] ?? '').toString(),
-      templateId: (json['templateId'] ?? '').toString(),
+      templateId: (json['templateId'] ?? json['template_id'] ?? '').toString(),
       name: (json['name'] ?? '').toString(),
-      isDefault: json['isDefault'] == true,
+      isDefault: json['isDefault'] == true ||
+          json['is_default'] == true ||
+          json['is_default'] == 1 ||
+          json['is_default'] == '1',
       thumbnail: mediaUrlOrNull(
-        (json['previewImage'] ?? json['thumbnail'])?.toString(),
+        (json['previewImage'] ?? json['preview_image'] ?? json['thumbnail'])?.toString(),
       ),
-      templateName: json['templateName']?.toString(),
+      templateName: (json['templateName'] ?? json['template_name'])?.toString(),
       type: json['type']?.toString(),
-      createdAt: DateTime.tryParse(json['createdAt']?.toString() ?? ''),
-      updatedAt: DateTime.tryParse(json['updatedAt']?.toString() ?? ''),
+      createdAt: DateTime.tryParse(json['createdAt']?.toString() ?? json['created_at']?.toString() ?? ''),
+      updatedAt: DateTime.tryParse(json['updatedAt']?.toString() ?? json['updated_at']?.toString() ?? ''),
     );
   }
 }
@@ -164,11 +167,14 @@ class SavedTemplateDetail {
 
     return SavedTemplateDetail(
       id: (root['id'] ?? '').toString(),
-      templateId: (root['templateId'] ?? '').toString(),
+      templateId: (root['templateId'] ?? root['template_id'] ?? '').toString(),
       name: (root['name'] ?? '').toString(),
-      isDefault: root['isDefault'] == true,
+      isDefault: root['isDefault'] == true ||
+          root['is_default'] == true ||
+          root['is_default'] == 1 ||
+          root['is_default'] == '1',
       previewImage: mediaUrlOrNull(
-        (root['previewImage'] ?? root['thumbnail'])?.toString(),
+        (root['previewImage'] ?? root['preview_image'] ?? root['thumbnail'])?.toString(),
       ),
       values: values,
       slots: slots,

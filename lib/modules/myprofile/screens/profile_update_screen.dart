@@ -16,11 +16,17 @@ import 'package:holynikkah/core/widgets/common_button.dart';
 import 'package:holynikkah/core/widgets/common_dropdown.dart';
 import 'package:holynikkah/core/widgets/common_snackbar.dart';
 import 'package:holynikkah/core/widgets/validated_text_field.dart';
+import 'package:holynikkah/modules/category/controller/category_provider.dart';
+import 'package:holynikkah/modules/category/models/category_model.dart';
+import 'package:holynikkah/modules/myprofile/screens/category_select_screen.dart';
 import 'package:holynikkah/modules/login/providers/auth_provider.dart';
 import 'package:holynikkah/modules/myprofile/providers/profile_provider.dart';
 import 'package:holynikkah/modules/registration/models/location_model.dart';
 import 'package:holynikkah/modules/registration/models/phone_visibility.dart';
 import 'package:holynikkah/modules/registration/services/locations_service.dart';
+import 'package:holynikkah/modules/registration/services/normal_category_service.dart';
+import 'package:holynikkah/modules/registration/services/registration_service.dart';
+import 'package:holynikkah/modules/registration/services/vip_category_service.dart';
 import 'package:holynikkah/modules/registration/widgets/phone_visibility_selector.dart';
 import 'package:holynikkah/modules/template/screens/common_image_picker.dart';
 import 'package:image_picker/image_picker.dart';
@@ -54,11 +60,17 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
       ValueNotifier<LocationState?>(null);
   final ValueNotifier<LocationDistrict?> districtNotifier =
       ValueNotifier<LocationDistrict?>(null);
+  final ValueNotifier<Categories?> vipCategoryNotifier =
+      ValueNotifier<Categories?>(null);
 
   List<LocationState> _states = [];
   List<LocationDistrict> _districts = [];
+  List<Categories> _categories = [];
+  List<String> _selectedNormalCategoryIds = [];
+
   bool _statesLoading = false;
   bool _districtsLoading = false;
+  bool _categoriesLoading = false;
   bool _isLoading = false;
 
   File? _profileImage;
@@ -71,6 +83,7 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
     super.initState();
     _loadProfileData();
     _loadStates();
+    _loadCategories();
   }
 
   void _loadProfileData() {
@@ -189,6 +202,89 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
       _loadDistricts(value.id);
     } else {
       setState(() => _districts = []);
+    }
+  }
+
+  Future<void> _loadCategories() async {
+    setState(() => _categoriesLoading = true);
+
+    try {
+      final list = await RegistrationService.instance.getCategories(
+        widget.isVip ? 'vip' : 'normal',
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        _categories = list;
+        _categoriesLoading = false;
+      });
+
+      final provider = context.read<ProfileProvider>();
+      final isVip = widget.isVip;
+
+      if (isVip) {
+        final currentCatId = provider.getCategoryId(true);
+        if (currentCatId != null && currentCatId.isNotEmpty) {
+          for (final cat in list) {
+            if (cat.catId?.toString() == currentCatId.toString()) {
+              vipCategoryNotifier.value = cat;
+              break;
+            }
+          }
+        }
+      } else {
+        final currentCatIds = provider.getCategoryIds(false);
+        if (currentCatIds.isNotEmpty) {
+          setState(() {
+            _selectedNormalCategoryIds = List<String>.from(currentCatIds);
+          });
+        }
+      }
+    } catch (e) {
+      AppLogger.warning(
+        'Failed to load categories: $e',
+        tag: 'ProfileUpdateScreen',
+      );
+      if (mounted) {
+        setState(() => _categoriesLoading = false);
+      }
+    }
+  }
+
+  Future<void> _openCategorySelectScreen() async {
+    final result = await Navigator.push<Map<String, dynamic>>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CategorySelectScreen(
+          isVip: widget.isVip,
+          initialVipCategoryId: vipCategoryNotifier.value?.catId,
+          initialNormalCategoryIds: _selectedNormalCategoryIds,
+        ),
+      ),
+    );
+
+    if (result != null && mounted) {
+      if (widget.isVip && result['vipCategory'] is Categories) {
+        setState(() {
+          vipCategoryNotifier.value = result['vipCategory'] as Categories;
+        });
+      } else if (!widget.isVip &&
+          result['normalCategoryIds'] is List<String>) {
+        setState(() {
+          _selectedNormalCategoryIds =
+              List<String>.from(result['normalCategoryIds'] as List);
+          if (result['normalCategories'] is List<Categories>) {
+            final returnedCats =
+                result['normalCategories'] as List<Categories>;
+            for (final cat in returnedCats) {
+              if (!_categories.any((c) => c.catId == cat.catId)) {
+                _categories.add(cat);
+              }
+            }
+          }
+        });
+      }
     }
   }
 
@@ -370,6 +466,53 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
         await auth.updateStoredNormalUser(updatedUser);
       }
 
+      // Save category selection
+      if (isVip && vipCategoryNotifier.value?.catId != null) {
+        final vipCatId = int.tryParse(vipCategoryNotifier.value!.catId!);
+        if (vipCatId != null) {
+          try {
+            final catRes = await VipCategoryService.instance.selectCategory(vipCatId);
+            if (catRes.status && mounted) {
+              context.read<ProfileProvider>().updateVipCategory(
+                vipCategoryNotifier.value!.catId,
+                vipCategoryNotifier.value!.name,
+              );
+              await context.read<CategoryProvider>().setVipSelected(true);
+              await auth.updateStoredVipCategorySelected(true);
+            }
+          } catch (e) {
+            AppLogger.warning('VIP category update failed: $e', tag: 'ProfileUpdateScreen');
+          }
+        }
+      } else if (!isVip && _selectedNormalCategoryIds.isNotEmpty) {
+        final catIds = _selectedNormalCategoryIds
+            .map((id) => int.tryParse(id))
+            .whereType<int>()
+            .toList();
+        if (catIds.isNotEmpty) {
+          try {
+            final catRes = await NormalCategoryService.instance.selectCategory(
+              categoryIds: catIds,
+            );
+            if (catRes.status && mounted) {
+              final selectedNames = _categories
+                  .where((c) => _selectedNormalCategoryIds.contains(c.catId))
+                  .map((c) => c.name ?? '')
+                  .where((n) => n.isNotEmpty)
+                  .toList();
+              context.read<ProfileProvider>().updateNormalCategories(
+                _selectedNormalCategoryIds,
+                selectedNames,
+              );
+              await context.read<CategoryProvider>().setNormalSelected(true);
+              await auth.updateStoredNormalCategorySelected(true);
+            }
+          } catch (e) {
+            AppLogger.warning('Normal category update failed: $e', tag: 'ProfileUpdateScreen');
+          }
+        }
+      }
+
       if (mounted) {
         CommonSnackBar.showSuccess(context, 'Profile updated successfully');
         Navigator.pop(context);
@@ -395,6 +538,7 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
     _informationController.dispose();
     stateNotifier.dispose();
     districtNotifier.dispose();
+    vipCategoryNotifier.dispose();
     super.dispose();
   }
 
@@ -670,6 +814,140 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
 
                   SizedBox(height: 16.h),
 
+                  /// CATEGORY SELECTION TILE (Registration-Style Trigger)
+                  GestureDetector(
+                    onTap: _openCategorySelectScreen,
+                    child: Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.all(16.w),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16.r),
+                        boxShadow: [
+                          BoxShadow(
+                            color:
+                                const Color(0xFF303036).withValues(alpha: 0.1),
+                            offset: const Offset(0, 4),
+                            blurRadius: 8,
+                          ),
+                        ],
+                        border: Border.all(
+                          color: AppColors.goldMain.withValues(alpha: 0.35),
+                          width: 1.2,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  widget.isVip ? 'VIP Category' : 'Categories',
+                                  style: AppTypography.marcellus(
+                                    color: AppColors.textMuted,
+                                    fontSize: 12.sp,
+                                  ),
+                                ),
+                                SizedBox(height: 4.h),
+                                if (_categoriesLoading)
+                                  Text(
+                                    'Loading categories...',
+                                    style: AppTypography.marcellus(
+                                      fontSize: 14.sp,
+                                      color: AppColors.textMuted,
+                                    ),
+                                  )
+                                else if (widget.isVip)
+                                  ValueListenableBuilder<Categories?>(
+                                    valueListenable: vipCategoryNotifier,
+                                    builder: (context, selectedCat, _) {
+                                      final title = selectedCat?.name ??
+                                          'Tap to select VIP category';
+                                      return Text(
+                                        title,
+                                        style: AppTypography.marcellus(
+                                          fontSize: 15.sp,
+                                          fontWeight: FontWeight.w700,
+                                          color: AppColors.black,
+                                        ),
+                                      );
+                                    },
+                                  )
+                                else
+                                  Builder(
+                                    builder: (context) {
+                                      if (_selectedNormalCategoryIds.isEmpty) {
+                                        return Text(
+                                          'Tap to select categories',
+                                          style: AppTypography.marcellus(
+                                            fontSize: 14.sp,
+                                            color: AppColors.textMuted,
+                                          ),
+                                        );
+                                      }
+                                      final selectedNames = _categories
+                                          .where((c) =>
+                                              _selectedNormalCategoryIds
+                                                  .contains(c.catId))
+                                          .map((c) => c.name ?? '')
+                                          .where((n) => n.isNotEmpty)
+                                          .toList();
+                                      final displayText =
+                                          selectedNames.isNotEmpty
+                                              ? selectedNames.join(', ')
+                                              : '${_selectedNormalCategoryIds.length} Categories Selected';
+                                      return Text(
+                                        displayText,
+                                        style: AppTypography.marcellus(
+                                          fontSize: 14.sp,
+                                          fontWeight: FontWeight.w600,
+                                          color: AppColors.black,
+                                          height: 1.3,
+                                        ),
+                                      );
+                                    },
+                                  ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(width: 8.w),
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 10.w,
+                              vertical: 6.h,
+                            ),
+                            decoration: BoxDecoration(
+                              color:
+                                  AppColors.secondary.withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(8.r),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'Change',
+                                  style: AppTypography.marcellus(
+                                    fontSize: 12.sp,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.secondary,
+                                  ),
+                                ),
+                                SizedBox(width: 2.w),
+                                Icon(
+                                  Icons.chevron_right_rounded,
+                                  size: 16.sp,
+                                  color: AppColors.secondary,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 16.h),
+
                   /// INFORMATION (BIO)
                   ValidatedTextField(
                     controller: _informationController,
@@ -697,7 +975,6 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
                     margin: EdgeInsets.symmetric(horizontal: 4.w),
                     onTap: _submitUpdate,
                   ),
-
                   SizedBox(height: 24.h),
                 ],
               ),

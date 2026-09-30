@@ -10,8 +10,11 @@ import 'package:holynikkah/modules/login/screens/login_screen.dart';
 import 'package:holynikkah/modules/myprofile/providers/profile_provider.dart';
 import 'package:holynikkah/modules/myprofile/screens/my_profile_detail_screen.dart';
 import 'package:holynikkah/modules/partner/screens/phone_requests_screen.dart';
+import 'package:holynikkah/modules/notifications/screens/notifications_screen.dart';
+import 'package:holynikkah/modules/notifications/widgets/notification_bell.dart';
 import 'package:holynikkah/modules/template/screens/my_template_screen.dart';
 import 'package:holynikkah/core/widgets/legal_screens.dart';
+import 'package:holynikkah/modules/myprofile/widgets/delete_account_dialog.dart';
 import 'package:provider/provider.dart';
 
 class MyProfileScreen extends StatefulWidget {
@@ -116,7 +119,22 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
               padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
               physics: const BouncingScrollPhysics(),
               children: [
-                SizedBox(height: 24.h),
+                SizedBox(height: 12.h),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'My Profile',
+                      style: AppTypography.cormorantGaramond(
+                        fontSize: 22.sp,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFFF4ECDD),
+                      ),
+                    ),
+                    const NotificationBellButton(),
+                  ],
+                ),
+                SizedBox(height: 16.h),
                 if (authProvider.isVipLoggedIn && authProvider.isNormalLoggedIn) ...[
                   _buildProfileSelector(profileProvider),
                   SizedBox(height: 16.h),
@@ -131,7 +149,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
                 SizedBox(height: 30.h),
 
                 // ACCOUNT group
-                _buildAccountGroup(context, isLoggedIn),
+                _buildAccountGroup(context, isLoggedIn, profileProvider),
                 SizedBox(height: 30.h),
 
                 // SUPPORT group
@@ -200,9 +218,13 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
                 height: 38.h,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12.r),
-                  color: !isVip ? const Color(0xFF16264C) : null,
-                  border: !isVip
-                      ? Border.all(color: const Color(0xFFE3C78F).withOpacity(0.24))
+                  gradient: !isVip
+                      ? const LinearGradient(
+                          colors: [
+                            Color(0xFFC9A15F), // brass
+                            Color(0xFFE3C78F), // brass-soft
+                          ],
+                        )
                       : null,
                 ),
                 child: Center(
@@ -211,7 +233,9 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
                     style: AppTypography.cormorantGaramond(
                       fontSize: 13.5.sp,
                       fontWeight: FontWeight.w600,
-                      color: !isVip ? const Color(0xFFF4ECDD) : const Color(0xFFCBB388).withOpacity(0.8),
+                      color: !isVip
+                          ? const Color(0xFF0A1220)
+                          : const Color(0xFFCBB388).withOpacity(0.8),
                     ),
                   ),
                 ),
@@ -442,7 +466,11 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
     );
   }
 
-  Widget _buildAccountGroup(BuildContext context, bool isLoggedIn) {
+  Widget _buildAccountGroup(
+    BuildContext context,
+    bool isLoggedIn,
+    ProfileProvider profileProvider,
+  ) {
     return _buildGroupSection(
       label: 'ACCOUNT',
       rows: [
@@ -451,7 +479,10 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
           title: 'Notifications',
           desc: 'Manage your alerts',
           onTap: () {
-            _showComingSoonSnackBar(context, 'Notifications preferences will be active soon.');
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const NotificationsScreen()),
+            );
           },
         ),
         _buildRowItem(
@@ -476,6 +507,14 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
             );
           },
         ),
+        if (isLoggedIn)
+          _buildRowItem(
+            icon: Icons.delete_forever_outlined,
+            title: 'Delete Account',
+            desc: 'Permanently remove your account and data',
+            isDestructive: true,
+            onTap: () => _deleteAccount(context, profileProvider),
+          ),
       ],
     );
   }
@@ -580,7 +619,21 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
     required String title,
     required String desc,
     required VoidCallback onTap,
+    bool isDestructive = false,
   }) {
+    final borderColor = isDestructive
+        ? const Color(0xFFE53935).withOpacity(0.4)
+        : const Color(0xFFC9A15F).withOpacity(0.4);
+    final bgColor = isDestructive
+        ? const Color(0xFFE53935).withOpacity(0.08)
+        : const Color(0xFFC9A15F).withOpacity(0.07);
+    final iconColor = isDestructive
+        ? const Color(0xFFEF5350)
+        : const Color(0xFFC9A15F);
+    final titleColor = isDestructive
+        ? const Color(0xFFFF8A80)
+        : const Color(0xFFF4ECDD);
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12.r),
@@ -593,13 +646,13 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
               height: 42.h,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(14.r),
-                border: Border.all(color: const Color(0xFFC9A15F).withOpacity(0.4)),
-                color: const Color(0xFFC9A15F).withOpacity(0.07),
+                border: Border.all(color: borderColor),
+                color: bgColor,
               ),
               child: Center(
                 child: Icon(
                   icon,
-                  color: const Color(0xFFC9A15F),
+                  color: iconColor,
                   size: 18.sp,
                 ),
               ),
@@ -614,7 +667,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
                     style: AppTypography.cormorantGaramond(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w700,
-                      color: const Color(0xFFF4ECDD),
+                      color: titleColor,
                     ),
                   ),
                   SizedBox(height: 2.h),
@@ -622,7 +675,9 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
                     desc,
                     style: AppTypography.cormorantGaramond(
                       fontSize: 14.sp,
-                      color: const Color(0xFFCBB388).withOpacity(0.62),
+                      color: isDestructive
+                          ? const Color(0xFFFF8A80).withOpacity(0.65)
+                          : const Color(0xFFCBB388).withOpacity(0.62),
                     ),
                   ),
                 ],
@@ -631,7 +686,9 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
             SizedBox(width: 14.w),
             Icon(
               Icons.chevron_right,
-              color: const Color(0xFFCBB388).withOpacity(0.62),
+              color: isDestructive
+                  ? const Color(0xFFEF5350).withOpacity(0.6)
+                  : const Color(0xFFCBB388).withOpacity(0.62),
               size: 17.sp,
             ),
           ],
@@ -640,27 +697,51 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
     );
   }
 
+  void _deleteAccount(BuildContext context, ProfileProvider profileProvider) {
+    DeleteAccountDialog.show(
+      context,
+      initialIsVip: profileProvider.isVipProfile,
+    );
+  }
+
   Widget _buildLogoutButton(BuildContext context) {
     return Center(
       child: Padding(
         padding: EdgeInsets.only(top: 16.h),
-        child: OutlinedButton(
-          style: OutlinedButton.styleFrom(
-            padding: EdgeInsets.symmetric(horizontal: 64.w, vertical: 16.h),
-            side: BorderSide(color: const Color(0xFFC9A15F).withOpacity(0.3)),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(999.r),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [
+                Color(0xFFC9A15F), // brass
+                Color(0xFFE3C78F), // brass-soft
+              ],
             ),
-            backgroundColor: Colors.transparent,
-            foregroundColor: const Color(0xFFCBB388),
+            borderRadius: BorderRadius.circular(999.r),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFFC9A15F).withValues(alpha: 0.35),
+                offset: const Offset(0, 4),
+                blurRadius: 14,
+              ),
+            ],
           ),
-          onPressed: () => _logout(context),
-          child: Text(
-            'Logout',
-            style: AppTypography.cormorantGaramond(
-              fontSize: 19.sp,
-              fontWeight: FontWeight.w400,
-              letterSpacing: 0.06.w,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(999.r),
+              onTap: () => _logout(context),
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 64.w, vertical: 14.h),
+                child: Text(
+                  'Logout',
+                  style: AppTypography.cormorantGaramond(
+                    fontSize: 19.sp,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF0A1220),
+                    letterSpacing: 0.06.w,
+                  ),
+                ),
+              ),
             ),
           ),
         ),
@@ -679,18 +760,18 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
         ),
         title: Text(
           'Join HolyNikah',
-          style: AppTypography.cormorantGaramond(
+          style: AppTypography.marcellus(
             color: const Color(0xFFF4ECDD), // var(--cream)
-            fontSize: 22.sp,
+            fontSize: 20.sp,
             fontWeight: FontWeight.bold,
           ),
           textAlign: TextAlign.center,
         ),
         content: Text(
           'To access this feature, please log in to your account.',
-          style: AppTypography.cormorantGaramond(
+          style: AppTypography.marcellus(
             color: const Color(0xFFCBB388), // var(--champagne)
-            fontSize: 16.sp,
+            fontSize: 14.sp,
           ),
           textAlign: TextAlign.center,
         ),
@@ -717,8 +798,8 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
             },
             child: Text(
               'VIP Login',
-              style: AppTypography.cormorantGaramond(
-                fontSize: 16.sp,
+              style: AppTypography.marcellus(
+                fontSize: 14.sp,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -744,35 +825,13 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
             },
             child: Text(
               'Normal Login',
-              style: AppTypography.cormorantGaramond(
-                fontSize: 16.sp,
+              style: AppTypography.marcellus(
+                fontSize: 14.sp,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  void _showComingSoonSnackBar(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: const Color(0xFF101D33),
-        content: Text(
-          message,
-          style: AppTypography.cormorantGaramond(
-            color: const Color(0xFFF4ECDD),
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12.r),
-          side: BorderSide(color: const Color(0xFFC9A15F).withOpacity(0.3)),
-        ),
-        duration: const Duration(seconds: 2),
       ),
     );
   }
@@ -788,18 +847,18 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
         ),
         title: Text(
           'Logout',
-          style: AppTypography.cormorantGaramond(
+          style: AppTypography.marcellus(
             color: const Color(0xFFF4ECDD),
-            fontSize: 22.sp,
+            fontSize: 20.sp,
             fontWeight: FontWeight.bold,
           ),
           textAlign: TextAlign.center,
         ),
         content: Text(
           'Are you sure you want to logout?',
-          style: AppTypography.cormorantGaramond(
+          style: AppTypography.marcellus(
             color: const Color(0xFFCBB388),
-            fontSize: 16.sp,
+            fontSize: 14.sp,
           ),
           textAlign: TextAlign.center,
         ),
@@ -808,9 +867,9 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
             onPressed: () => Navigator.pop(context),
             child: Text(
               'Cancel',
-              style: AppTypography.cormorantGaramond(
+              style: AppTypography.marcellus(
                 color: const Color(0xFFCBB388).withOpacity(0.7),
-                fontSize: 16.sp,
+                fontSize: 14.sp,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -830,9 +889,9 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
             },
             child: Text(
               'Logout',
-              style: AppTypography.cormorantGaramond(
+              style: AppTypography.marcellus(
                 color: Colors.redAccent,
-                fontSize: 16.sp,
+                fontSize: 14.sp,
                 fontWeight: FontWeight.bold,
               ),
             ),

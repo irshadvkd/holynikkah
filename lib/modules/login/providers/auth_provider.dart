@@ -7,11 +7,17 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:holynikkah/core/api/api_client.dart';
+import 'package:holynikkah/core/api/api_response.dart';
 import 'package:holynikkah/core/services/category_session_storage.dart';
 import 'package:holynikkah/core/services/template_session_storage.dart';
 import 'package:holynikkah/core/utils/app_logger.dart';
+import 'package:holynikkah/core/utils/constants.dart';
 import 'package:holynikkah/core/services/google_auth_service.dart';
+import 'package:holynikkah/core/services/notification_service.dart';
+import 'package:holynikkah/core/utils/routes.dart';
+import 'package:holynikkah/core/widgets/common_snackbar.dart';
 import 'package:holynikkah/modules/login/domain/auth_service.dart';
+import 'package:holynikkah/modules/notifications/services/notification_api.dart';
 import 'package:holynikkah/modules/registration/models/vip_user_fields.dart';
 import 'package:holynikkah/modules/registration/services/normal_otp_service.dart';
 import 'package:holynikkah/modules/registration/services/vip_otp_service.dart';
@@ -31,6 +37,17 @@ class AuthProvider extends ChangeNotifier {
   bool _isVipLoggedIn = false;
   bool _isNormalLoggedIn = false;
   bool _isLoading = false;
+  bool _isHandling401 = false;
+
+  AuthProvider() {
+    _initUnauthorizedListener();
+  }
+
+  void _initUnauthorizedListener() {
+    ApiClient.instance.onUnauthorized = ({String? message}) {
+      handleSessionExpired(customMessage: message);
+    };
+  }
 
   /// ============================
   /// 🔥 GETTERS
@@ -76,6 +93,13 @@ class AuthProvider extends ChangeNotifier {
     await _syncNormalCategoryFromStoredUser();
     await _syncVipTemplateFromStoredUser();
     await _syncNormalTemplateFromStoredUser();
+
+    if (_isVipLoggedIn) {
+      _syncFcmToken(isVip: true);
+    }
+    if (_isNormalLoggedIn) {
+      _syncFcmToken(isVip: false);
+    }
 
     AppLogger.info(
       "VIP: $_isVipLoggedIn | NORMAL: $_isNormalLoggedIn",
@@ -228,6 +252,8 @@ class AuthProvider extends ChangeNotifier {
       );
     }
 
+    _syncFcmToken(isVip: true);
+
     AppLogger.success("VIP user logged in", tag: "AuthProvider");
 
     notifyListeners();
@@ -259,9 +285,22 @@ class AuthProvider extends ChangeNotifier {
       );
     }
 
+    _syncFcmToken(isVip: false);
+
     AppLogger.success("Normal user logged in", tag: "AuthProvider");
 
     notifyListeners();
+  }
+
+  /// 🔹 Helper to register FCM token with backend
+  Future<void> _syncFcmToken({required bool isVip}) async {
+    final fcmToken = await NotificationService.instance.getToken();
+    if (fcmToken != null && fcmToken.isNotEmpty) {
+      await NotificationApi.instance.registerDeviceToken(
+        isVip: isVip,
+        fcmToken: fcmToken,
+      );
+    }
   }
 
   /// ============================
@@ -272,14 +311,22 @@ class AuthProvider extends ChangeNotifier {
   Future<void> logoutVip() async {
     AppLogger.info("Logging out VIP...", tag: "AuthProvider");
 
+    NotificationApi.instance.removeDeviceToken(isVip: true);
+
     _isVipLoggedIn = false;
 
     await _storage.delete(key: _vipLoginKey);
     await _storage.delete(key: _vipAuthTokenKey);
     await _storage.delete(key: _vipUserKey);
-    ApiClient.instance.setAuthToken(null);
     await CategorySessionStorage().setVipCategorySelected(false);
     await TemplateSessionStorage().setVipTemplateSelected(false);
+
+    if (_isNormalLoggedIn) {
+      final normalToken = await _storage.read(key: _normalAuthTokenKey);
+      ApiClient.instance.setAuthToken(normalToken);
+    } else {
+      ApiClient.instance.setAuthToken(null);
+    }
 
     notifyListeners();
   }
@@ -287,6 +334,8 @@ class AuthProvider extends ChangeNotifier {
   /// 🔹 LOGOUT NORMAL ONLY
   Future<void> logoutNormal() async {
     AppLogger.info("Logging out NORMAL...", tag: "AuthProvider");
+
+    NotificationApi.instance.removeDeviceToken(isVip: false);
 
     _isNormalLoggedIn = false;
 
@@ -296,6 +345,13 @@ class AuthProvider extends ChangeNotifier {
     await CategorySessionStorage().setNormalCategorySelected(false);
     await TemplateSessionStorage().setNormalTemplateSelected(false);
 
+    if (_isVipLoggedIn) {
+      final vipToken = await _storage.read(key: _vipAuthTokenKey);
+      ApiClient.instance.setAuthToken(vipToken);
+    } else {
+      ApiClient.instance.setAuthToken(null);
+    }
+
     notifyListeners();
   }
 
@@ -303,12 +359,17 @@ class AuthProvider extends ChangeNotifier {
   Future<void> logoutAll() async {
     AppLogger.info("Logging out ALL users...", tag: "AuthProvider");
 
+    NotificationApi.instance.removeDeviceToken(isVip: true);
+    NotificationApi.instance.removeDeviceToken(isVip: false);
+
     await AuthService.instance.logout();
 
     _isVipLoggedIn = false;
     _isNormalLoggedIn = false;
 
     await _storage.delete(key: _vipLoginKey);
+    await _storage.delete(key: _vipAuthTokenKey);
+    await _storage.delete(key: _vipUserKey);
     await _storage.delete(key: _normalLoginKey);
     await _storage.delete(key: _normalAuthTokenKey);
     await _storage.delete(key: _normalUserKey);
@@ -320,6 +381,96 @@ class AuthProvider extends ChangeNotifier {
     AppLogger.success("All users logged out", tag: "AuthProvider");
 
     notifyListeners();
+  }
+
+  /// 🔹 Handle 401 Unauthorized (e.g. session expired or logged in on another device)
+  Future<void> handleSessionExpired({String? customMessage}) async {
+    if (!_isVipLoggedIn && !_isNormalLoggedIn) return;
+    if (_isHandling401) return;
+    _isHandling401 = true;
+
+    AppLogger.warning(
+      "Session expired / logged in on another device (401). Clearing local session...",
+      tag: "AuthProvider",
+    );
+
+    _isVipLoggedIn = false;
+    _isNormalLoggedIn = false;
+    ApiClient.instance.setAuthToken(null);
+
+    await _storage.delete(key: _vipLoginKey);
+    await _storage.delete(key: _vipAuthTokenKey);
+    await _storage.delete(key: _vipUserKey);
+    await _storage.delete(key: _normalLoginKey);
+    await _storage.delete(key: _normalAuthTokenKey);
+    await _storage.delete(key: _normalUserKey);
+    await CategorySessionStorage().setVipCategorySelected(false);
+    await CategorySessionStorage().setNormalCategorySelected(false);
+    await TemplateSessionStorage().clearAllTemplateSelections();
+
+    notifyListeners();
+
+    final navContext = NotificationService.instance.navigatorKey.currentContext;
+    if (navContext != null) {
+      Navigator.of(navContext).pushNamedAndRemoveUntil(
+        Routes.home,
+        (route) => false,
+      );
+
+      final displayMsg = (customMessage != null && customMessage.isNotEmpty)
+          ? customMessage
+          : 'Your session has expired. You may have logged in from another device.';
+
+      CommonSnackBar.show(
+        navContext,
+        message: displayMsg,
+        type: SnackBarType.warning,
+      );
+    }
+
+    Future.delayed(const Duration(seconds: 3), () {
+      _isHandling401 = false;
+    });
+  }
+
+  /// ============================
+  /// 🔥 ACCOUNT DELETION
+  /// ============================
+
+  /// Permanently deletes the account on backend and clears local session
+  Future<ApiResponse<dynamic>> deleteAccount({required bool isVip}) async {
+    AppLogger.info(
+      "Requesting account deletion for ${isVip ? 'VIP' : 'NORMAL'} user...",
+      tag: "AuthProvider",
+    );
+
+    await ensureApiTokenFor(isVip: isVip);
+
+    final path = AppConstants.urls.deleteAccount(isVip);
+    final response = await ApiClient.instance.delete<dynamic>(
+      path,
+      parser: (json) => json,
+    );
+
+    if (response.success) {
+      AppLogger.success(
+        "Account deleted successfully on backend (${isVip ? 'VIP' : 'NORMAL'})",
+        tag: "AuthProvider",
+      );
+
+      if (isVip) {
+        await logoutVip();
+      } else {
+        await logoutNormal();
+      }
+    } else {
+      AppLogger.warning(
+        "Failed to delete ${isVip ? 'VIP' : 'NORMAL'} account: ${response.message} (status: ${response.statusCode})",
+        tag: "AuthProvider",
+      );
+    }
+
+    return response;
   }
 
   /// ============================

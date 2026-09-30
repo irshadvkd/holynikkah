@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:holynikkah/core/provider/theme_provider.dart';
 import 'package:holynikkah/core/services/navigation_logger.dart';
 import 'package:holynikkah/core/services/user_journey_tracker.dart';
+import 'package:holynikkah/core/services/notification_service.dart';
 import 'package:holynikkah/core/utils/constants.dart';
 import 'package:holynikkah/core/utils/routes.dart';
 import 'package:holynikkah/core/widgets/navigation_analytics_widget.dart';
@@ -11,6 +12,8 @@ import 'package:holynikkah/modules/category/screens/normal_category_screen.dart'
 import 'package:holynikkah/modules/category/screens/vip_category_screen.dart';
 import 'package:holynikkah/modules/home/screens/home_screen.dart';
 import 'package:holynikkah/modules/login/screens/login_screen.dart';
+import 'package:holynikkah/modules/notifications/screens/notifications_screen.dart';
+import 'package:holynikkah/modules/partner/screens/phone_requests_screen.dart';
 import 'package:holynikkah/modules/registration/screens/registration_screen.dart';
 import 'package:holynikkah/modules/registration/screens/verification_screen.dart';
 import 'package:holynikkah/modules/splash/splash_screen.dart';
@@ -48,6 +51,7 @@ class _ApplicationState extends State<Application> {
         return Consumer<ThemeProvider>(
           builder: (context, themeProvider, child) {
             return MaterialApp(
+              navigatorKey: NotificationService.instance.navigatorKey,
               title: AppConstants.misc.appName,
               debugShowCheckedModeBanner: false,
               theme: themeProvider.currentTheme.copyWith(
@@ -77,6 +81,17 @@ class _ApplicationState extends State<Application> {
                   final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
                   return HomeScreen(initialIndex: args?['initialIndex']);
                 },
+                Routes.notifications: (context) => const NotificationsScreen(),
+                Routes.phoneRequests: (context) {
+                  final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+                  final isIncoming = args?['initialIsIncoming'] ??
+                      (args?['tab'] == 'incoming' ? true : (args?['tab'] == 'outgoing' ? false : null));
+                  return PhoneRequestsScreen(
+                    initialIsIncoming: isIncoming,
+                    initialIsVip: args?['isVip'] ?? args?['initialIsVip'],
+                  );
+                },
+                Routes.profile: (context) => const HomeScreen(initialIndex: 4),
                 Routes.navigationAnalytics: (context) => const NavigationAnalyticsWidget(),
               },
               restorationScopeId: 'app',

@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:holynikkah/core/theme/app_typography.dart';
 import 'package:holynikkah/core/widgets/widgets.dart';
 import 'package:holynikkah/modules/login/providers/auth_provider.dart';
+import 'package:holynikkah/modules/notifications/services/notification_api.dart';
 import 'package:holynikkah/modules/partner/models/match_model.dart';
 import 'package:holynikkah/modules/partner/services/matches_service.dart';
 import 'package:holynikkah/modules/partner/services/phone_requests_service.dart';
@@ -81,6 +82,7 @@ class _PartnerFullScreenViewState extends State<PartnerFullScreenView> {
         _hasMore = feed.hasMore;
         _isLoading = false;
       });
+      _recordProfileView(0);
       return;
     }
 
@@ -88,6 +90,18 @@ class _PartnerFullScreenViewState extends State<PartnerFullScreenView> {
       _isLoading = false;
       _errorMessage = response.message ?? 'Failed to load matches';
     });
+  }
+
+  void _recordProfileView(int index) {
+    if (index >= 0 && index < _matches.length) {
+      final targetId = int.tryParse(_matches[index].id);
+      if (targetId != null) {
+        NotificationApi.instance.recordProfileView(
+          isVip: widget.isVip,
+          targetId: targetId,
+        );
+      }
+    }
   }
 
   Future<void> _loadMoreMatches() async {
@@ -125,6 +139,7 @@ class _PartnerFullScreenViewState extends State<PartnerFullScreenView> {
   }
 
   void _onPageChanged(int index) {
+    _recordProfileView(index);
     if (index >= _matches.length) {
       _loadMoreMatches();
       return;

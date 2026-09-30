@@ -1,15 +1,49 @@
 import 'dart:developer' as dev;
 import 'package:flutter/foundation.dart';
+import 'package:holynikkah/core/utils/constants.dart';
 
 /// 🧭 Global logger utility for consistent and secure logging across the app.
 ///
 /// Features:
 /// - Info, Warning, Error, Success, Debug, and Fatal log levels.
-/// - Disabled verbose logs in release builds for security/performance.
+/// - Allows verbose logs in release mode if [AppConstants.enableReleaseLogs] is true.
 /// - Optional secure redaction of sensitive values.
 /// - Includes timestamps and tag support for easy filtering.
 class AppLogger {
   AppLogger._(); // 🚫 Private constructor to prevent instantiation
+
+  static bool get _shouldLog => kDebugMode || AppConstants.enableReleaseLogs;
+
+  static void _writeLog(
+    String message, {
+    String tag = '',
+    Object? error,
+    StackTrace? stackTrace,
+  }) {
+    dev.log(
+      message,
+      name: tag,
+      error: error,
+      stackTrace: stackTrace,
+      time: DateTime.now(),
+    );
+
+    // In release mode, dev.log might not output to standard stdout/terminal.
+    // Use print to ensure logs are visible in console/logcat when enabled.
+    if (!kDebugMode && AppConstants.enableReleaseLogs) {
+      final prefix = tag.isNotEmpty ? '[$tag] ' : '';
+      // ignore: avoid_print
+      print('$prefix$message');
+      if (error != null) {
+        // ignore: avoid_print
+        print('$prefix Error: $error');
+      }
+      if (stackTrace != null) {
+        // ignore: avoid_print
+        print('$prefix StackTrace:\n$stackTrace');
+      }
+    }
+  }
 
   /// 🟢 Logs general informational messages.
   ///
@@ -18,7 +52,9 @@ class AppLogger {
   /// AppLogger.info('User logged in successfully', tag: 'Auth');
   /// ```
   static void info(String message, {String tag = 'INFO'}) {
-    if (kDebugMode) dev.log('💬 $message', name: tag, time: DateTime.now());
+    if (_shouldLog) {
+      _writeLog('💬 $message', tag: tag);
+    }
   }
 
   /// 🟡 Logs warnings for recoverable issues.
@@ -28,10 +64,12 @@ class AppLogger {
   /// AppLogger.warning('API response delayed', tag: 'Network');
   /// ```
   static void warning(String message, {String tag = 'WARNING'}) {
-    if (kDebugMode) dev.log('⚠️ $message', name: tag, time: DateTime.now());
+    if (_shouldLog) {
+      _writeLog('⚠️ $message', tag: tag);
+    }
   }
 
-  /// 🔴 Logs errors — displayed even in production builds.
+  /// 🔴 Logs errors — displayed in both debug and release builds.
   ///
   /// Supports optional error object and stack trace.
   ///
@@ -44,17 +82,16 @@ class AppLogger {
   /// }
   /// ```
   static void error(
-      String message, {
-        String tag = 'ERROR',
-        Object? error,
-        StackTrace? stackTrace,
-      }) {
-    dev.log(
+    String message, {
+    String tag = 'ERROR',
+    Object? error,
+    StackTrace? stackTrace,
+  }) {
+    _writeLog(
       '❌ $message',
-      name: tag,
+      tag: tag,
       error: error,
       stackTrace: stackTrace,
-      time: DateTime.now(),
     );
   }
 
@@ -65,19 +102,21 @@ class AppLogger {
   /// AppLogger.success('Theme applied successfully', tag: 'ThemeService');
   /// ```
   static void success(String message, {String tag = 'SUCCESS'}) {
-    if (kDebugMode) dev.log('✅ $message', name: tag, time: DateTime.now());
+    if (_shouldLog) {
+      _writeLog('✅ $message', tag: tag);
+    }
   }
 
   /// 🐞 Debug level — for verbose internal debugging.
-  ///
-  /// Only logs in debug mode.
   ///
   /// Example:
   /// ```dart
   /// AppLogger.debug('Widget rebuild triggered', tag: 'UI');
   /// ```
   static void debug(String message, {String tag = 'DEBUG'}) {
-    if (kDebugMode) dev.log('🐛 $message', name: tag, time: DateTime.now());
+    if (_shouldLog) {
+      _writeLog('🐛 $message', tag: tag);
+    }
   }
 
   /// 💀 Fatal / critical log — for unrecoverable errors.
@@ -86,13 +125,17 @@ class AppLogger {
   /// ```dart
   /// AppLogger.fatal('Database initialization failed!', tag: 'DB');
   /// ```
-  static void fatal(String message, {String tag = 'FATAL', Object? error, StackTrace? stackTrace}) {
-    dev.log(
+  static void fatal(
+    String message, {
+    String tag = 'FATAL',
+    Object? error,
+    StackTrace? stackTrace,
+  }) {
+    _writeLog(
       '💀 $message',
-      name: tag,
+      tag: tag,
       error: error,
       stackTrace: stackTrace,
-      time: DateTime.now(),
     );
   }
 

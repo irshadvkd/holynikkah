@@ -1,8 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:holynikkah/core/utils/app_logger.dart';
+import 'package:holynikkah/core/utils/constants.dart';
 
-/// Logs request/response metadata using [AppLogger] (debug builds only).
+/// Logs request/response metadata using [AppLogger].
 class LoggingInterceptor extends Interceptor {
   LoggingInterceptor({this.logBody = true});
 
@@ -10,7 +11,7 @@ class LoggingInterceptor extends Interceptor {
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    if (kDebugMode) {
+    if (kDebugMode || AppConstants.enableReleaseLogs) {
       AppLogger.info(
         '→ ${options.method} ${options.uri}',
         tag: 'API',
@@ -30,7 +31,7 @@ class LoggingInterceptor extends Interceptor {
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
-    if (kDebugMode) {
+    if (kDebugMode || AppConstants.enableReleaseLogs) {
       final statusCode = response.statusCode ?? 0;
       final message =
           '← $statusCode ${response.requestOptions.method} '

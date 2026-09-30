@@ -24,6 +24,7 @@ class ApiClient {
   late final Dio _dio;
   bool _initialized = false;
   String? _authToken;
+  void Function({String? message})? onUnauthorized;
 
   Dio get dio {
     if (!_initialized) init();
@@ -58,7 +59,10 @@ class ApiClient {
     );
 
     _dio.interceptors.addAll([
-      AuthInterceptor(getToken: () => _authToken),
+      AuthInterceptor(
+        getToken: () => _authToken,
+        onUnauthorized: ({String? message}) => onUnauthorized?.call(message: message),
+      ),
       if (enableLogging) LoggingInterceptor(),
       if (enableCurl) CurlInterceptor(),
     ]);
@@ -259,6 +263,11 @@ class ApiClient {
       }
     }
 
+    if (statusCode == 401) {
+      final msg = _extractErrorMessage(body);
+      onUnauthorized?.call(message: msg);
+    }
+
     return ApiResponse.failure(
       ApiException(
         message: _extractErrorMessage(body) ?? 'Request failed',
@@ -294,6 +303,10 @@ class ApiClient {
       case DioExceptionType.badResponse:
         final statusCode = error.response?.statusCode;
         final body = error.response?.data;
+        if (statusCode == 401) {
+          final msg = _extractErrorMessage(body);
+          onUnauthorized?.call(message: msg);
+        }
         return ApiException(
           message: _extractErrorMessage(body) ?? error.message ?? 'Server error',
           statusCode: statusCode,

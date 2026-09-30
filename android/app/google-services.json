@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "269423378271-q2brf9jde626cmap46jivakih5a2utkr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.holynikah.holynikah",
+            "certificate_hash": "5f58cbc64aaba18253b768fda0d3f40c549a8309"
+          }
+        },
+        {
           "client_id": "269423378271-16flepavfkdni191jl7n2akqhheqag1s.apps.googleusercontent.com",
           "client_type": 3
         }

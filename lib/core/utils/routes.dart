@@ -8,5 +8,8 @@ class Routes {
   static const String categorySelection = '/category-selection';
   static const String vipCategory = '/vip-category';
   static const String home = '/home';
+  static const String notifications = '/notifications';
+  static const String phoneRequests = '/phone-requests';
+  static const String profile = '/profile';
   static const String navigationAnalytics = '/navigation-analytics';
 }

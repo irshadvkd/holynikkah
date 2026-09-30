@@ -5,6 +5,13 @@ import 'package:flutter/foundation.dart';
 final class AppConstants {
   const AppConstants._(); // private constructor (prevent instantiation)
 
+  /// Set to `true` to print console logs even in release mode.
+  /// Can also be overridden at build time via: `--dart-define=ENABLE_RELEASE_LOGS=true`
+  static const bool enableReleaseLogs = bool.fromEnvironment(
+    'ENABLE_RELEASE_LOGS',
+    defaultValue: true,
+  );
+
   /// OTP digit count used across login and verification flows.
   static const int otpLength = 4;
 
@@ -27,10 +34,10 @@ final class AppConstants {
 final class _Urls {
   const _Urls();
 
-  static const String _prodBase = 'https://admin.holynikah.com/api';
+  static const String _prodBase = 'https://console.holynikah.com/api';
   static const String _devBase = 'http://172.20.10.2:8000/api';
 
-  static const String _prodImageBase = 'https://admin.holynikah.com/';
+  static const String _prodImageBase = 'https://console.holynikah.com/';
   static const String _devImageBase = 'http://172.20.10.2:8000/';
 
   /// Base URL — no trailing slash.
@@ -109,6 +116,7 @@ final class _Urls {
   final String normalOtpVerify = "/normal-users/otp/verify";
   final String normalUsersRegister = "/normal-users/register";
   final String normalCategorySelect = "/normal-users/category/select";
+  final String normalUserDeleteAccount = "/normal-users/delete-account";
 
   // VIP OTP
   final String vipOtpSend = "/vip-users/otp/send";
@@ -116,6 +124,10 @@ final class _Urls {
   final String vipOtpVerify = "/vip-users/otp/verify";
   final String vipUsersRegister = "/vip-users/register";
   final String vipCategorySelect = "/vip-users/category/select";
+  final String vipUserDeleteAccount = "/vip-users/delete-account";
+
+  /// Delete account endpoint for normal and VIP tiers
+  String deleteAccount(bool isVip) => "${_savedPrefix(isVip)}/delete-account";
 
   // Locations
   final String locationStates = "/locations/states";
@@ -169,6 +181,16 @@ final class _Urls {
 
   String savedTemplateMakeDefault(bool isVip, String id) =>
       "${_savedPrefix(isVip)}/templates/saved/$id/default";
+
+  // Notifications
+  String notifications(bool isVip) => "${_savedPrefix(isVip)}/notifications";
+  String notificationRead(bool isVip, int id) =>
+      "${_savedPrefix(isVip)}/notifications/$id/read";
+  String notificationsMarkAllRead(bool isVip) =>
+      "${_savedPrefix(isVip)}/notifications/mark-all-read";
+  String deviceToken(bool isVip) => "${_savedPrefix(isVip)}/device-token";
+  String profileView(bool isVip, dynamic targetId) =>
+      "${_savedPrefix(isVip)}/profiles/$targetId/view";
 }
 
 final class _JsonPaths {

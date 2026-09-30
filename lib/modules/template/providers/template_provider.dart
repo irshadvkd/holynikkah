@@ -192,6 +192,17 @@ class TemplateProvider extends ChangeNotifier {
     if (response.success && response.data != null) {
       _savedTemplates = response.data!.items;
       _savedStatus = TemplateLoadStatus.success;
+
+      final hasDefault = _savedTemplates.any((t) => t.isDefault);
+      if (hasDefault) {
+        if (isVip && !_isVipTemplateSelected) {
+          _isVipTemplateSelected = true;
+          await TemplateSessionStorage().setVipTemplateSelected(true);
+        } else if (!isVip && !_isNormalTemplateSelected) {
+          _isNormalTemplateSelected = true;
+          await TemplateSessionStorage().setNormalTemplateSelected(true);
+        }
+      }
     } else {
       _savedError = response.message ?? 'Failed to load saved templates';
       _savedStatus = TemplateLoadStatus.error;

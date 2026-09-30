@@ -39,6 +39,12 @@ class ProfileProvider extends ChangeNotifier {
   String? _vipProfileImagePath;
   String? _normalProfileImagePath;
 
+  // Category tracking
+  String? _vipCategoryId;
+  String? _vipCategoryName;
+  List<String> _normalCategoryIds = [];
+  List<String> _normalCategoryNames = [];
+
   bool _isFetching = false;
 
   // Getters
@@ -46,6 +52,10 @@ class ProfileProvider extends ChangeNotifier {
   bool get isFetching => _isFetching;
   String get vipHnId => _vipProfileId;
   String get normalHnId => _normalProfileId;
+  String? get vipCategoryId => _vipCategoryId;
+  String? get vipCategoryName => _vipCategoryName;
+  List<String> get normalCategoryIds => _normalCategoryIds;
+  List<String> get normalCategoryNames => _normalCategoryNames;
 
   String get profileId {
     if (_isVipProfile) {
@@ -147,6 +157,21 @@ class ProfileProvider extends ChangeNotifier {
     return val.isNotEmpty ? val : _information;
   }
 
+  String? getCategoryId(bool isVip) {
+    if (isVip) return _vipCategoryId;
+    return _normalCategoryIds.isNotEmpty ? _normalCategoryIds.first : null;
+  }
+
+  List<String> getCategoryIds(bool isVip) {
+    if (isVip) return _vipCategoryId != null ? [_vipCategoryId!] : [];
+    return _normalCategoryIds;
+  }
+
+  String? getCategoryName(bool isVip) {
+    if (isVip) return _vipCategoryName;
+    return _normalCategoryNames.isNotEmpty ? _normalCategoryNames.join(', ') : null;
+  }
+
   String? getProfileImagePath(bool isVip) {
     final val = isVip ? _vipProfileImagePath : _normalProfileImagePath;
     return val ?? _profileImagePath;
@@ -223,6 +248,20 @@ class ProfileProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void updateVipCategory(String? id, String? name) {
+    _vipCategoryId = id;
+    _vipCategoryName = name;
+    notifyListeners();
+  }
+
+  void updateNormalCategories(List<String> ids, [List<String>? names]) {
+    _normalCategoryIds = ids;
+    if (names != null) {
+      _normalCategoryNames = names;
+    }
+    notifyListeners();
+  }
+
   /// Apply user dictionary directly to the state (from login, storage, or API)
   void applyUserData(Map<String, dynamic> data, {required bool isVip}) {
     final id = data['hn_id']?.toString() ?? data['id']?.toString() ?? '';
@@ -280,6 +319,17 @@ class ProfileProvider extends ChangeNotifier {
       if (state != null && state.isNotEmpty) _vipState = state;
       if (district != null && district.isNotEmpty) _vipDistrict = district;
       if (city != null && city.isNotEmpty) _vipCity = city;
+
+      final catId = data['vip_category_id']?.toString() ??
+          data['category_id']?.toString() ??
+          (data['category'] is Map ? (data['category']['id'] ?? data['category']['catId'])?.toString() : null);
+      if (catId != null && catId.isNotEmpty) _vipCategoryId = catId;
+
+      final catName = data['vip_category_name']?.toString() ??
+          data['category_name']?.toString() ??
+          (data['category'] is Map ? (data['category']['name'] ?? data['category']['title'])?.toString() : null);
+      if (catName != null && catName.isNotEmpty) _vipCategoryName = catName;
+
       if (imagePath != null && imagePath.isNotEmpty) {
         final current = _vipProfileImagePath;
         final isCurrentLocal = current != null && current.startsWith('/') && File(current).existsSync();
@@ -296,6 +346,30 @@ class ProfileProvider extends ChangeNotifier {
       if (state != null && state.isNotEmpty) _normalState = state;
       if (district != null && district.isNotEmpty) _normalDistrict = district;
       if (city != null && city.isNotEmpty) _normalCity = city;
+
+      if (data['category_ids'] is List) {
+        _normalCategoryIds = (data['category_ids'] as List)
+            .map((e) => e.toString())
+            .toList();
+      } else if (data['categories'] is List) {
+        _normalCategoryIds = (data['categories'] as List)
+            .map((e) => (e is Map ? (e['id'] ?? e['catId']) : e)?.toString() ?? '')
+            .where((e) => e.isNotEmpty)
+            .toList();
+        _normalCategoryNames = (data['categories'] as List)
+            .map((e) => (e is Map ? (e['name'] ?? e['title']) : e)?.toString() ?? '')
+            .where((e) => e.isNotEmpty)
+            .toList();
+      } else if (data['category_id'] != null) {
+        _normalCategoryIds = [data['category_id'].toString()];
+      }
+
+      final singleCatName = data['category_name']?.toString() ??
+          (data['category'] is Map ? (data['category']['name'] ?? data['category']['title'])?.toString() : null);
+      if (singleCatName != null && singleCatName.isNotEmpty && _normalCategoryNames.isEmpty) {
+        _normalCategoryNames = [singleCatName];
+      }
+
       if (imagePath != null && imagePath.isNotEmpty) {
         final current = _normalProfileImagePath;
         final isCurrentLocal = current != null && current.startsWith('/') && File(current).existsSync();
@@ -393,6 +467,42 @@ class ProfileProvider extends ChangeNotifier {
     }
   }
 
+  void clearVipProfile() {
+    _vipProfileId = '';
+    _vipName = '';
+    _vipPhoneNumber = '';
+    _vipGender = '';
+    _vipInformation = '';
+    _vipState = null;
+    _vipDistrict = null;
+    _vipCity = null;
+    _vipProfileImagePath = null;
+    _vipCategoryId = null;
+    _vipCategoryName = null;
+    if (_isVipProfile) {
+      _isVipProfile = false;
+    }
+    notifyListeners();
+  }
+
+  void clearNormalProfile() {
+    _normalProfileId = '';
+    _normalName = '';
+    _normalPhoneNumber = '';
+    _normalGender = '';
+    _normalInformation = '';
+    _normalState = null;
+    _normalDistrict = null;
+    _normalCity = null;
+    _normalProfileImagePath = null;
+    _normalCategoryIds = [];
+    _normalCategoryNames = [];
+    if (!_isVipProfile) {
+      _isVipProfile = true;
+    }
+    notifyListeners();
+  }
+
   void clearProfile() {
     _isVipProfile = false;
     _profileId = '';
@@ -414,6 +524,8 @@ class ProfileProvider extends ChangeNotifier {
     _vipDistrict = null;
     _vipCity = null;
     _vipProfileImagePath = null;
+    _vipCategoryId = null;
+    _vipCategoryName = null;
 
     _normalProfileId = '';
     _normalName = '';
@@ -424,6 +536,8 @@ class ProfileProvider extends ChangeNotifier {
     _normalDistrict = null;
     _normalCity = null;
     _normalProfileImagePath = null;
+    _normalCategoryIds = [];
+    _normalCategoryNames = [];
 
     _isFetching = false;
     notifyListeners();

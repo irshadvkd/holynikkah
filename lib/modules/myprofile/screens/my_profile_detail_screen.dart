@@ -60,6 +60,7 @@ class _MyProfileDetailScreenState extends State<MyProfileDetailScreen> {
     final state = profileProvider.getState(isVipSelected);
     final district = profileProvider.getDistrict(isVipSelected);
     final city = profileProvider.getCity(isVipSelected);
+    final categoryName = profileProvider.getCategoryName(isVipSelected);
     final info = profileProvider.getInfo(isVipSelected);
     final imagePath = profileProvider.getProfileImagePath(isVipSelected);
     final isNetwork = profileProvider.isProfileImageNetworkTier(isVipSelected);
@@ -150,6 +151,8 @@ class _MyProfileDetailScreenState extends State<MyProfileDetailScreen> {
                     _buildInfoRow('State', state ?? 'Not set'),
                     _buildInfoRow('District', district ?? 'Not set'),
                     _buildInfoRow('City', city ?? 'Not set'),
+                    if (categoryName != null && categoryName.isNotEmpty)
+                      _buildInfoRow('Category', categoryName),
                     _buildInfoRow(
                       'Information',
                       info.isEmpty ? 'Not set' : info,
