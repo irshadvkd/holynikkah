@@ -24,6 +24,9 @@ final class AppConstants {
   /// 🖼️ Icon asset paths
   static const icons = _IconPaths();
 
+  /// 🌄 Image asset paths
+  static const images = _ImagePaths();
+
   /// 🎨 Theme file paths
   static const themes = _ThemePaths();
 
@@ -92,13 +95,13 @@ final class _Urls {
   final String shaadiVibesFeed = "/shadi-vibes";
   String shaadiVibesView(int id) => "/shadi-vibes/$id/views";
 
-  // Space Ad 1
-  final String spaceAd1Feed = "/space-ad-1";
-  String spaceAd1View(int id) => "/space-ad-1/$id/views";
+  // Space Ad 1 (Advertisement 1)
+  final String spaceAd1Feed = "/advertisement1";
+  String spaceAd1View(int id) => "/advertisement1/$id/views";
 
-  // Space Ad 2
-  final String spaceAd2Feed = "/space-ad-2";
-  String spaceAd2View(int id) => "/space-ad-2/$id/views";
+  // Space Ad 2 (Advertisement 2)
+  final String spaceAd2Feed = "/advertisement2";
+  String spaceAd2View(int id) => "/advertisement2/$id/views";
 
   // User
   final String userProfile = "/user/profile";
@@ -227,6 +230,17 @@ final class _IconPaths {
   final String like = "assets/icons/like.svg";
   final String comment = "assets/icons/comment.svg";
   final String share = "assets/icons/share.svg";
+}
+
+final class _ImagePaths {
+  const _ImagePaths();
+
+  final String loginBg = "assets/images/login_bg.png";
+  final String adsBg = "assets/images/ads_bg.png";
+  final String adsBg1 = "assets/images/ads_bg1.png";
+  final String moroccanPattern = "assets/images/moroccan_pattern.jpg";
+  final String vipCategoryBg = "assets/images/vip_category_bg.jpeg";
+  final String vipCategoryBg2 = "assets/images/vip_category_bg_2.jpeg";
 }
 
 final class _ThemePaths {

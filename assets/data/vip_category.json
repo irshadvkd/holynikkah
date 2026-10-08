@@ -3,7 +3,7 @@
     {
       "catId": "1",
       "name": "Middle Class",
-      "networth": "₹16.6Cr–207.5Cr",
+      "networth": "Less than ₹2 Crore",
       "grad_color1": "#12315A",
       "grad_color2": "#0B2242",
       "text_color": "#E8D28A",
@@ -14,7 +14,7 @@
     {
       "catId": "2",
       "name": "Upper Middle Class",
-      "networth": "₹415Cr–830Cr",
+      "networth": "₹2–5 Crore",
       "grad_color1": "#F0863A",
       "grad_color2": "#DE690A",
       "text_color": "#FFE9D2",
@@ -25,7 +25,7 @@
     {
       "catId": "3",
       "name": "HNI (Rich)",
-      "networth": "₹16.6Cr–207.5Cr",
+      "networth": "₹5–25 Crore",
       "grad_color1": "#F6D949",
       "grad_color2": "#EAC012",
       "text_color": "#5B4A05",
@@ -36,7 +36,7 @@
     {
       "catId": "4",
       "name": "Super Rich",
-      "networth": "₹207.5Cr–415Cr",
+      "networth": "₹25–50 Crore",
       "grad_color1": "#A9DBE2",
       "grad_color2": "#7FBFC9",
       "text_color": "#8A5A17",
@@ -47,7 +47,7 @@
     {
       "catId": "5",
       "name": "Ultra Rich",
-      "networth": "₹415Cr–830Cr",
+      "networth": "₹50–100+ Crore",
       "grad_color1": "#F5A0BB",
       "grad_color2": "#E8688F",
       "text_color": "#FFE9F0",
@@ -58,7 +58,7 @@
     {
       "catId": "6",
       "name": "Billionaire",
-      "networth": "₹6,640Cr",
+      "networth": "₹800+ Crore",
       "grad_color1": "#5FC28D",
       "grad_color2": "#3B9C68",
       "text_color": "#E9FFF3",

@@ -76,8 +76,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   bool _statesLoading = false;
   bool _districtsLoading = false;
 
-  /// Loading state
+  /// Loading & submission lock state
   bool _isLoading = false;
+  bool _isSubmitting = false;
 
   /// Secure storage
   final _storage = const FlutterSecureStorage();
@@ -790,40 +791,48 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
   /// Continue button action
   void _continue() async {
-    if (_isLoading) return;
+    if (_isSubmitting || _isLoading) return;
+    _isSubmitting = true;
 
     // Validate fields before activating overlay loader
     if (gender.isEmpty) {
+      _isSubmitting = false;
       CommonSnackBar.showError(context, 'Please select gender');
       return;
     }
 
     if (_nameController.text.trim().isEmpty) {
+      _isSubmitting = false;
       CommonSnackBar.showError(context, 'Please enter your name');
       return;
     }
 
     if (stateNotifier.value == null) {
+      _isSubmitting = false;
       CommonSnackBar.showError(context, 'Please select state');
       return;
     }
 
     if (districtNotifier.value == null) {
+      _isSubmitting = false;
       CommonSnackBar.showError(context, 'Please select district');
       return;
     }
 
     if (_cityController.text.trim().isEmpty) {
+      _isSubmitting = false;
       CommonSnackBar.showError(context, 'Please enter city');
       return;
     }
 
     if (_informationController.text.isEmpty) {
+      _isSubmitting = false;
       CommonSnackBar.showError(context, 'Please enter about yourself');
       return;
     }
 
     if (_informationController.text.trim().length < 25) {
+      _isSubmitting = false;
       CommonSnackBar.showError(
         context,
         'Information should be minimum 25 characters',
@@ -832,6 +841,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     }
 
     if (_informationController.text.trim().length > 500) {
+      _isSubmitting = false;
       CommonSnackBar.showError(
         context,
         'Information must not exceed 500 characters',
@@ -840,6 +850,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     }
 
     if (!_formKey.currentState!.validate()) {
+      _isSubmitting = false;
       CommonSnackBar.showError(
         context,
         'Please check and complete all required fields correctly',
@@ -989,10 +1000,13 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         );
       }
     } finally {
-      if (mounted && !isSuccess) {
-        setState(() {
-          _isLoading = false;
-        });
+      if (!isSuccess) {
+        _isSubmitting = false;
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
       }
     }
   }

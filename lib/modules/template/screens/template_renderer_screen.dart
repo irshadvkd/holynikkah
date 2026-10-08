@@ -246,39 +246,52 @@ class _TemplateRendererScreenState extends State<TemplateRendererScreen> {
       ),
     );
 
-    final previewImage = await _capturePreview();
+    String? error;
+    try {
+      final previewImage = await _capturePreview();
+      if (!mounted) return;
+
+      final auth = context.read<AuthProvider>();
+      final provider = context.read<TemplateProvider>();
+      await auth.ensureApiTokenFor(isVip: widget.isVip);
+
+      final slotImages = Map<String, File>.from(_slotImages);
+      final retainedSlots = Map<String, String>.from(_retainedSlots);
+
+      error = widget.savedTemplateId == null
+          ? await provider.createSavedTemplate(
+              isVip: widget.isVip,
+              templateId: _template.id,
+              name: name,
+              values: values,
+              previewImage: previewImage,
+              slotImages: slotImages,
+              slots: retainedSlots,
+            )
+          : await provider.updateSavedTemplate(
+              isVip: widget.isVip,
+              id: widget.savedTemplateId!,
+              name: name,
+              values: values,
+              previewImage: previewImage,
+              slotImages: slotImages,
+              slots: retainedSlots,
+            );
+    } catch (e, stack) {
+      AppLogger.error(
+        'Failed to save template',
+        tag: 'TemplateRenderer',
+        error: e,
+        stackTrace: stack,
+      );
+      error = 'Failed to save template. Please try again.';
+    } finally {
+      if (mounted) {
+        Navigator.of(context).pop(); // dismiss loader
+      }
+    }
 
     if (!mounted) return;
-
-    final auth = context.read<AuthProvider>();
-    final provider = context.read<TemplateProvider>();
-    await auth.ensureApiTokenFor(isVip: widget.isVip);
-
-    final slotImages = Map<String, File>.from(_slotImages);
-    final retainedSlots = Map<String, String>.from(_retainedSlots);
-
-    final error = widget.savedTemplateId == null
-        ? await provider.createSavedTemplate(
-            isVip: widget.isVip,
-            templateId: _template.id,
-            name: name,
-            values: values,
-            previewImage: previewImage,
-            slotImages: slotImages,
-            slots: retainedSlots,
-          )
-        : await provider.updateSavedTemplate(
-            isVip: widget.isVip,
-            id: widget.savedTemplateId!,
-            name: name,
-            values: values,
-            previewImage: previewImage,
-            slotImages: slotImages,
-            slots: retainedSlots,
-          );
-
-    if (!mounted) return;
-    Navigator.of(context).pop(); // dismiss loader
 
     if (error != null) {
       CommonSnackBar.showError(context, error);

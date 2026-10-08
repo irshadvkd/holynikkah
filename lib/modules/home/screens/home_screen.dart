@@ -133,7 +133,7 @@ class _HomeScreenState extends State<HomeScreen> {
         isCategorySelected: categoryProvider.isNormalSelected,
         isTemplateSelected: templateProvider.isNormalTemplateSelected,
       ),
-      const ReelsScreen(),
+      ReelsScreen(isActive: _selectedIndex == 2),
       const AdsScreen(),
       const MyProfileScreen(),
     ];

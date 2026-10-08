@@ -81,7 +81,12 @@ class _ApplicationState extends State<Application> {
                   final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
                   return HomeScreen(initialIndex: args?['initialIndex']);
                 },
-                Routes.notifications: (context) => const NotificationsScreen(),
+                Routes.notifications: (context) {
+                  final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+                  return NotificationsScreen(
+                    initialIsVip: args?['isVip'] ?? args?['initialIsVip'],
+                  );
+                },
                 Routes.phoneRequests: (context) {
                   final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
                   final isIncoming = args?['initialIsIncoming'] ??

@@ -38,7 +38,8 @@ class _PhoneRequestsScreenState extends State<PhoneRequestsScreen> {
   @override
   void initState() {
     super.initState();
-    _isVip = widget.initialIsVip ?? true;
+    final auth = context.read<AuthProvider>();
+    _isVip = widget.initialIsVip ?? (auth.isVipLoggedIn || !auth.isNormalLoggedIn);
     _isIncoming = widget.initialIsIncoming ?? true;
   }
 

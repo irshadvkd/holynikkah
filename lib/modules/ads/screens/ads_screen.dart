@@ -50,14 +50,14 @@ class _AdsScreenState extends State<AdsScreen>
       angleDeg: 52.5,
       title: 'Space Advertisement',
       feedUrl: AppConstants.urls.spaceAd1Feed,
-      viewUrlPrefix: '/space-ad-1',
+      viewUrlPrefix: '/advertisement1',
     ),
     _OrbitItem(
       label: 'SPACE 4\nADVERTISEMENT',
       angleDeg: 87.5,
       title: 'Space Advertisement',
       feedUrl: AppConstants.urls.spaceAd2Feed,
-      viewUrlPrefix: '/space-ad-2',
+      viewUrlPrefix: '/advertisement2',
     ),
   ];
 
@@ -87,9 +87,9 @@ class _AdsScreenState extends State<AdsScreen>
           // Responsive scale factor based on reference screen size (390 x 720)
           final scaleX = width / 390.0;
           final scaleY = height / 720.0;
-          final scale = math.min(scaleX, scaleY).clamp(0.65, 1.25);
+          final scale = math.min(scaleX, scaleY).clamp(0.65, 2.5);
 
-          final centerX = (width * 0.15).clamp(35.0, 70.0);
+          final centerX = 58.5 * scale;
           final centerY = height / 2;
           final center = Offset(centerX, centerY);
 
@@ -120,6 +120,7 @@ class _AdsScreenState extends State<AdsScreen>
                         center: center,
                         rimRadius: rimRadius,
                         animationValue: _animationController.value,
+                        scale: scale,
                       ),
                     );
                   },
@@ -133,6 +134,7 @@ class _AdsScreenState extends State<AdsScreen>
                     center: center,
                     radiusX: orbitRadiusX,
                     radiusY: orbitRadiusY,
+                    scale: scale,
                   ),
                 ),
               ),
@@ -188,7 +190,7 @@ class _AdsScreenState extends State<AdsScreen>
                     child: Text(
                       'Prayers',
                       style: AppTypography.cormorantGaramond(
-                        fontSize: (30 * scale).clamp(18.0, 32.0),
+                        fontSize: (30 * scale).clamp(18.0, 56.0),
                         fontWeight: FontWeight.w700,
                         color: AppColors.textPrimary,
                         letterSpacing: 0.5,
@@ -282,8 +284,8 @@ class _OrbitGlobe extends StatelessWidget {
     final dx = math.cos(angleRad);
     final dy = math.sin(angleRad);
     final double labelDistance = 14 * scale;
-    final double labelWidth = 125 * scale;
-    final double fontSize = (16 * scale).clamp(8.0, 12.5);
+    final double labelWidth = 135 * scale;
+    final double fontSize = (11.5 * scale).clamp(9.0, 22.0);
 
     return Stack(
       children: [
@@ -369,11 +371,13 @@ class _OrbitPainter extends CustomPainter {
   final Offset center;
   final double radiusX;
   final double radiusY;
+  final double scale;
 
   const _OrbitPainter({
     required this.center,
     required this.radiusX,
     required this.radiusY,
+    this.scale = 1.0,
   });
 
   @override
@@ -384,7 +388,7 @@ class _OrbitPainter extends CustomPainter {
         ..color = AppColors.primary
             .withValues(alpha: 0.35) // Gold soft color matching the theme
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 0.8, // Reverted back to original
+        ..strokeWidth = (0.8 * scale).clamp(0.8, 2.0),
     );
   }
 
@@ -392,7 +396,8 @@ class _OrbitPainter extends CustomPainter {
   bool shouldRepaint(_OrbitPainter oldDelegate) {
     return oldDelegate.center != center ||
         oldDelegate.radiusX != radiusX ||
-        oldDelegate.radiusY != radiusY;
+        oldDelegate.radiusY != radiusY ||
+        oldDelegate.scale != scale;
   }
 }
 
@@ -400,11 +405,13 @@ class _RotatingRimPainter extends CustomPainter {
   final Offset center;
   final double rimRadius;
   final double animationValue;
+  final double scale;
 
   const _RotatingRimPainter({
     required this.center,
     required this.rimRadius,
     required this.animationValue,
+    this.scale = 1.0,
   });
 
   @override
@@ -418,7 +425,7 @@ class _RotatingRimPainter extends CustomPainter {
       ..color = AppColors.primary
           .withValues(alpha: 0.22)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.7;
+      ..strokeWidth = (0.7 * scale).clamp(0.7, 1.8);
     canvas.drawCircle(Offset.zero, rimRadius, limbPaint);
 
     // 2. 24 ticks around the circle
@@ -426,12 +433,12 @@ class _RotatingRimPainter extends CustomPainter {
       ..color = AppColors.primary
           .withValues(alpha: 0.5)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.0;
+      ..strokeWidth = (1.0 * scale).clamp(1.0, 2.2);
     final majorTickPaint = Paint()
       ..color = AppColors.primary
           .withValues(alpha: 0.75)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.3;
+      ..strokeWidth = (1.3 * scale).clamp(1.3, 2.8);
 
     for (int i = 0; i < 24; i++) {
       final double angle = i * (2 * math.pi / 24);
@@ -439,7 +446,7 @@ class _RotatingRimPainter extends CustomPainter {
       final double sinA = math.sin(angle);
 
       final bool isMajor = (i % 6 == 0);
-      final double tickLength = isMajor ? 13.0 : 8.0;
+      final double tickLength = (isMajor ? 13.0 : 8.0) * scale;
       final Paint currentPaint = isMajor ? majorTickPaint : tickPaint;
 
       final double startR = rimRadius;
@@ -459,6 +466,7 @@ class _RotatingRimPainter extends CustomPainter {
   bool shouldRepaint(covariant _RotatingRimPainter oldDelegate) {
     return oldDelegate.animationValue != animationValue ||
         oldDelegate.center != center ||
-        oldDelegate.rimRadius != rimRadius;
+        oldDelegate.rimRadius != rimRadius ||
+        oldDelegate.scale != scale;
   }
 }

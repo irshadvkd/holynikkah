@@ -52,9 +52,15 @@ class EmailVerificationData {
       email: json['email']?.toString() ?? '',
       isVipRegistered: isVip,
       isNormalRegistered: isNormal,
-      prefillData: json['prefill_data'] as Map<String, dynamic>?,
-      vipUser: json['vip_user'] as Map<String, dynamic>?,
-      normalUser: json['normal_user'] as Map<String, dynamic>?,
+      prefillData: json['prefill_data'] is Map
+          ? Map<String, dynamic>.from(json['prefill_data'] as Map)
+          : null,
+      vipUser: json['vip_user'] is Map
+          ? Map<String, dynamic>.from(json['vip_user'] as Map)
+          : null,
+      normalUser: json['normal_user'] is Map
+          ? Map<String, dynamic>.from(json['normal_user'] as Map)
+          : null,
     );
   }
 }
@@ -203,11 +209,13 @@ class GoogleAuthService {
 
       AppLogger.info('verify-email status: ${response.statusCode}, body: ${response.data}', tag: 'GoogleAuthService');
 
-      if (response.data is Map<String, dynamic>) {
-        final map = response.data as Map<String, dynamic>;
+      if (response.data is Map) {
+        final map = Map<String, dynamic>.from(response.data as Map);
         final status = map['status'] == true;
-        if (status && map['data'] != null && map['data'] is Map<String, dynamic>) {
-          return EmailVerificationData.fromJson(map['data'] as Map<String, dynamic>);
+        if (status && map['data'] != null && map['data'] is Map) {
+          return EmailVerificationData.fromJson(
+            Map<String, dynamic>.from(map['data'] as Map),
+          );
         }
       }
       return null;

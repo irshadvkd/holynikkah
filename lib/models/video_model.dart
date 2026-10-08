@@ -21,6 +21,26 @@ class VideoModel {
 
   String? get videoUrl => sources.isNotEmpty ? sources.first : null;
 
+  VideoModel copyWith({
+    int? id,
+    String? title,
+    String? description,
+    String? subtitle,
+    String? thumb,
+    List<String>? sources,
+    bool? isWatched,
+  }) {
+    return VideoModel(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      subtitle: subtitle ?? this.subtitle,
+      thumb: thumb ?? this.thumb,
+      sources: sources ?? this.sources,
+      isWatched: isWatched ?? this.isWatched,
+    );
+  }
+
   factory VideoModel.fromJson(Map<String, dynamic> json) {
     return VideoModel(
       id: json['id'] is int ? json['id'] as int : int.tryParse('${json['id']}'),
@@ -112,6 +132,7 @@ class ReelsFeedResult {
     required this.lastPage,
     required this.perPage,
     required this.total,
+    this.hasMore = false,
   });
 
   final List<VideoModel> reels;
@@ -119,10 +140,9 @@ class ReelsFeedResult {
   final int lastPage;
   final int perPage;
   final int total;
+  final bool hasMore;
 
-  bool get hasMore => currentPage < lastPage;
-
-  factory ReelsFeedResult.fromJson(dynamic json) {
+  factory ReelsFeedResult.fromJson(dynamic json, {int? requestPage}) {
     if (json is! Map) {
       return const ReelsFeedResult(
         reels: [],
@@ -130,6 +150,7 @@ class ReelsFeedResult {
         lastPage: 1,
         perPage: 10,
         total: 0,
+        hasMore: false,
       );
     }
 
@@ -137,18 +158,34 @@ class ReelsFeedResult {
     final reels = ReelsResponse.parseVideos(root);
     final pagination = _paginationSource(root);
 
-    final currentPage = _int(pagination['current_page'], fallback: 1);
+    final currentPage = _int(
+      pagination['current_page'] ?? root['current_page'] ?? root['page'],
+      fallback: requestPage ?? 1,
+    );
     final lastPage = _max(
-      _int(pagination['last_page'], fallback: currentPage),
+      _int(pagination['last_page'] ?? root['last_page'], fallback: currentPage),
       currentPage,
     );
+
+    final rawHasMore = root['has_more'] ??
+        pagination['has_more'] ??
+        root['hasMore'] ??
+        pagination['hasMore'] ??
+        (root['next_page_url'] != null || pagination['next_page_url'] != null
+            ? true
+            : null);
+
+    final hasMore = rawHasMore != null
+        ? VideoModel._bool(rawHasMore)
+        : (currentPage < lastPage);
 
     return ReelsFeedResult(
       reels: reels,
       currentPage: currentPage,
       lastPage: lastPage,
-      perPage: _int(pagination['per_page'], fallback: 10),
-      total: _int(pagination['total'], fallback: reels.length),
+      perPage: _int(pagination['per_page'] ?? root['per_page'], fallback: 10),
+      total: _int(pagination['total'] ?? root['total'], fallback: reels.length),
+      hasMore: hasMore,
     );
   }
 

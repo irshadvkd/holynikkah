@@ -45,22 +45,29 @@ class Categories {
   });
 
   Categories.fromJson(dynamic json) {
-    catId = (json['catId'] ?? json['id'])?.toString();
-    name = json['name'] ?? json['title'];
-    networth = json['networth'];
+    if (json is! Map) return;
+    catId = (json['catId'] ?? json['id'] ?? json['category_id'])?.toString();
+    name = json['name'] ?? json['title'] ?? json['category_name'];
+    networth = json['networth'] ??
+        json['net_worth'] ??
+        json['netWorth'] ??
+        json['net_worth_range'];
     bgColor =
         json['bgColor'] ??
         json['bg_color'] ??
         json['grad_color1'] ??
+        json['gradient_start_color'] ??
         json['button_bg_color'];
     textColor =
         json['textColor'] ??
         json['text_color'] ??
         json['button_text_color'];
-    sortOrder = _int(json['sort_order']);
+    sortOrder = _int(json['sort_order'] ?? json['sortOrder'] ?? json['order']);
     gradientEndColor = json['gradient_end_color'] ??
         json['gradientEndColor'] ??
-        json['grad_color2'];
+        json['grad_color2'] ??
+        json['gradient_stop_color'] ??
+        json['button_end_color'];
     icon = json['icon'];
   }
   String? catId;
@@ -77,6 +84,7 @@ class Categories {
     map['catId'] = catId;
     map['name'] = name;
     map['networth'] = networth;
+    map['net_worth'] = networth;
     map['bgColor'] = bgColor;
     map['grad_color1'] = bgColor;
     map['textColor'] = textColor;
@@ -108,8 +116,11 @@ class CategoriesResponse {
 
   static List<dynamic> _extractItems(dynamic json) {
     if (json is List) return json;
-    if (json is Map && json['data'] is List) {
-      return json['data'] as List;
+    if (json is Map) {
+      if (json['data'] is List) return json['data'] as List;
+      if (json['categories'] is List) return json['categories'] as List;
+      if (json['vip_categories'] is List) return json['vip_categories'] as List;
+      if (json['items'] is List) return json['items'] as List;
     }
     return [];
   }
@@ -117,7 +128,9 @@ class CategoriesResponse {
   static bool _isActive(dynamic item) {
     if (item is! Map) return true;
     final status = item['status']?.toString().toLowerCase();
-    return status == null || status == 'active';
+    final isActive = item['is_active'];
+    if (isActive is bool) return isActive;
+    return status == null || status == 'active' || status == '1';
   }
 }
 

@@ -1,5 +1,6 @@
 import 'dart:developer' as dev;
 import 'package:flutter/foundation.dart';
+import 'package:holynikkah/core/services/crashlytics_service.dart';
 import 'package:holynikkah/core/utils/constants.dart';
 
 /// 🧭 Global logger utility for consistent and secure logging across the app.
@@ -9,6 +10,7 @@ import 'package:holynikkah/core/utils/constants.dart';
 /// - Allows verbose logs in release mode if [AppConstants.enableReleaseLogs] is true.
 /// - Optional secure redaction of sensitive values.
 /// - Includes timestamps and tag support for easy filtering.
+/// - Automatically sends logs and errors to Firebase Crashlytics.
 class AppLogger {
   AppLogger._(); // 🚫 Private constructor to prevent instantiation
 
@@ -55,6 +57,7 @@ class AppLogger {
     if (_shouldLog) {
       _writeLog('💬 $message', tag: tag);
     }
+    CrashlyticsService.instance.log('💬 [$tag] $message');
   }
 
   /// 🟡 Logs warnings for recoverable issues.
@@ -67,9 +70,10 @@ class AppLogger {
     if (_shouldLog) {
       _writeLog('⚠️ $message', tag: tag);
     }
+    CrashlyticsService.instance.log('⚠️ [$tag] $message');
   }
 
-  /// 🔴 Logs errors — displayed in both debug and release builds.
+  /// 🔴 Logs errors — displayed in both debug and release builds, and sent to Crashlytics.
   ///
   /// Supports optional error object and stack trace.
   ///
@@ -93,6 +97,17 @@ class AppLogger {
       error: error,
       stackTrace: stackTrace,
     );
+
+    if (error != null) {
+      CrashlyticsService.instance.recordError(
+        error,
+        stackTrace ?? StackTrace.current,
+        reason: '[$tag] $message',
+        fatal: false,
+      );
+    } else {
+      CrashlyticsService.instance.log('❌ [$tag] $message');
+    }
   }
 
   /// ✅ Logs success messages — useful for completed actions.
@@ -105,6 +120,7 @@ class AppLogger {
     if (_shouldLog) {
       _writeLog('✅ $message', tag: tag);
     }
+    CrashlyticsService.instance.log('✅ [$tag] $message');
   }
 
   /// 🐞 Debug level — for verbose internal debugging.
@@ -136,6 +152,13 @@ class AppLogger {
       tag: tag,
       error: error,
       stackTrace: stackTrace,
+    );
+
+    CrashlyticsService.instance.recordError(
+      error ?? Exception(message),
+      stackTrace ?? StackTrace.current,
+      reason: '[$tag] $message',
+      fatal: true,
     );
   }
 

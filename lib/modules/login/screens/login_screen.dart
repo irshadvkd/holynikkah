@@ -13,6 +13,7 @@ import 'package:holynikkah/modules/category/controller/category_provider.dart';
 import 'package:holynikkah/modules/login/providers/auth_provider.dart';
 import 'package:holynikkah/modules/login/widgets/google_logo_icon.dart';
 import 'package:holynikkah/modules/myprofile/providers/profile_provider.dart';
+import 'package:holynikkah/modules/registration/models/vip_user_fields.dart';
 import 'package:holynikkah/modules/template/providers/template_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -86,8 +87,11 @@ class _LoginScreenState extends State<LoginScreen>
         child: Container(
           width: double.infinity,
           height: double.infinity,
-          decoration: const BoxDecoration(
-            gradient: AppColors.darkGreenGradient,
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage(AppConstants.images.loginBg),
+              fit: BoxFit.cover,
+            ),
           ),
           child: SafeArea(
             child: Consumer<AuthProvider>(
@@ -470,13 +474,16 @@ class _LoginScreenState extends State<LoginScreen>
       if (result.isAlreadyRegistered) {
         // User already has an account -> Sync categories/templates & navigate to Home
         if (result.backendUserData != null) {
+          final isCategorySelected =
+              VipUserFields.isCategorySelected(result.backendUserData);
           if (isVip) {
             await context
                 .read<CategoryProvider>()
-                .setVipSelected(true);
+                .applyVipCategoryFromUser(result.backendUserData);
+            if (!mounted) return;
             await context
                 .read<AuthProvider>()
-                .updateStoredVipCategorySelected(true);
+                .updateStoredVipCategorySelected(isCategorySelected);
             if (!mounted) return;
             await context
                 .read<TemplateProvider>()
@@ -484,10 +491,11 @@ class _LoginScreenState extends State<LoginScreen>
           } else {
             await context
                 .read<CategoryProvider>()
-                .setNormalSelected(true);
+                .applyNormalCategoryFromUser(result.backendUserData);
+            if (!mounted) return;
             await context
                 .read<AuthProvider>()
-                .updateStoredNormalCategorySelected(true);
+                .updateStoredNormalCategorySelected(isCategorySelected);
             if (!mounted) return;
             await context
                 .read<TemplateProvider>()
@@ -501,7 +509,9 @@ class _LoginScreenState extends State<LoginScreen>
         }
         if (!mounted) return;
         CommonSnackBar.showSuccess(context, 'Login successful');
-        Navigator.of(context).pushReplacementNamed(Routes.home);
+        if (Navigator.of(context).canPop()) {
+          Navigator.of(context).pop();
+        }
       } else {
         // User not registered -> Navigate to Register with prefill data from other tier if available
         final prefill = result.prefillData;

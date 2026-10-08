@@ -382,17 +382,47 @@ class ProfileProvider extends ChangeNotifier {
 
   /// Load user data from local SecureStorage via AuthProvider immediately
   Future<void> loadFromStorage(AuthProvider authProvider) async {
+    if (!authProvider.isVipLoggedIn && !authProvider.isNormalLoggedIn) {
+      clearProfile();
+      return;
+    }
+
     if (authProvider.isVipLoggedIn) {
       final vipUser = await authProvider.getStoredUser(isVip: true);
       if (vipUser != null) {
         applyUserData(vipUser, isVip: true);
       }
+    } else {
+      _vipProfileId = '';
+      _vipName = '';
+      _vipPhoneNumber = '';
+      _vipGender = '';
+      _vipInformation = '';
+      _vipState = null;
+      _vipDistrict = null;
+      _vipCity = null;
+      _vipProfileImagePath = null;
+      _vipCategoryId = null;
+      _vipCategoryName = null;
     }
+
     if (authProvider.isNormalLoggedIn) {
       final normalUser = await authProvider.getStoredUser(isVip: false);
       if (normalUser != null) {
         applyUserData(normalUser, isVip: false);
       }
+    } else {
+      _normalProfileId = '';
+      _normalName = '';
+      _normalPhoneNumber = '';
+      _normalGender = '';
+      _normalInformation = '';
+      _normalState = null;
+      _normalDistrict = null;
+      _normalCity = null;
+      _normalProfileImagePath = null;
+      _normalCategoryIds = [];
+      _normalCategoryNames = [];
     }
 
     if (authProvider.isVipLoggedIn && !authProvider.isNormalLoggedIn) {

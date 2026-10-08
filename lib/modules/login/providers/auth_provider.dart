@@ -9,6 +9,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:holynikkah/core/api/api_client.dart';
 import 'package:holynikkah/core/api/api_response.dart';
 import 'package:holynikkah/core/services/category_session_storage.dart';
+import 'package:holynikkah/core/services/crashlytics_service.dart';
 import 'package:holynikkah/core/services/template_session_storage.dart';
 import 'package:holynikkah/core/utils/app_logger.dart';
 import 'package:holynikkah/core/utils/constants.dart';
@@ -96,10 +97,13 @@ class AuthProvider extends ChangeNotifier {
 
     if (_isVipLoggedIn) {
       _syncFcmToken(isVip: true);
-    }
-    if (_isNormalLoggedIn) {
+      NotificationApi.instance.syncUnreadCount(isVip: true);
+    } else if (_isNormalLoggedIn) {
       _syncFcmToken(isVip: false);
+      NotificationApi.instance.syncUnreadCount(isVip: false);
     }
+
+    _syncCrashlyticsUserContext();
 
     AppLogger.info(
       "VIP: $_isVipLoggedIn | NORMAL: $_isNormalLoggedIn",
@@ -253,6 +257,8 @@ class AuthProvider extends ChangeNotifier {
     }
 
     _syncFcmToken(isVip: true);
+    NotificationApi.instance.syncUnreadCount(isVip: true);
+    _syncCrashlyticsUserContext();
 
     AppLogger.success("VIP user logged in", tag: "AuthProvider");
 
@@ -286,6 +292,8 @@ class AuthProvider extends ChangeNotifier {
     }
 
     _syncFcmToken(isVip: false);
+    NotificationApi.instance.syncUnreadCount(isVip: false);
+    _syncCrashlyticsUserContext();
 
     AppLogger.success("Normal user logged in", tag: "AuthProvider");
 
@@ -324,9 +332,13 @@ class AuthProvider extends ChangeNotifier {
     if (_isNormalLoggedIn) {
       final normalToken = await _storage.read(key: _normalAuthTokenKey);
       ApiClient.instance.setAuthToken(normalToken);
+      NotificationApi.instance.syncUnreadCount(isVip: false);
     } else {
       ApiClient.instance.setAuthToken(null);
+      NotificationService.instance.unreadCountNotifier.value = 0;
     }
+
+    _syncCrashlyticsUserContext();
 
     notifyListeners();
   }
@@ -348,9 +360,13 @@ class AuthProvider extends ChangeNotifier {
     if (_isVipLoggedIn) {
       final vipToken = await _storage.read(key: _vipAuthTokenKey);
       ApiClient.instance.setAuthToken(vipToken);
+      NotificationApi.instance.syncUnreadCount(isVip: true);
     } else {
       ApiClient.instance.setAuthToken(null);
+      NotificationService.instance.unreadCountNotifier.value = 0;
     }
+
+    _syncCrashlyticsUserContext();
 
     notifyListeners();
   }
@@ -374,11 +390,14 @@ class AuthProvider extends ChangeNotifier {
     await _storage.delete(key: _normalAuthTokenKey);
     await _storage.delete(key: _normalUserKey);
     ApiClient.instance.setAuthToken(null);
+    NotificationService.instance.unreadCountNotifier.value = 0;
     await CategorySessionStorage().setVipCategorySelected(false);
     await CategorySessionStorage().setNormalCategorySelected(false);
     await TemplateSessionStorage().clearAllTemplateSelections();
 
     AppLogger.success("All users logged out", tag: "AuthProvider");
+
+    _syncCrashlyticsUserContext();
 
     notifyListeners();
   }
@@ -407,6 +426,8 @@ class AuthProvider extends ChangeNotifier {
     await CategorySessionStorage().setVipCategorySelected(false);
     await CategorySessionStorage().setNormalCategorySelected(false);
     await TemplateSessionStorage().clearAllTemplateSelections();
+
+    _syncCrashlyticsUserContext();
 
     notifyListeners();
 
@@ -712,6 +733,32 @@ class AuthProvider extends ChangeNotifier {
         'Failed to update stored normal template flag: $e',
         tag: 'AuthProvider',
       );
+    }
+  }
+
+  /// 🔹 Sync User Context & Custom Attributes with Crashlytics
+  Future<void> _syncCrashlyticsUserContext() async {
+    try {
+      CrashlyticsService.instance.setCustomKey('is_vip_logged_in', _isVipLoggedIn);
+      CrashlyticsService.instance.setCustomKey('is_normal_logged_in', _isNormalLoggedIn);
+
+      if (_isVipLoggedIn) {
+        final user = await getStoredUser(isVip: true);
+        final id = user?['id']?.toString() ?? user?['user_id']?.toString() ?? user?['phone']?.toString();
+        if (id != null && id.isNotEmpty) {
+          await CrashlyticsService.instance.setUserIdentifier('VIP_$id');
+        }
+      } else if (_isNormalLoggedIn) {
+        final user = await getStoredUser(isVip: false);
+        final id = user?['id']?.toString() ?? user?['user_id']?.toString() ?? user?['phone']?.toString();
+        if (id != null && id.isNotEmpty) {
+          await CrashlyticsService.instance.setUserIdentifier('NORMAL_$id');
+        }
+      } else {
+        await CrashlyticsService.instance.clearUserIdentifier();
+      }
+    } catch (e) {
+      AppLogger.warning('Failed to sync Crashlytics user context: $e', tag: 'AuthProvider');
     }
   }
 }

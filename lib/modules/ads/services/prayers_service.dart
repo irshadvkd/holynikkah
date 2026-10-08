@@ -32,6 +32,7 @@ class PrayersService {
     int page = 1,
     int perPage = defaultPerPage,
     String? firebaseUid,
+    Iterable<int>? excludeIds,
   }) async {
     final uid = firebaseUid ?? await _resolveFirebaseUid();
     if (uid == null || uid.isEmpty) {
@@ -40,8 +41,11 @@ class PrayersService {
       );
     }
 
+    final excludeList = excludeIds?.where((id) => id > 0).join(',');
+
     AppLogger.info(
-      'Fetching prayers feed page=$page perPage=$perPage',
+      'Fetching prayers feed page=$page perPage=$perPage'
+      '${excludeList != null && excludeList.isNotEmpty ? ' exclude_ids=$excludeList' : ''}',
       tag: 'PrayersService',
     );
 
@@ -51,8 +55,11 @@ class PrayersService {
         'firebase_uid': uid,
         'page': page,
         'per_page': perPage,
+        'limit': perPage,
+        if (excludeList != null && excludeList.isNotEmpty)
+          'exclude_ids': excludeList,
       },
-      parser: PrayersFeedResult.fromJson,
+      parser: (json) => PrayersFeedResult.fromJson(json, requestPage: page),
     );
 
     if (response.success) {
@@ -62,7 +69,7 @@ class PrayersService {
       }
       AppLogger.success(
         'Prayers feed loaded: ${feed?.prayers.length ?? 0} '
-        '(page ${feed?.currentPage}/${feed?.lastPage})',
+        '(page ${feed?.currentPage}/${feed?.lastPage}, hasMore: ${feed?.hasMore})',
         tag: 'PrayersService',
       );
     } else {

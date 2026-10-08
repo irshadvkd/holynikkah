@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:holynikkah/core/theme/app_typography.dart';
@@ -9,7 +10,13 @@ import 'package:video_player/video_player.dart';
 
 class ReelsScreen extends StatefulWidget {
   final bool isBackArrowEnabled;
-  const ReelsScreen({super.key, this.isBackArrowEnabled = false});
+  final bool isActive;
+
+  const ReelsScreen({
+    super.key,
+    this.isBackArrowEnabled = false,
+    this.isActive = true,
+  });
 
   @override
   State<ReelsScreen> createState() => _ReelsScreenState();
@@ -50,11 +57,25 @@ class _ReelsScreenState extends State<ReelsScreen> with WidgetsBindingObserver {
   }
 
   @override
+  void didUpdateWidget(covariant ReelsScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.isActive != widget.isActive) {
+      if (!widget.isActive) {
+        _pauseAllControllers();
+      } else {
+        _syncPlaybackState(playCurrent: true);
+      }
+    }
+  }
+
+  @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     switch (state) {
       case AppLifecycleState.resumed:
         _isAppInForeground = true;
-        _syncPlaybackState(playCurrent: true);
+        if (widget.isActive) {
+          _syncPlaybackState(playCurrent: true);
+        }
       case AppLifecycleState.inactive:
       case AppLifecycleState.paused:
       case AppLifecycleState.detached:
@@ -81,12 +102,12 @@ class _ReelsScreenState extends State<ReelsScreen> with WidgetsBindingObserver {
 
       final isCurrent = entry.key == currentIndex;
 
-      if (isCurrent && playCurrent && _isAppInForeground) {
+      if (isCurrent && playCurrent && _isAppInForeground && widget.isActive) {
         controller
           ..setVolume(_activeVolume)
           ..setLooping(true)
           ..play();
-      } else if (!isCurrent) {
+      } else if (!isCurrent || !widget.isActive) {
         controller
           ..pause()
           ..setVolume(0.0);
@@ -112,6 +133,7 @@ class _ReelsScreenState extends State<ReelsScreen> with WidgetsBindingObserver {
         await controller.dispose();
       }
       controllers.clear();
+      await ReelVideoLoader.clearCache();
     }
 
     setState(() {
@@ -151,22 +173,33 @@ class _ReelsScreenState extends State<ReelsScreen> with WidgetsBindingObserver {
     });
 
     final nextPage = _currentPage + 1;
-    final response = await ReelsService.instance.fetchFeed(page: nextPage);
+    final currentIds = videos.map((v) => v.id).whereType<int>();
+    final response = await ReelsService.instance.fetchFeed(
+      page: nextPage,
+      excludeIds: currentIds,
+    );
 
     if (!mounted) return;
 
     if (response.success && response.data != null) {
       final feed = response.data!;
+      final existingIds = videos.map((v) => v.id).whereType<int>().toSet();
+      final newReels = feed.reels
+          .where((r) => r.id == null || !existingIds.contains(r.id))
+          .toList();
+
       final previousLength = videos.length;
       setState(() {
-        videos = [...videos, ...feed.reels];
+        videos = [...videos, ...newReels];
         _currentPage = feed.currentPage;
-        _hasMore = feed.hasMore;
+        _hasMore = feed.hasMore && newReels.isNotEmpty;
         _isLoadingMore = false;
         _loadMoreFailed = false;
       });
-      _preloadUpcomingVideos(fromIndex: previousLength, count: 2);
-      _prepareActiveReelAfterLoad(previousLength);
+      if (newReels.isNotEmpty) {
+        _preloadUpcomingVideos(fromIndex: previousLength, count: 2);
+        _prepareActiveReelAfterLoad(previousLength);
+      }
       return;
     }
 
@@ -207,6 +240,24 @@ class _ReelsScreenState extends State<ReelsScreen> with WidgetsBindingObserver {
     }
   }
 
+  void _cleanupDistantControllers(int activeIndex) {
+    final keysToRemove = <int>[];
+    for (final index in controllers.keys) {
+      if (index < activeIndex - 1 || index > activeIndex + 2) {
+        keysToRemove.add(index);
+      }
+    }
+
+    for (final index in keysToRemove) {
+      final controller = controllers.remove(index);
+      if (controller != null) {
+        controller.pause();
+        controller.dispose();
+      }
+      _preparingIndexes.remove(index);
+    }
+  }
+
   void _onPageChanged(int index) {
     setState(() => currentIndex = index);
     _syncPlaybackState();
@@ -220,6 +271,11 @@ class _ReelsScreenState extends State<ReelsScreen> with WidgetsBindingObserver {
     if (index + 1 < videos.length) {
       _prepareController(index + 1);
     }
+    if (index - 1 >= 0) {
+      _prepareController(index - 1);
+    }
+
+    _cleanupDistantControllers(index);
 
     _maybeLoadMore(index);
     _recordViewIfNeeded(index);
@@ -554,72 +610,123 @@ class _ReelItemState extends State<ReelItem> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        if (widget.video.thumb.isNotEmpty)
-          Image.network(
-            widget.video.thumb,
-            fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) {
-              return Container(
-                color: Colors.grey[900],
-                child: const Center(
-                  child: Icon(Icons.error, color: Colors.white),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final screenWidth = constraints.maxWidth;
+        final screenHeight = constraints.maxHeight;
+        final screenAspect = screenWidth / (screenHeight > 0 ? screenHeight : 1);
+        final isWideScreen = screenAspect > 0.62; // Phones are ~0.56. Tablets / iPads are > 0.65
+
+        final isInitialized =
+            widget.controller != null && widget.controller!.value.isInitialized;
+        final videoSize = isInitialized ? widget.controller!.value.size : null;
+        final videoAspect = (videoSize != null && videoSize.height > 0)
+            ? videoSize.width / videoSize.height
+            : 9 / 16;
+
+        return Stack(
+          fit: StackFit.expand,
+          children: [
+            // 1. Ambient Background Layer (for tablets/iPads or letterboxing)
+            if (isWideScreen) ...[
+              if (widget.video.thumb.isNotEmpty)
+                Image.network(
+                  widget.video.thumb,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  height: double.infinity,
+                  errorBuilder: (_, __, ___) => const ColoredBox(color: Colors.black),
+                )
+              else if (isInitialized)
+                SizedBox(
+                  width: double.infinity,
+                  height: double.infinity,
+                  child: FittedBox(
+                    fit: BoxFit.cover,
+                    child: SizedBox(
+                      width: widget.controller!.value.size.width,
+                      height: widget.controller!.value.size.height,
+                      child: VideoPlayer(widget.controller!),
+                    ),
+                  ),
+                )
+              else
+                const ColoredBox(color: Colors.black),
+
+              Positioned.fill(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+                  child: Container(
+                    color: Colors.black.withValues(alpha: 0.5),
+                  ),
                 ),
-              );
-            },
-          ),
-
-        if (widget.controller != null && widget.controller!.value.isInitialized)
-          SizedBox(
-            width: double.infinity,
-            height: double.infinity,
-            child: FittedBox(
-              fit: BoxFit.cover,
-              child: SizedBox(
-                width: widget.controller!.value.size.width,
-                height: widget.controller!.value.size.height,
-                child: VideoPlayer(widget.controller!),
               ),
-            ),
-          )
-        else if (widget.isLoading || widget.controller != null)
-          Container(
-            color: Colors.black,
-            child: const Center(
-              child: CircularProgressIndicator(color: Colors.white),
-            ),
-          ),
+            ] else ...[
+              // Standard phone background thumbnail while video loads
+              if (widget.video.thumb.isNotEmpty && !isInitialized)
+                Image.network(
+                  widget.video.thumb,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => const ColoredBox(color: Colors.black),
+                ),
+            ],
 
-        GestureDetector(
-          onTap: () {
+            // 2. Video Foreground Layer
+            if (isInitialized)
+              Center(
+                child: AspectRatio(
+                  aspectRatio: isWideScreen ? videoAspect : screenAspect,
+                  child: FittedBox(
+                    fit: isWideScreen ? BoxFit.contain : BoxFit.cover,
+                    child: SizedBox(
+                      width: widget.controller!.value.size.width,
+                      height: widget.controller!.value.size.height,
+                      child: VideoPlayer(widget.controller!),
+                    ),
+                  ),
+                ),
+              )
+            else if (widget.isLoading || widget.controller != null)
+              Container(
+                color: isWideScreen ? Colors.transparent : Colors.black,
+                child: const Center(
+                  child: CircularProgressIndicator(color: Colors.white),
+                ),
+              ),
+
+            // Tap detector for play/pause
+            GestureDetector(
+              onTap: () {
+                if (widget.controller != null &&
+                    widget.controller!.value.isInitialized) {
+                  if (widget.controller!.value.isPlaying) {
+                    widget.controller!.pause();
+                  } else {
+                    widget.controller!.play();
+                  }
+                  setState(() {});
+                }
+              },
+              child: Container(color: Colors.transparent),
+            ),
+
+            /// 🔥 BACK BUTTON
+            if (widget.enableBackArrow)
+              Positioned(
+                top: MediaQuery.of(context).padding.top + 12,
+                left: 16,
+                child: const CustomBackButton(),
+              ),
+
             if (widget.controller != null &&
-                widget.controller!.value.isInitialized) {
-              if (widget.controller!.value.isPlaying) {
-                widget.controller!.pause();
-              } else {
-                widget.controller!.play();
-              }
-              setState(() {});
-            }
-          },
-          child: Container(color: Colors.transparent),
-        ),
-
-        /// 🔥 BACK BUTTON ADDED
-        if (widget.enableBackArrow)
-          Positioned(
-            top: MediaQuery.of(context).padding.top + 12,
-            left: 16,
-            child: const CustomBackButton(),
-          ),
-
-        if (widget.controller != null &&
-            widget.controller!.value.isInitialized &&
-            !widget.controller!.value.isPlaying)
-          Center(child: Icon(Icons.play_arrow, color: Colors.white, size: 80)),
-      ],
+                widget.controller!.value.isInitialized &&
+                !widget.controller!.value.isPlaying)
+              const Center(
+                child: Icon(Icons.play_arrow, color: Colors.white, size: 80),
+              ),
+          ],
+        );
+      },
     );
   }
 }

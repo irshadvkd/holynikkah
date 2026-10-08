@@ -74,6 +74,39 @@ class _VipCategoryCardState extends State<VipCategoryCard>
     }
   }
 
+  static const List<Map<String, Color>> _defaultTierPalettes = [
+    {
+      'start': Color(0xFF12315A),
+      'end': Color(0xFF0B2242),
+      'text': Color(0xFFE8D28A),
+    },
+    {
+      'start': Color(0xFFF0863A),
+      'end': Color(0xFFDE690A),
+      'text': Color(0xFFFFE9D2),
+    },
+    {
+      'start': Color(0xFFF6D949),
+      'end': Color(0xFFEAC012),
+      'text': Color(0xFF5B4A05),
+    },
+    {
+      'start': Color(0xFFA9DBE2),
+      'end': Color(0xFF7FBFC9),
+      'text': Color(0xFF8A5A17),
+    },
+    {
+      'start': Color(0xFFF5A0BB),
+      'end': Color(0xFFE8688F),
+      'text': Color(0xFFFFE9F0),
+    },
+    {
+      'start': Color(0xFF5FC28D),
+      'end': Color(0xFF3B9C68),
+      'text': Color(0xFFE9FFF3),
+    },
+  ];
+
   @override
   Widget build(BuildContext context) {
     final tierLabel =
@@ -81,13 +114,16 @@ class _VipCategoryCardState extends State<VipCategoryCard>
     final netWorth = _formatNetWorth(widget.category.networth);
     final crownCount = widget.tierIndex + 1;
 
+    final defaultPalette = _defaultTierPalettes[
+        widget.tierIndex.clamp(0, _defaultTierPalettes.length - 1)];
+
     final gradientColors = [
-      _parseColor(widget.category.bgColor, const Color(0xFF12315A)),
-      _parseColor(widget.category.gradientEndColor, const Color(0xFF0B2242)),
+      _parseColor(widget.category.bgColor, defaultPalette['start']!),
+      _parseColor(widget.category.gradientEndColor, defaultPalette['end']!),
     ];
-    final textColor = _parseColor(widget.category.textColor, const Color(0xFFE8D28A));
-    final classNameColor = _parseColor(widget.category.textColor, Colors.white);
-    final crownColor = _parseColor(widget.category.textColor, const Color(0xFFE8D28A));
+    final textColor = _parseColor(widget.category.textColor, defaultPalette['text']!);
+    final classNameColor = _parseColor(widget.category.textColor, defaultPalette['text']!);
+    final crownColor = _parseColor(widget.category.textColor, defaultPalette['text']!);
 
     return AnimatedBuilder(
       animation: _entryController,

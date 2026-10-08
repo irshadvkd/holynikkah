@@ -8,10 +8,16 @@ import 'package:holynikkah/core/theme/app_typography.dart';
 import 'package:holynikkah/modules/login/providers/auth_provider.dart';
 import 'package:holynikkah/modules/notifications/models/in_app_notification_model.dart';
 import 'package:holynikkah/modules/notifications/services/notification_api.dart';
+import 'package:holynikkah/modules/notifications/widgets/notification_detail_dialog.dart';
 import 'package:provider/provider.dart';
 
 class NotificationsScreen extends StatefulWidget {
-  const NotificationsScreen({super.key});
+  final bool? initialIsVip;
+
+  const NotificationsScreen({
+    super.key,
+    this.initialIsVip,
+  });
 
   @override
   State<NotificationsScreen> createState() => _NotificationsScreenState();
@@ -24,20 +30,46 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   bool _hasMore = false;
   int _currentPage = 1;
   String? _errorMessage;
+  late bool _isVip;
 
   @override
   void initState() {
     super.initState();
+    final auth = context.read<AuthProvider>();
+    _isVip = widget.initialIsVip ?? (auth.isVipLoggedIn || !auth.isNormalLoggedIn);
     _loadNotifications(refresh: true);
   }
 
-  bool _getIsVip() {
-    final auth = context.read<AuthProvider>();
-    if (auth.isVipLoggedIn) return true;
-    return false;
+  bool _getIsVip() => _isVip;
+
+  void _onTierChanged(bool isVip) {
+    if (_isVip == isVip) return;
+    setState(() {
+      _isVip = isVip;
+      _notifications.clear();
+      _isLoading = true;
+      _errorMessage = null;
+      _currentPage = 1;
+    });
+    _loadNotifications(refresh: true);
   }
 
   Future<void> _loadNotifications({bool refresh = false}) async {
+    final auth = context.read<AuthProvider>();
+    if (!auth.isVipLoggedIn && !auth.isNormalLoggedIn) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _isLoadingMore = false;
+          _hasMore = false;
+          _errorMessage = null;
+          _notifications.clear();
+        });
+        NotificationService.instance.unreadCountNotifier.value = 0;
+      }
+      return;
+    }
+
     if (refresh) {
       setState(() {
         _isLoading = true;
@@ -120,17 +152,14 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           NotificationService.instance.unreadCountNotifier.value = current - 1;
         }
       });
-      await NotificationApi.instance.markAsRead(
+      NotificationApi.instance.markAsRead(
         isVip: isVip,
         notificationId: item.id,
       );
     }
 
     if (!mounted) return;
-    NotificationService.instance.handleNotificationRouting(
-      item.data.isNotEmpty ? item.data : {'type': item.type},
-      context: context,
-    );
+    await NotificationDetailDialog.show(context, _notifications[index]);
   }
 
   IconData _getIconForType(String type) {
@@ -183,6 +212,13 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AuthProvider>();
+    final hasVip = auth.isVipLoggedIn;
+    final hasNormal = auth.isNormalLoggedIn;
+
+    if (_isVip && !hasVip && hasNormal) _isVip = false;
+    if (!_isVip && !hasNormal && hasVip) _isVip = true;
+
     final hasUnread = _notifications.any((n) => !n.isRead);
 
     return Container(
@@ -231,7 +267,76 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               ),
           ],
         ),
-        body: _buildBody(),
+        body: Column(
+          children: [
+            if (hasVip && hasNormal) ...[
+              Padding(
+                padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 8.h),
+                child: _buildTierSelector(),
+              ),
+            ],
+            Expanded(child: _buildBody()),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTierSelector() {
+    return Container(
+      padding: EdgeInsets.all(4.w),
+      decoration: BoxDecoration(
+        color: AppColors.secondary,
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: AppColors.inputBorder),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: _tierSegment('VIP', _isVip, () => _onTierChanged(true)),
+          ),
+          SizedBox(width: 8.w),
+          Expanded(
+            child: _tierSegment('Normal', !_isVip, () => _onTierChanged(false)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _tierSegment(String label, bool selected, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 12.w),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: selected ? AppColors.primary : Colors.transparent,
+          gradient: selected
+              ? const LinearGradient(
+                  colors: [AppColors.primary, AppColors.primaryDark],
+                )
+              : null,
+          borderRadius: BorderRadius.circular(8.r),
+          boxShadow: selected
+              ? [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
+        ),
+        child: Text(
+          label,
+          style: AppTypography.cormorantGaramond(
+            color: selected ? AppColors.onPrimary : AppColors.textSecondary,
+            fontSize: 13.sp,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
       ),
     );
   }
@@ -284,12 +389,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     width: 72.w,
                     height: 72.h,
                     decoration: BoxDecoration(
-                      color: AppColors.goldLight.withOpacity(0.1),
+                      color: AppColors.goldLight.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
                       Icons.notifications_off_outlined,
-                      color: AppColors.goldLight.withOpacity(0.6),
+                      color: AppColors.goldLight.withValues(alpha: 0.6),
                       size: 36.sp,
                     ),
                   ),
@@ -306,7 +411,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   Text(
                     'We will notify you when something important happens.',
                     style: GoogleFonts.inter(
-                      color: AppColors.goldLight.withOpacity(0.7),
+                      color: AppColors.goldLight.withValues(alpha: 0.7),
                       fontSize: 12.sp,
                     ),
                     textAlign: TextAlign.center,
@@ -357,20 +462,20 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 padding: EdgeInsets.all(14.w),
                 decoration: BoxDecoration(
                   color: item.isRead
-                      ? const Color(0xFF0E182A).withOpacity(0.45)
-                      : const Color(0xFF16264C).withOpacity(0.75),
+                      ? const Color(0xFF0E182A).withValues(alpha: 0.45)
+                      : const Color(0xFF16264C).withValues(alpha: 0.75),
                   borderRadius: BorderRadius.circular(16.r),
                   border: Border.all(
                     color: item.isRead
-                        ? const Color(0xFFE3C78F).withOpacity(0.12)
-                        : AppColors.goldLight.withOpacity(0.45),
+                        ? const Color(0xFFE3C78F).withValues(alpha: 0.12)
+                        : AppColors.goldLight.withValues(alpha: 0.45),
                     width: item.isRead ? 1.0 : 1.5,
                   ),
                   boxShadow: item.isRead
                       ? null
                       : [
                           BoxShadow(
-                            color: AppColors.goldLight.withOpacity(0.08),
+                            color: AppColors.goldLight.withValues(alpha: 0.08),
                             blurRadius: 10,
                             offset: const Offset(0, 4),
                           ),
@@ -384,10 +489,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       width: 44.w,
                       height: 44.h,
                       decoration: BoxDecoration(
-                        color: typeColor.withOpacity(0.15),
+                        color: typeColor.withValues(alpha: 0.15),
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: typeColor.withOpacity(0.35),
+                          color: typeColor.withValues(alpha: 0.35),
                           width: 1,
                         ),
                       ),
@@ -423,7 +528,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                 Text(
                                   _formatTimeAgo(item.createdAt),
                                   style: GoogleFonts.inter(
-                                    color: AppColors.goldLight.withOpacity(0.6),
+                                    color: AppColors.goldLight.withValues(alpha: 0.6),
                                     fontSize: 10.sp,
                                   ),
                                 ),
@@ -435,8 +540,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                             item.message,
                             style: GoogleFonts.inter(
                               color: item.isRead
-                                  ? AppColors.white.withOpacity(0.7)
-                                  : AppColors.white.withOpacity(0.95),
+                                  ? AppColors.white.withValues(alpha: 0.7)
+                                  : AppColors.white.withValues(alpha: 0.95),
                               fontSize: 12.sp,
                               height: 1.35,
                             ),

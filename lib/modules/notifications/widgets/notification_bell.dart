@@ -64,7 +64,7 @@ class NotificationBellButton extends StatelessWidget {
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.error.withOpacity(0.4),
+                          color: AppColors.error.withValues(alpha: 0.4),
                           blurRadius: 4,
                           offset: const Offset(0, 2),
                         ),

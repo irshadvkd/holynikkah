@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 /// A production-ready gradient border container
 /// matching complex CSS border-image + shadow + background gradient

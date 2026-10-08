@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:holynikkah/core/services/crashlytics_service.dart';
 import 'package:holynikkah/core/utils/app_logger.dart';
 
 /// 🧭 Navigation Logger Service
@@ -40,6 +41,7 @@ class NavigationLogger {
 
     _currentSession.add(event);
     _currentRoute = to;
+    CrashlyticsService.instance.setCustomKey('current_screen', to);
 
     AppLogger.info(
       'Route: $from → $to ${parameters != null ? 'with params: $parameters' : ''}',

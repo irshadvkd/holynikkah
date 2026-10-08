@@ -1,5 +1,6 @@
 import 'package:holynikkah/core/api/api_client.dart';
 import 'package:holynikkah/core/api/api_response.dart';
+import 'package:holynikkah/core/services/notification_service.dart';
 import 'package:holynikkah/core/utils/app_logger.dart';
 import 'package:holynikkah/core/utils/constants.dart';
 import 'package:holynikkah/modules/notifications/models/in_app_notification_model.dart';
@@ -67,6 +68,14 @@ class NotificationApi {
     int page = 1,
     int pageSize = 20,
   }) async {
+    final token = ApiClient.instance.authToken;
+    if (token == null || token.isEmpty) {
+      AppLogger.info('Skipping notifications fetch: user is not authenticated', tag: _tag);
+      return ApiResponse.success(
+        data: const NotificationsFetchResult(unreadCount: 0, items: []),
+      );
+    }
+
     AppLogger.info('Fetching notifications (isVip: $isVip, page: $page)', tag: _tag);
 
     return await ApiClient.instance.get<NotificationsFetchResult>(
@@ -119,6 +128,9 @@ class NotificationApi {
     required bool isVip,
     required int notificationId,
   }) async {
+    final token = ApiClient.instance.authToken;
+    if (token == null || token.isEmpty) return false;
+
     try {
       AppLogger.info('Marking notification #$notificationId as read', tag: _tag);
       final response = await ApiClient.instance.patch<Map<String, dynamic>>(
@@ -133,6 +145,9 @@ class NotificationApi {
 
   /// Mark all notifications as read
   Future<bool> markAllAsRead({required bool isVip}) async {
+    final token = ApiClient.instance.authToken;
+    if (token == null || token.isEmpty) return false;
+
     try {
       AppLogger.info('Marking all notifications as read', tag: _tag);
       final response = await ApiClient.instance.patch<Map<String, dynamic>>(
@@ -150,6 +165,9 @@ class NotificationApi {
     required bool isVip,
     required int targetId,
   }) async {
+    final token = ApiClient.instance.authToken;
+    if (token == null || token.isEmpty) return false;
+
     try {
       AppLogger.info('Recording profile view for targetId=$targetId', tag: _tag);
       final response = await ApiClient.instance.post<Map<String, dynamic>>(
@@ -159,6 +177,22 @@ class NotificationApi {
     } catch (e) {
       AppLogger.error('Error recording profile view: $e', tag: _tag);
       return false;
+    }
+  }
+
+  /// Sync and update unread notification badge count from backend
+  Future<void> syncUnreadCount({required bool isVip}) async {
+    try {
+      final res = await fetchNotifications(isVip: isVip, page: 1, pageSize: 1);
+      if (res.success && res.data != null) {
+        NotificationService.instance.unreadCountNotifier.value = res.data!.unreadCount;
+        AppLogger.info(
+          'Synced unread notification count for ${isVip ? 'VIP' : 'NORMAL'}: ${res.data!.unreadCount}',
+          tag: _tag,
+        );
+      }
+    } catch (e) {
+      AppLogger.warning('Failed to sync unread count: $e', tag: _tag);
     }
   }
 }

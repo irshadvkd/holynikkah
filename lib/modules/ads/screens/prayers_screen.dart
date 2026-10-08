@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -88,21 +89,30 @@ class _PrayersScreenState extends State<PrayersScreen> {
     });
 
     final nextPage = _currentPage + 1;
-    final response = await PrayersService.instance.fetchFeed(page: nextPage);
+    final currentIds = _prayers.map((p) => p.id).whereType<int>();
+    final response = await PrayersService.instance.fetchFeed(
+      page: nextPage,
+      excludeIds: currentIds,
+    );
 
     if (!mounted) return;
 
     if (response.success && response.data != null) {
       final feed = response.data!;
+      final existingIds = _prayers.map((p) => p.id).whereType<int>().toSet();
+      final newPrayers = feed.prayers
+          .where((p) => p.id == null || !existingIds.contains(p.id))
+          .toList();
+
       final previousLength = _prayers.length;
       setState(() {
-        _prayers = [..._prayers, ...feed.prayers];
+        _prayers = [..._prayers, ...newPrayers];
         _currentPage = feed.currentPage;
-        _hasMore = feed.hasMore;
+        _hasMore = feed.hasMore && newPrayers.isNotEmpty;
         _isLoadingMore = false;
         _loadMoreFailed = false;
       });
-      if (_currentIndex >= previousLength) {
+      if (newPrayers.isNotEmpty && _currentIndex >= previousLength) {
         _recordViewIfNeeded(_currentIndex);
       }
       return;
@@ -169,143 +179,119 @@ class _PrayersScreenState extends State<PrayersScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.secondary,
-      extendBodyBehindAppBar: true,
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              AppColors.secondaryLight,
-              AppColors.secondary,
-              AppColors.background,
-            ],
-          ),
+      body: SafeArea(
+        top: false,
+        bottom: false,
+        child: Column(
+          children: [
+            const _StaticHeader(title: 'Prayers'),
+            Expanded(
+              child: _buildBody(context),
+            ),
+          ],
         ),
-        child: _buildBody(context),
       ),
     );
   }
 
   Widget _buildBody(BuildContext context) {
     if (_isLoading) {
-      return const Stack(
-        fit: StackFit.expand,
-        children: [
-          Center(
-            child: CircularProgressIndicator(color: AppColors.primary),
-          ),
-          _PrayerOverlay(
-            showSwipeHint: false,
-          ),
-        ],
+      return const Center(
+        child: CircularProgressIndicator(color: AppColors.primary),
       );
     }
 
     if (_errorMessage != null) {
-      return Stack(
-        fit: StackFit.expand,
-        children: [
-          Center(
-            child: Padding(
-              padding: EdgeInsets.all(24.w),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.wifi_off_rounded, color: AppColors.textSecondary, size: 48.sp),
-                  SizedBox(height: 16.h),
-                  Text(
-                    _errorMessage!,
-                    textAlign: TextAlign.center,
-                    style: AppTypography.bodyMedium(color: AppColors.textSecondary),
-                  ),
-                  SizedBox(height: 20.h),
-                  ElevatedButton(
-                    onPressed: () => _loadPrayers(refresh: true),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: AppColors.onPrimary,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.r),
-                      ),
-                      padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
-                    ),
-                    child: Text(
-                      'Retry',
-                      style: AppTypography.button(
-                        color: AppColors.onPrimary,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ],
+      return Center(
+        child: Padding(
+          padding: EdgeInsets.all(24.w),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.wifi_off_rounded,
+                color: AppColors.textSecondary,
+                size: 48.sp,
               ),
-            ),
+              SizedBox(height: 16.h),
+              Text(
+                _errorMessage!,
+                textAlign: TextAlign.center,
+                style: AppTypography.bodyMedium(color: AppColors.textSecondary),
+              ),
+              SizedBox(height: 20.h),
+              ElevatedButton(
+                onPressed: () => _loadPrayers(refresh: true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: AppColors.onPrimary,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
+                ),
+                child: Text(
+                  'Retry',
+                  style: AppTypography.button(
+                    color: AppColors.onPrimary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
           ),
-          const _PrayerOverlay(
-            showSwipeHint: false,
-          ),
-        ],
+        ),
       );
     }
 
     if (_prayers.isEmpty) {
-      return Stack(
-        fit: StackFit.expand,
-        children: [
-          Center(
-            child: Padding(
-              padding: EdgeInsets.all(24.w),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.inbox_outlined,
-                    color: AppColors.textSecondary,
-                    size: 48.sp,
-                  ),
-                  SizedBox(height: 16.h),
-                  Text(
-                    'No prayers available',
-                    textAlign: TextAlign.center,
-                    style: AppTypography.bodyMedium(color: AppColors.textSecondary),
-                  ),
-                  SizedBox(height: 20.h),
-                  ElevatedButton(
-                    onPressed: () => _loadPrayers(refresh: true),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: AppColors.onPrimary,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.r),
-                      ),
-                      padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
-                    ),
-                    child: Text(
-                      'Refresh',
-                      style: AppTypography.button(
-                        color: AppColors.onPrimary,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ],
+      return Center(
+        child: Padding(
+          padding: EdgeInsets.all(24.w),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.inbox_outlined,
+                color: AppColors.textSecondary,
+                size: 48.sp,
               ),
-            ),
+              SizedBox(height: 16.h),
+              Text(
+                'No prayers available',
+                textAlign: TextAlign.center,
+                style: AppTypography.bodyMedium(color: AppColors.textSecondary),
+              ),
+              SizedBox(height: 20.h),
+              ElevatedButton(
+                onPressed: () => _loadPrayers(refresh: true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: AppColors.onPrimary,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
+                ),
+                child: Text(
+                  'Refresh',
+                  style: AppTypography.button(
+                    color: AppColors.onPrimary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
           ),
-          const _PrayerOverlay(
-            showSwipeHint: false,
-          ),
-        ],
+        ),
       );
     }
 
     final canSwipeNext =
         _currentIndex < _prayers.length - 1 || _hasMore;
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
 
     return Stack(
       fit: StackFit.expand,
@@ -327,149 +313,110 @@ class _PrayersScreenState extends State<PrayersScreen> {
             return _PrayerItem(prayer: _prayers[index]);
           },
         ),
-        _PrayerOverlay(
-          showSwipeHint: _showSwipeHint && canSwipeNext,
-        ),
+        if (_showSwipeHint && canSwipeNext)
+          Positioned(
+            bottom: bottomPadding + 16.h,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.65),
+                  borderRadius: BorderRadius.circular(20.r),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.15),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.keyboard_arrow_up_rounded,
+                      color: AppColors.white.withValues(alpha: 0.8),
+                      size: 20.sp,
+                    ),
+                    SizedBox(width: 4.w),
+                    Text(
+                      'Swipe up for next',
+                      style: AppTypography.marcellus(
+                        color: AppColors.white.withValues(alpha: 0.8),
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
       ],
     );
   }
 }
 
-/// Floating chrome — no solid AppBar (Stories / Reels pattern).
-class _PrayerOverlay extends StatelessWidget {
-  const _PrayerOverlay({
-    required this.showSwipeHint,
-  });
+class _StaticHeader extends StatelessWidget {
+  const _StaticHeader({required this.title});
 
-  final bool showSwipeHint;
+  final String title;
 
   @override
   Widget build(BuildContext context) {
     final topPadding = MediaQuery.of(context).padding.top;
-    final bottomPadding = MediaQuery.of(context).padding.bottom;
 
-    return IgnorePointer(
-      ignoring: false,
-      child: Stack(
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.only(
+        top: topPadding + 6.h,
+        bottom: 12.h,
+        left: 16.w,
+        right: 16.w,
+      ),
+      decoration: const BoxDecoration(
+        color: AppColors.secondary,
+        border: Border(
+          bottom: BorderSide(
+            color: Color(0x1FFFFFFF),
+            width: 0.5,
+          ),
+        ),
+      ),
+      child: Row(
         children: [
-          /// Top gradient scrim — keeps controls readable on any image.
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: DecoratedBox(
+          GestureDetector(
+            onTap: () => Navigator.of(context).pop(),
+            behavior: HitTestBehavior.opaque,
+            child: Container(
+              width: 38.w,
+              height: 38.w,
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.black.withValues(alpha: 0.55),
-                    Colors.black.withValues(alpha: 0.2),
-                    Colors.transparent,
-                  ],
-                  stops: const [0, 0.6, 1],
+                shape: BoxShape.circle,
+                color: AppColors.white.withValues(alpha: 0.08),
+                border: Border.all(
+                  color: AppColors.white.withValues(alpha: 0.12),
+                  width: 1,
                 ),
               ),
-              child: SizedBox(height: topPadding + 64.h),
+              child: Icon(
+                Icons.arrow_back_ios_new_rounded,
+                color: AppColors.primary,
+                size: 18.sp,
+              ),
             ),
           ),
-
-          /// Bottom gradient scrim for swipe hint.
-          if (showSwipeHint)
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.bottomCenter,
-                    end: Alignment.topCenter,
-                    colors: [
-                      Colors.black.withValues(alpha: 0.5),
-                      Colors.transparent,
-                    ],
-                  ),
-                ),
-                child: SizedBox(height: bottomPadding + 72.h),
+          SizedBox(width: 14.w),
+          Expanded(
+            child: Text(
+              title,
+              style: AppTypography.title(
+                color: AppColors.white,
+                fontWeight: FontWeight.w700,
               ),
-            ),
-
-          /// Top controls
-          Positioned(
-            top: topPadding + 8.h,
-            left: 20.w,
-            right: 20.w,
-            child: Row(
-              children: [
-                GestureDetector(
-                  onTap: () => Navigator.of(context).pop(),
-                  behavior: HitTestBehavior.opaque,
-                  child: Container(
-                    width: 40.w,
-                    height: 40.w,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppColors.white.withValues(alpha: 0.08),
-                      border: Border.all(
-                        color: AppColors.white.withValues(alpha: 0.12),
-                        width: 1,
-                      ),
-                    ),
-                    child: Icon(
-                      Icons.arrow_back_ios_new_rounded,
-                      color: AppColors.primary,
-                      size: 18.sp,
-                    ),
-                  ),
-                ),
-                SizedBox(width: 12.w),
-                Expanded(
-                  child: Text(
-                    'Prayers',
-                    style: AppTypography.headline(
-                      color: AppColors.white,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-                SizedBox(width: 40.w),
-              ],
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
-
-          /// Swipe hint
-          if (showSwipeHint)
-            Positioned(
-              bottom: bottomPadding + 24.h,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: AnimatedOpacity(
-                  opacity: showSwipeHint ? 1 : 0,
-                  duration: const Duration(milliseconds: 400),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.keyboard_arrow_up_rounded,
-                        color: AppColors.white.withValues(alpha: 0.8),
-                        size: 20.sp,
-                      ),
-                      SizedBox(width: 4.w),
-                      Text(
-                        'Swipe up for next',
-                        style: AppTypography.marcellus(
-                          color: AppColors.white.withValues(alpha: 0.8),
-                          fontSize: 13.sp,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
         ],
       ),
     );
@@ -489,19 +436,71 @@ class _PrayerItem extends StatelessWidget {
       );
     }
 
-    return CachedNetworkImage(
-      imageUrl: prayer.imageUrl,
-      fit: BoxFit.cover,
-      width: double.infinity,
-      height: double.infinity,
-      placeholder: (context, url) => Shimmer.fromColors(
-        baseColor: AppColors.secondary,
-        highlightColor: AppColors.secondaryLight,
-        child: const ColoredBox(color: AppColors.secondary),
-      ),
-      errorWidget: (context, url, error) => Center(
-        child: Icon(Icons.broken_image_outlined, color: AppColors.textSecondary, size: 48.sp),
-      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final screenWidth = constraints.maxWidth;
+        final screenHeight = constraints.maxHeight;
+        final screenAspect = screenWidth / (screenHeight > 0 ? screenHeight : 1);
+        final isWideScreen = screenAspect > 0.62; // Standard phones are ~0.45 - 0.56. Tablets / iPads > 0.65
+
+        if (!isWideScreen) {
+          // Mobile phones: Standard full screen BoxFit.cover
+          return CachedNetworkImage(
+            imageUrl: prayer.imageUrl,
+            fit: BoxFit.cover,
+            width: double.infinity,
+            height: double.infinity,
+            placeholder: (context, url) => Shimmer.fromColors(
+              baseColor: AppColors.secondary,
+              highlightColor: AppColors.secondaryLight,
+              child: const ColoredBox(color: AppColors.secondary),
+            ),
+            errorWidget: (context, url, error) => Center(
+              child: Icon(Icons.broken_image_outlined, color: AppColors.textSecondary, size: 48.sp),
+            ),
+          );
+        }
+
+        // Tablets / iPads (wide screens): Ambient Blurred Backdrop + BoxFit.contain
+        return Stack(
+          fit: StackFit.expand,
+          children: [
+            // 1. Ambient blurred background filling wide tablet / iPad screens
+            CachedNetworkImage(
+              imageUrl: prayer.imageUrl,
+              fit: BoxFit.cover,
+              width: double.infinity,
+              height: double.infinity,
+              errorWidget: (_, __, ___) => const ColoredBox(color: AppColors.secondary),
+            ),
+            Positioned.fill(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 28, sigmaY: 28),
+                child: Container(
+                  color: Colors.black.withValues(alpha: 0.45),
+                ),
+              ),
+            ),
+            // 2. Full uncropped crisp poster in center
+            Center(
+              child: CachedNetworkImage(
+                imageUrl: prayer.imageUrl,
+                fit: BoxFit.contain,
+                width: double.infinity,
+                height: double.infinity,
+                placeholder: (context, url) => Shimmer.fromColors(
+                  baseColor: AppColors.secondary,
+                  highlightColor: AppColors.secondaryLight,
+                  child: const ColoredBox(color: AppColors.secondary),
+                ),
+                errorWidget: (context, url, error) => Center(
+                  child: Icon(Icons.broken_image_outlined, color: AppColors.textSecondary, size: 48.sp),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

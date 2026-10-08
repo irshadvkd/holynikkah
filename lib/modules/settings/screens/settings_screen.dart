@@ -142,7 +142,9 @@ class SettingsScreen extends StatelessWidget {
           TextButton(
             onPressed: () async {
               final authProvider = context.read<AuthProvider>();
+              final profileProvider = context.read<ProfileProvider>();
               await authProvider.logoutAll();
+              profileProvider.clearProfile();
               if (!context.mounted) return;
               Navigator.of(context).pushAndRemoveUntil(
                 MaterialPageRoute(builder: (context) => const HomeScreen(initialIndex: 2)),

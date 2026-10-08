@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:holynikkah/core/theme/app_typography.dart';
-import 'package:holynikkah/core/utils/validation_utils.dart';
 
 class OvalTextField extends StatelessWidget {
   final TextEditingController controller;

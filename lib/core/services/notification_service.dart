@@ -309,11 +309,24 @@ class NotificationService {
     final route = data['route']?.toString();
     AppLogger.info('Routing notification type: $type, route: $route', tag: _tag);
 
+    bool? isVip;
+    if (data['is_vip'] != null) {
+      isVip = data['is_vip'] == true ||
+          data['is_vip'] == 'true' ||
+          data['is_vip'] == 1 ||
+          data['is_vip'] == '1';
+    } else if (data['tier'] != null) {
+      isVip = data['tier'].toString().toLowerCase() == 'vip';
+    }
+
     if (type == 'phone_request_incoming' || route == '/phone-requests/incoming') {
       Navigator.pushNamed(
         navContext,
         Routes.phoneRequests,
-        arguments: {'initialIsIncoming': true},
+        arguments: {
+          'initialIsIncoming': true,
+          if (isVip != null) 'isVip': isVip,
+        },
       );
     } else if (type == 'phone_request_approved' ||
         type == 'phone_request_rejected' ||
@@ -321,15 +334,29 @@ class NotificationService {
       Navigator.pushNamed(
         navContext,
         Routes.phoneRequests,
-        arguments: {'initialIsIncoming': false},
+        arguments: {
+          'initialIsIncoming': false,
+          if (isVip != null) 'isVip': isVip,
+        },
       );
     } else if (type == 'profile_verified' || type == 'welcome') {
       Navigator.pushNamed(navContext, Routes.home, arguments: {'initialIndex': 4});
     } else if (type == 'profile_view') {
       // Future: Navigate to specific viewer profile if viewer_id present
-      Navigator.pushNamed(navContext, Routes.notifications);
+      Navigator.pushNamed(
+        navContext,
+        Routes.notifications,
+        arguments: ifElseMap(isVip),
+      );
     } else {
-      Navigator.pushNamed(navContext, Routes.notifications);
+      Navigator.pushNamed(
+        navContext,
+        Routes.notifications,
+        arguments: ifElseMap(isVip),
+      );
     }
   }
+
+  static Map<String, dynamic>? ifElseMap(bool? isVip) =>
+      isVip != null ? {'isVip': isVip} : null;
 }

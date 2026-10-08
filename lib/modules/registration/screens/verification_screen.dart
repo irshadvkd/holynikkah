@@ -15,6 +15,7 @@ import 'package:holynikkah/modules/registration/models/vip_otp_model.dart';
 import 'package:holynikkah/modules/registration/services/normal_otp_service.dart';
 import 'package:holynikkah/modules/registration/services/vip_otp_service.dart';
 import 'package:holynikkah/modules/myprofile/providers/profile_provider.dart';
+import 'package:holynikkah/modules/registration/models/vip_user_fields.dart';
 import 'package:holynikkah/modules/template/providers/template_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -144,11 +145,12 @@ class _VerificationScreenState extends State<VerificationScreen> {
     final isVip = _registrationType.toLowerCase() == 'vip';
 
     if (data.loginSuccess) {
+      final isCategorySelected = VipUserFields.isCategorySelected(data.user);
       if (isVip) {
         await auth.setVipLoggedIn(token: data.token, user: data.user);
         if (!mounted) return;
-        await context.read<CategoryProvider>().setVipSelected(true);
-        await auth.updateStoredVipCategorySelected(true);
+        await context.read<CategoryProvider>().applyVipCategoryFromUser(data.user);
+        await auth.updateStoredVipCategorySelected(isCategorySelected);
         if (!mounted) return;
         await context.read<TemplateProvider>().applyVipTemplateFromUser(
           data.user,
@@ -156,8 +158,8 @@ class _VerificationScreenState extends State<VerificationScreen> {
       } else {
         await auth.setNormalLoggedIn(token: data.token, user: data.user);
         if (!mounted) return;
-        await context.read<CategoryProvider>().setNormalSelected(true);
-        await auth.updateStoredNormalCategorySelected(true);
+        await context.read<CategoryProvider>().applyNormalCategoryFromUser(data.user);
+        await auth.updateStoredNormalCategorySelected(isCategorySelected);
         if (!mounted) return;
         await context.read<TemplateProvider>().applyNormalTemplateFromUser(
           data.user,

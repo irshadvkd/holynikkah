@@ -1,183 +1,158 @@
 # HolyNikah - Flutter Application
 
-A Flutter application for matrimonial services with VIP and normal registration options.
+A modern Flutter matrimonial and lifestyle application featuring VIP and Normal matchmaking, customizable profile templates, interactive video reels, and an Astrolabe-inspired media and advertisement hub.
 
-## Project Structure
+---
+
+## 🌟 Key Features
+
+### 1. 💍 Matrimonial & Matchmaking
+- **VIP & Normal Registers**: Distinct onboarding, tier selection, and profile browsing workflows.
+- **Interactive Partner Profiles**: Rich partner discovery cards with contact request / phone access approval workflows.
+- **Customizable Profile Templates**: Dynamic Islamic template renderer supporting bespoke wedding bio themes (Emerald, Rose Gold, Midnight Royale, etc.).
+- **Smart Category Filtering**: Multi-category support for normal users and tier-based single-category selection for VIP users.
+
+### 2. 🌌 Astrolabe Ads & Media Hub
+- **Celestial Orbital Navigation**: Astrolabe-themed interactive hub with animated rotating brass rings and trigonometric orbital positioning.
+- **Vertical Fullscreen Feeds**: TikTok / Instagram Reels-style smooth vertical swipe player for images and video reels.
+- **Content Channels**:
+  - **Prayers**: Dedicated prayer cards and spiritual content feed.
+  - **Antiaging**: Skincare and wellness video/image feed (`/api/antiaging`).
+  - **Aura**: Lifestyle and personality feed (`/api/aura`).
+  - **Replenish Except His Own**: Wellness channel (`/api/replenish-except-his-own`).
+  - **Shadi Vibes**: Wedding inspiration & stories (`/api/shadi-vibes`).
+  - **Space Advertisements 1 & 2**: In-menu partner advertisements (`/api/advertisement1`, `/api/advertisement2`).
+- **View Analytics Tracking**: Automatic in-flight view recording with client-side deduplication.
+
+### 3. 👤 Dynamic Profile Management
+- **Animated Lattice Canvas**: Fluid, low-power procedural lattice background animation on the profile screen.
+- **Profile Customization**: In-place editing of personal details, matrimonial preferences, partner expectations, and category subscriptions.
+- **Security & Privacy**: Verified mobile numbers, phone visibility gating, and OTP-based authentication.
+
+---
+
+## 🏗️ Architecture & Project Structure
+
+The project follows a modular, layered architecture (UI, Logic, and Data) powered by `Provider` for state management and `auto_route` for declarative routing.
 
 ```
 lib/
-├── core/                           # Core application components
-│   ├── provider/                   # Global state management
-│   ├── router/                     # Auto Route navigation
-│   │   ├── app_router.dart        # Route definitions
-│   │   └── app_router.gr.dart     # Generated routes (auto-generated)
-│   ├── services/                   # External services
-│   ├── theme/                      # App theming
-│   ├── utils/                      # Utility functions
-│   └── widgets/                    # Reusable widgets
-│       ├── common_dropdown.dart    # Dropdown component
-│       ├── common_text_field.dart  # Text input component
-│       └── widgets.dart           # Widget exports
-├── models/                         # Data models
-├── modules/                        # Feature modules
-│   ├── ads/                       # Advertisement module
-│   ├── category/                  # Category selection
-│   ├── donaters/                  # Donation module
-│   ├── home/                      # Home screen
-│   ├── login/                     # Authentication
-│   ├── reels/                     # Video reels
-│   ├── registration/              # User registration
-│   │   ├── providers/             # Registration state
-│   │   └── screens/               # Registration screens
-│   ├── settings/                  # App settings
-│   └── splash/                    # Splash screen
-├── application.dart               # App configuration
-├── main.dart                      # App entry point
-└── multi_provider.dart           # Provider setup
+├── core/                               # Core application foundation
+│   ├── api/                            # ApiClient, ApiResponse & interceptors
+│   ├── constants/                      # App-wide constants & keys
+│   ├── provider/                       # Global root providers
+│   ├── router/                         # Auto Route declarations & guards
+│   ├── services/                       # Firebase Auth, storage & notifications
+│   ├── theme/                          # AppColors, AppTypography, AppTheme
+│   ├── utils/                          # AppLogger, media helpers, date formatters
+│   └── widgets/                        # Reusable core widgets (buttons, inputs, snackbars)
+├── models/                             # Shared data models (User, Prayer, Video, etc.)
+├── modules/                            # Domain-driven feature modules
+│   ├── ads/                            # Astrolabe navigation & common ad feeds
+│   │   ├── screens/                    # AdsScreen, CommonAdFeedScreen
+│   │   └── services/                   # CommonAdFeedService & analytics
+│   ├── category/                       # Category selection & tier cards
+│   ├── donaters/                       # Donation & community support
+│   ├── home/                           # Main navigation tabs & dashboard
+│   ├── login/                          # Mobile & Google OTP authentication
+│   ├── myprofile/                      # Profile view, editing & lattice animation
+│   ├── partner/                        # Match browsing, search & partner detail views
+│   ├── reels/                          # Video reels player & feed
+│   ├── registration/                   # Multi-step user registration wizard
+│   ├── template/                       # Profile template selection & renderer
+│   └── splash/                         # Initial launch & session bootstrap
+├── application.dart                    # MaterialApp & global styling setup
+├── main.dart                           # Entrypoint & Firebase initialization
+└── multi_provider.dart                 # Dependency injection provider tree
 ```
 
-## Key Dependencies
+---
 
-- **flutter_screenutil**: Responsive UI scaling
-- **auto_route**: Type-safe navigation
-- **provider**: State management
-- **google_fonts**: Custom fonts
-- **dropdown_button2**: Enhanced dropdowns
-- **image_picker**: Image selection
-- **flutter_secure_storage**: Secure data storage
+## 🚀 Getting Started
 
-## Development Guidelines
+### Prerequisites
+- **Flutter SDK**: `>=3.10.0`
+- **Dart SDK**: `>=3.0.0`
+- **Laravel Backend**: Active instance running (e.g. `php artisan serve --port 8000`)
+- **Firebase Project**: Configured for Android and iOS authentication
 
-### When Adding New Features
+### Installation
 
-1. **Create Feature Module**:
-   ```
-   lib/modules/feature_name/
-   ├── providers/          # Feature-specific state
-   ├── screens/           # UI screens
-   ├── widgets/           # Feature widgets
-   └── models/            # Feature models
-   ```
-
-2. **Add Routes**:
-   - Add route in `lib/core/router/app_router.dart`
-   - Run `flutter packages pub run build_runner build --delete-conflicting-outputs`
-
-3. **State Management**:
-   - Create providers in feature's `providers/` folder
-   - Add to `multi_provider.dart` if global
-
-### When Modifying UI Components
-
-1. **Common Widgets**:
-   - Update in `lib/core/widgets/`
-   - Export in `widgets.dart`
-   - Follow existing naming: `Common[ComponentName]`
-
-2. **Styling**:
-   - Use `flutter_screenutil` for responsive sizing
-   - Follow theme colors from `AppColors`
-   - Use `GoogleFonts.inter()` for typography
-
-### When Adding Dependencies
-
-1. **Add to pubspec.yaml**:
-   ```yaml
-   dependencies:
-     new_package: ^version
-   ```
-
-2. **Run commands**:
+1. **Clone the Repository**:
    ```bash
-   flutter pub get
-   # If code generation needed:
-   flutter packages pub run build_runner build --delete-conflicting-outputs
-   ```
-
-### When Working with Forms
-
-1. **Validation**:
-   - Use form validation for UI feedback
-   - Show SnackBar for comprehensive errors
-   - Validate all required fields before submission
-
-2. **Dropdowns**:
-   - Use `CommonDropdown` with `ValueNotifier`
-   - Implement cascading selections when needed
-   - Dispose ValueNotifiers in widget disposal
-
-### Code Generation Commands
-
-```bash
-# Generate routes after adding new routes
-flutter packages pub run build_runner build --delete-conflicting-outputs
-
-# Watch for changes during development
-flutter packages pub run build_runner watch --delete-conflicting-outputs
-
-# Clean generated files
-flutter packages pub run build_runner clean
-```
-
-### Common Issues & Solutions
-
-1. **Route Generation Errors**:
-   - Ensure `@RoutePage()` annotation on page widgets
-   - Run build_runner after route changes
-   - Check for missing required parameters
-
-2. **State Management**:
-   - Use `ValueNotifier` for simple reactive state
-   - Use `Provider` for complex state management
-   - Always dispose controllers and notifiers
-
-3. **UI Responsiveness**:
-   - Use `.w`, `.h`, `.sp`, `.r` extensions from screenutil
-   - Test on different screen sizes
-   - Follow material design guidelines
-
-### File Naming Conventions
-
-- **Screens**: `feature_name_screen.dart`
-- **Widgets**: `common_widget_name.dart`
-- **Providers**: `feature_name_provider.dart`
-- **Models**: `model_name.dart`
-- **Routes**: Use PascalCase with `Route` suffix
-
-### Testing
-
-```bash
-# Run tests
-flutter test
-
-# Run with coverage
-flutter test --coverage
-
-# Analyze code
-flutter analyze
-```
-
-## Getting Started
-
-1. **Clone and Setup**:
-   ```bash
-   git clone <repository>
+   git clone <repository_url>
    cd holynikkah
-   flutter pub get
-   flutter packages pub run build_runner build --delete-conflicting-outputs
    ```
 
-2. **Run Application**:
+2. **Install Dependencies**:
+   ```bash
+   flutter pub get
+   ```
+
+3. **Generate Code & Routes**:
+   ```bash
+   flutter pub run build_runner build --delete-conflicting-outputs
+   ```
+
+4. **Configure Environment & Endpoints**:
+   Update `lib/core/utils/constants.dart` with your local or production backend IP:
+   ```dart
+   static const String defaultLocalIp = '192.168.1.X'; // Or your machine's IP
+   ```
+
+5. **Run the Application**:
    ```bash
    flutter run
    ```
 
-3. **Build for Release**:
-   ```bash
-   flutter build apk --release
-   flutter build ios --release
-   ```
+---
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 📡 API Specifications & Integrations
+
+### Backend Endpoints Overview
+
+| Category / Feature | Feed Route (GET) | View Tracking Route (POST) |
+|---|---|---|
+| **Antiaging** | `/api/antiaging` | `/api/antiaging/{id}/views` |
+| **Aura** | `/api/aura` | `/api/aura/{id}/views` |
+| **Replenish** | `/api/replenish-except-his-own` | `/api/replenish-except-his-own/{id}/views` |
+| **Shadi Vibes** | `/api/shadi-vibes` | `/api/shadi-vibes/{id}/views` |
+| **Advertisement 1** | `/api/advertisement1` | `/api/advertisement1/{id}/views` |
+| **Advertisement 2** | `/api/advertisement2` | `/api/advertisement2/{id}/views` |
+| **Prayers** | `/api/prayers/feed` | `/api/prayers/{id}/views` |
+
+---
+
+## 🛠️ Code Generation & Build Commands
+
+```bash
+# Generate routes & json serializable classes
+flutter pub run build_runner build --delete-conflicting-outputs
+
+# Watch for changes during active development
+flutter pub run build_runner watch --delete-conflicting-outputs
+
+# Clean generated artifacts
+flutter pub run build_runner clean
+
+# Run static analysis
+flutter analyze
+
+# Execute test suite
+flutter test
+```
+
+---
+
+## 📦 Key Dependencies
+
+| Package | Purpose |
+|---|---|
+| [`provider`](https://pub.dev/packages/provider) | Reactive State Management |
+| [`auto_route`](https://pub.dev/packages/auto_route) | Strongly-typed Navigation & Deep Linking |
+| [`cached_network_image`](https://pub.dev/packages/cached_network_image) | High-performance image caching |
+| [`video_player`](https://pub.dev/packages/video_player) | Fullscreen and in-feed video playback |
+| [`flutter_screenutil`](https://pub.dev/packages/flutter_screenutil) | Responsive UI scaling across devices |
+| [`firebase_auth`](https://pub.dev/packages/firebase_auth) | Phone & Google Authentication |
+| [`flutter_secure_storage`](https://pub.dev/packages/flutter_secure_storage) | Encrypted token storage |
+| [`shimmer`](https://pub.dev/packages/shimmer) | Polished loading placeholders |

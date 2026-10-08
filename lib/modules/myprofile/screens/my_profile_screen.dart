@@ -32,7 +32,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
     super.initState();
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 60),
+      duration: const Duration(seconds: 25),
     )..repeat();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -280,7 +280,8 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
         child: Row(
           children: [
             // Avatar
-            profileProvider.profileImagePath != null &&
+            isLoggedIn &&
+                    profileProvider.profileImagePath != null &&
                     profileProvider.profileImagePath!.isNotEmpty &&
                     profileProvider.profileImagePath != '0' &&
                     profileProvider.profileImagePath != 'null'
@@ -877,7 +878,9 @@ class _MyProfileScreenState extends State<MyProfileScreen> with SingleTickerProv
           TextButton(
             onPressed: () async {
               final authProvider = context.read<AuthProvider>();
+              final profileProvider = context.read<ProfileProvider>();
               await authProvider.logoutAll();
+              profileProvider.clearProfile();
               if (!context.mounted) return;
               Navigator.of(context).pop(); // Close dialog
               Navigator.of(context).pushAndRemoveUntil(

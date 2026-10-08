@@ -33,11 +33,15 @@ class CommonAdFeedService {
     int page = 1,
     int perPage = defaultPerPage,
     String? firebaseUid,
+    Iterable<int>? excludeIds,
   }) async {
     final uid = firebaseUid ?? await _resolveFirebaseUid();
 
+    final excludeList = excludeIds?.where((id) => id > 0).join(',');
+
     AppLogger.info(
-      'Fetching common ad feed url=$feedUrl page=$page perPage=$perPage status=$status',
+      'Fetching common ad feed url=$feedUrl page=$page perPage=$perPage status=$status'
+      '${excludeList != null && excludeList.isNotEmpty ? ' exclude_ids=$excludeList' : ''}',
       tag: 'CommonAdFeedService',
     );
 
@@ -48,8 +52,11 @@ class CommonAdFeedService {
         if (uid != null && uid.isNotEmpty) 'firebase_uid': uid,
         'page': page,
         'per_page': perPage,
+        'limit': perPage,
+        if (excludeList != null && excludeList.isNotEmpty)
+          'exclude_ids': excludeList,
       },
-      parser: PrayersFeedResult.fromJson,
+      parser: (json) => PrayersFeedResult.fromJson(json, requestPage: page),
     );
 
     if (response.success) {
@@ -59,7 +66,7 @@ class CommonAdFeedService {
       }
       AppLogger.success(
         'Common ad feed loaded: ${feed?.prayers.length ?? 0} '
-        '(page ${feed?.currentPage}/${feed?.lastPage})',
+        '(page ${feed?.currentPage}/${feed?.lastPage}, hasMore: ${feed?.hasMore})',
         tag: 'CommonAdFeedService',
       );
     } else {
